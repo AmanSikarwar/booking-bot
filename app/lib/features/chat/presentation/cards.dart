@@ -427,7 +427,8 @@ class _SafetyCardState extends State<_SafetyCard> {
                     style: FilledButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: widget.color,
-                      textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                      textStyle: Theme.of(context).textTheme.labelLarge
+                          ?.copyWith(fontWeight: FontWeight.w700, fontSize: 16),
                     ),
                     onPressed: () => _call(a.number),
                     icon: const Icon(Icons.call),

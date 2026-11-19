@@ -157,9 +157,13 @@ class _ChatScreenState extends State<ChatScreen> {
             customMessageBuilder: (context, m, _, {required isSentByMe, groupStatus}) =>
                 _custom(context, m, flagged: flagged),
             emptyChatListBuilder: (context) => _Welcome(onPick: _send),
+            chatAnimatedListBuilder: (context, itemBuilder) =>
+                ChatAnimatedListReversed(itemBuilder: itemBuilder),
             composerBuilder: (context) => Composer(
               hintText: t.chat.inputHint,
               sendButtonVisibilityMode: SendButtonVisibilityMode.disabled,
+              sendOnEnter: true,
+              textInputAction: TextInputAction.send,
               topWidget: !online
                   ? _Strip(icon: Icons.wifi_off, text: t.offline.banner)
                   : flagged
