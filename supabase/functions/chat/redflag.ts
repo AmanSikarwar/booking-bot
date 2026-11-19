@@ -64,9 +64,9 @@ export class RedFlagDetector {
     let outcome: RedFlagOutcome | null = null;
     for (const c of this.#categories) {
       const phrase = c.phrases.find((p) => padded.includes(` ${p}`));
-      const combo = phrase ? undefined : c.combos.find((groups) =>
-        groups.every((g) => g.some((w) => tokens.some((t) => t.startsWith(w))))
-      );
+      const combo = phrase
+        ? undefined
+        : c.combos.find((groups) => groups.every((g) => g.some((w) => tokens.some((t) => t.startsWith(w)))));
       if (!phrase && !combo) continue;
       categories.push(c.id);
       matches.push(phrase ?? combo!.map((g) => g.find((w) => tokens.some((t) => t.startsWith(w)))).join("+"));

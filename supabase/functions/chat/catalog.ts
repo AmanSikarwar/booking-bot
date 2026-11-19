@@ -19,8 +19,17 @@ export interface Package {
 }
 
 export const CATEGORIES = [
-  "general", "diabetes", "thyroid", "heart", "liver", "kidney",
-  "vitamins", "women", "senior", "fever", "fitness",
+  "general",
+  "diabetes",
+  "thyroid",
+  "heart",
+  "liver",
+  "kidney",
+  "vitamins",
+  "women",
+  "senior",
+  "fever",
+  "fitness",
 ] as const;
 
 export interface SearchOptions {

@@ -1,4 +1,4 @@
-import { CATEGORIES, type Catalog, type SearchOptions } from "./catalog.ts";
+import { type Catalog, CATEGORIES, type SearchOptions } from "./catalog.ts";
 import { isBookable, TIME_WINDOWS, type TimeWindow } from "./slots.ts";
 
 export type Validated<T> = { ok: true; value: T } | { ok: false; error: string };

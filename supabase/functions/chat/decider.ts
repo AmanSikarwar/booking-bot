@@ -4,7 +4,15 @@ import type { Locale } from "./catalog.ts";
 export type Probs = Record<"emergency" | "mental_health_crisis" | "routine", number>;
 
 export type Triage =
-  | { ok: true; probs: Probs; model: string; latencyMs: number; inputTokens: number; outputTokens: number; costUsd: number }
+  | {
+    ok: true;
+    probs: Probs;
+    model: string;
+    latencyMs: number;
+    inputTokens: number;
+    outputTokens: number;
+    costUsd: number;
+  }
   | { ok: false; reason: "timeout" | "rate_limited" | "upstream_error" | "malformed" | "refusal"; latencyMs: number };
 
 export interface Decider {

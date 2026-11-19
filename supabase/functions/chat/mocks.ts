@@ -32,7 +32,11 @@ export class MockChat implements ChatModel {
             }),
           },
         }
-        : { id: "mock_search", type: "function", function: { name: "search_packages", arguments: JSON.stringify({ query: text }) } };
+        : {
+          id: "mock_search",
+          type: "function",
+          function: { name: "search_packages", arguments: JSON.stringify({ query: text }) },
+        };
       yield { type: "tool_calls", calls: [call] };
     } else {
       yield* words("I can help you choose lab tests and book home collection.");

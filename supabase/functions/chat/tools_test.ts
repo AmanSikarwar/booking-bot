@@ -84,7 +84,13 @@ Deno.test("validate: book args", () => {
     now,
   );
   assert(ok.ok && ok.value.time_window === "07-09");
-  const base = { package_id: "pkg_thyroid_profile", date: "2026-11-22", time_window: "07-09", address_label: "Home", patient_name: "Priya" };
+  const base = {
+    package_id: "pkg_thyroid_profile",
+    date: "2026-11-22",
+    time_window: "07-09",
+    address_label: "Home",
+    patient_name: "Priya",
+  };
   assert(!validateBook(JSON.stringify({ ...base, package_id: "pkg_nope" }), catalog, now).ok);
   assert(!validateBook(JSON.stringify({ ...base, date: "2026-12-30" }), catalog, now).ok);
   assert(!validateBook(JSON.stringify({ ...base, time_window: "13-15" }), catalog, now).ok);

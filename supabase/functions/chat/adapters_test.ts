@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertRejects } from "@std/assert";
-import { LlmError, OpenRouterChat, type ChatChunk } from "./llm.ts";
+import { type ChatChunk, LlmError, OpenRouterChat } from "./llm.ts";
 import { escalation, OpenRouterDecider } from "./decider.ts";
 
 function sseResponse(lines: string[], split = 7): Response {
@@ -24,7 +24,10 @@ async function collect(gen: AsyncGenerator<ChatChunk>) {
 
 Deno.test("chat adapter: assembles fragmented tool calls in order", async () => {
   const chunks = [
-    { model: "google/gemma", choices: [{ delta: { tool_calls: [{ index: 0, id: "a", function: { name: "search_", arguments: '{"que' } }] } }] },
+    {
+      model: "google/gemma",
+      choices: [{ delta: { tool_calls: [{ index: 0, id: "a", function: { name: "search_", arguments: '{"que' } }] } }],
+    },
     { choices: [{ delta: { tool_calls: [{ index: 1, id: "b", function: { name: "book_slot", arguments: "{}" } }] } }] },
     { choices: [{ delta: { tool_calls: [{ index: 0, function: { name: "packages", arguments: 'ry":"sugar"}' } }] } }] },
     { choices: [], usage: { prompt_tokens: 120, completion_tokens: 9, cost: 0 } },
@@ -69,7 +72,10 @@ Deno.test("chat adapter: 5xx retried once then fails", async () => {
 });
 
 Deno.test("chat adapter: mid-stream error chunk throws", async () => {
-  const chunks = [JSON.stringify({ choices: [{ delta: { content: "Hi" } }] }), JSON.stringify({ error: { message: "provider died" } })];
+  const chunks = [
+    JSON.stringify({ choices: [{ delta: { content: "Hi" } }] }),
+    JSON.stringify({ error: { message: "provider died" } }),
+  ];
   const model = new OpenRouterChat("k", "m", () => Promise.resolve(sseResponse(chunks)));
   await assertRejects(() => collect(model.stream({ messages: [] })), LlmError, "provider died");
 });
@@ -77,22 +83,49 @@ Deno.test("chat adapter: mid-stream error chunk throws", async () => {
 const decision = (body: unknown, status = 200) => () => Promise.resolve(new Response(JSON.stringify(body), { status }));
 
 Deno.test("decider: parses choice probabilities", async () => {
-  const d = new OpenRouterDecider("k", "pplx", decision({
-    model: "perplexity/pplx-decider-flash-v1.3",
-    answers: { urgency: { type: "choice", choice: "emergency", probabilities: { emergency: 0.8, mental_health_crisis: 0.05, routine: 0.15 } } },
-    usage: { input_tokens: 50, output_tokens: 1, cost: 0 },
-  }));
+  const d = new OpenRouterDecider(
+    "k",
+    "pplx",
+    decision({
+      model: "perplexity/pplx-decider-flash-v1.3",
+      answers: {
+        urgency: {
+          type: "choice",
+          choice: "emergency",
+          probabilities: { emergency: 0.8, mental_health_crisis: 0.05, routine: 0.15 },
+        },
+      },
+      usage: { input_tokens: 50, output_tokens: 1, cost: 0 },
+    }),
+  );
   const t = await d.triage(["my left arm went numb"], "en");
   assert(t.ok && t.probs.emergency === 0.8 && t.model.startsWith("perplexity"));
 });
 
 Deno.test("decider: fails open on refusal, malformed, rate limit and timeout", async () => {
-  const refusal = await new OpenRouterDecider("k", "m", decision({ answers: { urgency: { type: "refusal" } } })).triage([], "en");
-  const malformed = await new OpenRouterDecider("k", "m", decision({ answers: { urgency: { probabilities: { emergency: "high" } } } })).triage([], "en");
+  const refusal = await new OpenRouterDecider("k", "m", decision({ answers: { urgency: { type: "refusal" } } })).triage(
+    [],
+    "en",
+  );
+  const malformed = await new OpenRouterDecider(
+    "k",
+    "m",
+    decision({ answers: { urgency: { probabilities: { emergency: "high" } } } }),
+  ).triage([], "en");
   const limited = await new OpenRouterDecider("k", "m", decision({}, 429)).triage([], "en");
-  const slow = await new OpenRouterDecider("k", "m", (_u, init) =>
-    new Promise((_, reject) => init!.signal!.addEventListener("abort", () => reject(init!.signal!.reason))), 20).triage([], "en");
-  assertEquals([refusal, malformed, limited, slow].map((t) => !t.ok && t.reason), ["refusal", "malformed", "rate_limited", "timeout"]);
+  const slow = await new OpenRouterDecider(
+    "k",
+    "m",
+    (_u, init) =>
+      new Promise((_, reject) => init!.signal!.addEventListener("abort", () => reject(init!.signal!.reason))),
+    20,
+  ).triage([], "en");
+  assertEquals([refusal, malformed, limited, slow].map((t) => !t.ok && t.reason), [
+    "refusal",
+    "malformed",
+    "rate_limited",
+    "timeout",
+  ]);
 });
 
 Deno.test("decider: threshold boundaries", () => {

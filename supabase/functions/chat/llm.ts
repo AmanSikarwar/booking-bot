@@ -107,7 +107,7 @@ export class OpenRouterChat implements ChatModel {
       max_tokens: 400,
       provider: { require_parameters: true },
     });
-    for (let attempt = 0; ; attempt++) {
+    for (let attempt = 0;; attempt++) {
       let res: Response;
       try {
         res = await this.fetchFn("https://openrouter.ai/api/v1/chat/completions", {
