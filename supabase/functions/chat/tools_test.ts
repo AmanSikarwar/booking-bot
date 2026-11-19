@@ -119,3 +119,8 @@ Deno.test("search: tags match whole words, so 'fat' does not match 'fatigue'", (
   const ids = catalog.search("tired all the time fatigue hair fall").map((r) => r.id);
   assert(!ids.includes("pkg_lipid_profile"), ids.join());
 });
+
+Deno.test("search: match reason drops tags contained in longer matched tags", () => {
+  const r = catalog.search("full body checkup")[0];
+  assertEquals(r.match_reason.en, "Matches: full body checkup");
+});

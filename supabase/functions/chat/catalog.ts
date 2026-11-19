@@ -102,7 +102,8 @@ export class Catalog {
 }
 
 function toResult(p: Package, matched: string[]): PackageResult {
-  const terms = matched.slice(0, 3).join(", ");
+  const distinct = matched.filter((m) => !matched.some((o) => o !== m && o.includes(m)));
+  const terms = distinct.slice(0, 3).join(", ");
   return {
     id: p.id,
     name: p.name,
