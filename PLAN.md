@@ -35,7 +35,7 @@ Today, users have to browse long test lists they don't understand, or call the l
 
 **Journeys**
 
-1. **Goal to package to booking:** "I want to check my thyroid" → package cards → tap *Book home collection* → Saathi confirms date, time window, address label and patient name → booking confirmation card.
+1. **Goal to package to booking:** "I want to check my thyroid" → package cards → tap *Book home collection* → a booking-details card opens (date, time window, address, patient name) → *Confirm booking* → booking confirmation card. Typing "book a thyroid test for Papa tomorrow morning" instead makes Saathi show the same card, pre-filled.
 2. **Symptom to package (no diagnosis):** "I feel tired and my hair is falling" → Saathi says these tests are *commonly ordered* in such cases, shows cards, and suggests consulting a doctor to interpret results.
 3. **Red flag:** "I have chest pain and can't breathe properly", or a paraphrase such as "my left arm went numb and I'm sweating a lot" → **urgent-care card** (call 112 / 108), with no packages and no booking.
 4. **Offline:** the user opens the app on a train with no signal → sees past chats and bookings → types a message → it is marked *Queued* → it sends automatically when the network returns, and the reply streams in.
@@ -45,7 +45,7 @@ Today, users have to browse long test lists they don't understand, or call the l
 
 ## 3. Scope
 
-**In scope:** chat with streamed replies, two agent tools (`search_packages`, mocked `book_slot`), package and booking cards, offline history and bookings, outbox with exactly-once send, layered red-flag escalation, English/Hindi toggle, Saathi persona and fixed safety copy, tests, CI, deployed backend, an Android APK and a web build. iOS compiles from the same code but is not a tested deliverable.
+**In scope:** chat with streamed replies, three agent tools (`search_packages`, `show_booking_form`, mocked `book_slot`), package and booking cards, offline history and bookings, outbox with exactly-once send, layered red-flag escalation, English/Hindi toggle, Saathi persona and fixed safety copy, tests, CI, deployed backend, an Android APK and a web build. iOS compiles from the same code but is not a tested deliverable.
 
 **Out of scope (documented, not built):** payments, real slot inventory, real user accounts (anonymous auth only), prescription upload, doctor consultation, push notifications, lab-side admin.
 
@@ -182,7 +182,8 @@ The quota guard runs after layer 1, so keyword red flags work even with the quot
 - If the user describes possible emergency signs, stop, tell them to seek urgent care now (112 / 108), and **do not** suggest or book tests.
 - Always use `search_packages` before recommending. Never invent packages, and **never state prices or test lists in text**, because the cards show them.
 - Show at most 3 packages and explain each in one line, tied to what the user said.
-- Before `book_slot`, **confirm** the package, date, time window, address label and patient name with the user. Book only after explicit confirmation.
+- To collect booking details, call `show_booking_form` (pre-filled with anything the user said) instead of asking in text. A structured message from the form or a slot chip ("Book <package> (<id>) on <date> <window> at <address> for <name>.") is the explicit confirmation; call `book_slot` with exactly those details.
+- Otherwise, before `book_slot`, **confirm** the package, date, time window, address label and patient name with the user. Book only after explicit confirmation.
 - Reply in the selected locale, following the persona's voice rules below.
 - Only discuss lab tests and bookings. Politely decline anything else.
 - Two short few-shot examples (one search, one booking confirmation), written in Saathi's voice, steady tool use on a small model.
@@ -267,6 +268,19 @@ Searches the lab's test package catalogue by symptom, health goal or test name, 
 
 The implementation is deterministic keyword and tag scoring over the English and Hindi tags, plus category and price filters. Each result is compact (id, name, price, test count, fasting, report time and a match reason), at roughly 300 tokens per package.
 
+### Tool: `show_booking_form`
+
+Shows a native booking-details card for one package. Used instead of collecting details in text.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| package_id | text | Yes | Must exist in the catalogue |
+| date, time_window, address_label, patient_name | as in `book_slot` | No | Pre-fill from what the user said; invalid values are dropped, not rejected |
+
+The server emits a `booking_form` event with the package, fasting hours, the pre-fill and **availability** (open windows for each of the next 8 IST dates, with full and already-started slots removed), so the card only offers slots that can actually be booked. The model gets `{status: "form_shown"}` and writes one short line.
+
+The same card also opens **locally** when the user taps *Book home collection* on any package card (chat, catalogue or side panel), with no model call and offline. Without server availability it offers all future windows; a full slot comes back as `slot_unavailable` with alternative chips. Submitting marks the card as sent, shows a read-only summary, and queues the structured action message; the bubble shows a friendly summary ("Thyroid Profile · Sat 21 Nov · 7–9 am · Home · for Priya") while the server receives the structured text.
+
 ### Tool: `book_slot` (mocked)
 
 Books a home sample collection, only after the user has explicitly confirmed every detail.
@@ -302,6 +316,7 @@ The chat model doesn't enforce JSON schemas, so every tool call is checked on th
 | PackageCard | Name, sample-tube caps, match reason, test count / fasting / report time (tap to expand the full test list), price and MRP | **Book home collection** (sends a structured "I want to book {package}" message with `kind: action`) |
 | BookingCard | Booking reference, package, date and window, address label, patient name, status, "Saved offline" badge | **View all bookings** |
 | SlotAlternatives | 2–3 alternative slots as chips | Tapping a chip sends a confirmation message (`kind: action`) |
+| BookingFormCard | Package, fasting note, date chips (Today, Tomorrow, then dates), time-window chips (full slots disabled and marked), address chips (Home, Office, Other with a text field), patient name field, inline validation | **Confirm booking** (structured `kind: action` message); afterwards a read-only summary |
 | UrgentCareCard | Red, high-contrast fixed urgent-care copy, no avatar | **Call 112**, **Call 108** (phone links), "I understand" |
 | CrisisSupportCard | Calm, fixed crisis-support copy, no avatar | **Call 14416** |
 | Status chips | Queued (offline), Sending, Failed (tap to retry), "Finding packages…" while a tool runs | Retry |
@@ -551,6 +566,7 @@ Each event has a type and a JSON payload.
 | text_delta | A piece of assistant text | Saathi's streamed reply |
 | tool_started | Tool name | Shows the "Finding packages…" chip |
 | package_cards | Search query and up to 3 packages (id, name, price, MRP, test count, top tests, fasting, report time, match reason) | Rendered as PackageCards |
+| booking_form | Package id and name, fasting hours, pre-fill (date, window, address, patient; each may be null), availability (date → open windows) | Rendered as the BookingFormCard |
 | booking_confirmed | Booking reference, package id and name, date, window, address label, patient name, status | Saved locally right away |
 | slot_unavailable | The requested slot and up to 3 alternatives | Rendered as slot chips |
 | urgent_care | Category (cardiac, respiratory and so on) and helplines (112, 108) | Rendered with the fixed urgent-care copy from the app |
