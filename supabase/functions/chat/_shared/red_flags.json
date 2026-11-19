@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "variants": {
+    "sans": "saans", "saas": "saans", "sas": "saans", "saans": "saans",
+    "me": "mein", "mai": "mein", "mei": "mein", "mey": "mein", "main": "mein",
+    "nahin": "nahi", "nhi": "nahi", "nai": "nahi",
+    "rha": "raha", "rhi": "rahi",
+    "taklif": "takleef", "takleef": "takleef", "takliph": "takleef",
+    "dikkat": "dikkat", "dikat": "dikkat",
+    "chati": "chhati", "chaati": "chhati", "chhaati": "chhati",
+    "seene": "seena", "sine": "seena", "sina": "seena", "seeney": "seena",
+    "dardh": "dard", "darad": "dard",
+    "behos": "behosh", "beosh": "behosh", "behoshi": "behosh",
+    "khun": "khoon", "khoon": "khoon",
+    "ulti": "ulti", "ultee": "ulti",
+    "khaansi": "khansi", "khasi": "khansi",
+    "sooj": "sooj", "suj": "sooj", "sujan": "sooj", "soojan": "sooj"
+  },
+  "categories": [
+    {
+      "id": "cardiac",
+      "outcome": "urgent",
+      "phrases": [
+        "chest pain", "chest pains", "chest tightness", "tightness in chest", "tightness in my chest",
+        "tight chest", "chest pressure", "pressure in chest", "pressure in my chest", "heart attack",
+        "सीने में दर्द", "छाती में दर्द", "सीने में जकडन", "दिल का दौरा",
+        "seena mein dard", "chhati mein dard", "dil ka daura"
+      ],
+      "combos": [
+        [
+          ["chest", "seena", "chhati", "सीना", "सीने", "छाती"],
+          ["pain", "pains", "ache", "aching", "pressure", "tight", "tightness", "heavy", "heaviness", "squeezing", "dard", "दर्द", "jakdan", "जकडन"]
+        ]
+      ]
+    },
+    {
+      "id": "respiratory",
+      "outcome": "urgent",
+      "phrases": [
+        "cant breathe", "cannot breathe", "can not breathe", "unable to breathe", "not able to breathe",
+        "difficulty breathing", "difficulty in breathing", "trouble breathing", "short of breath",
+        "shortness of breath", "breathless", "breathlessness", "gasping for air", "gasping",
+        "सांस लेने में तकलीफ", "सांस नहीं आ रही", "सांस फूल रही", "दम घुट",
+        "saans nahi aa rahi", "saans phool rahi", "saans lene mein takleef", "saans lene mein dikkat", "dum ghut"
+      ],
+      "combos": [
+        [
+          ["breathe", "breathing", "breath", "saans", "सांस"],
+          ["cant", "cannot", "difficulty", "trouble", "struggling", "unable", "nahi", "takleef", "dikkat", "तकलीफ", "नहीं", "phool", "फूल"]
+        ]
+      ]
+    },
+    {
+      "id": "syncope",
+      "outcome": "urgent",
+      "phrases": [
+        "fainted", "fainting", "passed out", "unconscious", "blacked out", "collapsed",
+        "बेहोश", "behosh"
+      ],
+      "combos": []
+    },
+    {
+      "id": "stroke",
+      "outcome": "urgent",
+      "phrases": [
+        "face drooping", "drooping face", "face is drooping", "slurred speech", "speech is slurred",
+        "weakness on one side", "one side weak", "one sided weakness", "one side of my body",
+        "paralysis", "stroke", "लकवा", "मुंह टेढा", "lakwa", "munh tedha", "zubaan ladkhada"
+      ],
+      "combos": []
+    },
+    {
+      "id": "bleeding",
+      "outcome": "urgent",
+      "phrases": [
+        "severe bleeding", "heavy bleeding", "bleeding heavily", "wont stop bleeding", "bleeding wont stop",
+        "bleeding a lot", "खून बह रहा", "बहुत खून", "khoon beh raha", "bahut khoon"
+      ],
+      "combos": []
+    },
+    {
+      "id": "seizure",
+      "outcome": "urgent",
+      "phrases": [
+        "seizure", "seizures", "convulsion", "convulsions", "having fits", "had a fit",
+        "fits aa rahe", "मिर्गी", "दौरा पड", "mirgi", "daura pad", "daura padh"
+      ],
+      "combos": []
+    },
+    {
+      "id": "blood_vomit",
+      "outcome": "urgent",
+      "phrases": [
+        "coughing blood", "coughing up blood", "cough with blood", "vomiting blood", "blood in vomit",
+        "throwing up blood", "खून की उल्टी", "खांसी में खून", "khoon ki ulti", "khansi mein khoon"
+      ],
+      "combos": []
+    },
+    {
+      "id": "anaphylaxis",
+      "outcome": "urgent",
+      "phrases": [
+        "throat is closing", "throat closing", "cant swallow", "गला सूज", "चेहरा सूज"
+      ],
+      "combos": [
+        [
+          ["throat", "face", "tongue", "lips", "lip", "gala", "chehra", "गला", "चेहरा", "जीभ", "होंठ"],
+          ["swelling", "swollen", "swell", "swelled", "sooj", "सूज", "सूजन"]
+        ]
+      ]
+    },
+    {
+      "id": "self_harm",
+      "outcome": "crisis",
+      "phrases": [
+        "kill myself", "killing myself", "suicide", "suicidal", "end my life", "want to die", "wanna die",
+        "self harm", "hurt myself", "cut myself", "no reason to live", "better off dead",
+        "आत्महत्या", "मरना चाहता", "मरना चाहती", "जान दे दूंगा", "जान दे दूंगी", "जीना नहीं चाहता", "जीना नहीं चाहती",
+        "khudkushi", "aatmhatya", "marna chahta", "marna chahti", "jaan de dunga", "jaan de dungi",
+        "jeena nahi chahta", "jeena nahi chahti"
+      ],
+      "combos": []
+    }
+  ]
+}
