@@ -163,7 +163,6 @@ class _ChatScreenState extends State<ChatScreen> {
               hintText: t.chat.inputHint,
               sendButtonVisibilityMode: SendButtonVisibilityMode.disabled,
               sendOnEnter: true,
-              textInputAction: TextInputAction.send,
               topWidget: !online
                   ? _Strip(icon: Icons.wifi_off, text: t.offline.banner)
                   : flagged
