@@ -95,6 +95,11 @@ export const FALLBACK_REPLY: Record<Locale, string> = {
   hi: "आपने जो बताया, उसके लिए ये पैकेज आमतौर पर करवाए जाते हैं। टेस्ट देखने के लिए किसी पर टैप करें, या मुझे और बताइए।",
 };
 
+export const EMPTY_REPLY: Record<Locale, string> = {
+  en: "Tell me what you'd like to check, or how you've been feeling, and I'll suggest the right tests.",
+  hi: "बताइए आप क्या जाँच करवाना चाहते हैं, या आपकी तबीयत कैसी है, मैं सही टेस्ट सुझाऊँगा।",
+};
+
 export const DISCLAIMER: Record<Locale, string> = {
   en: "\n\nThis is not a diagnosis. Please consult a doctor about your symptoms.",
   hi: "\n\nयह कोई निदान नहीं है। अपने लक्षणों के बारे में कृपया डॉक्टर से सलाह लें।",

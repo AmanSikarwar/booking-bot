@@ -1,7 +1,7 @@
 import { type Catalog, forModel, type Locale } from "./catalog.ts";
 import { type Decider, escalation } from "./decider.ts";
 import { type ChatMessage, type ChatModel, LlmError, type ToolCall } from "./llm.ts";
-import { DISCLAIMER, FALLBACK_REPLY, looksLikeDiagnosis, systemPrompt, TOOLS } from "./prompt.ts";
+import { DISCLAIMER, EMPTY_REPLY, FALLBACK_REPLY, looksLikeDiagnosis, systemPrompt, TOOLS } from "./prompt.ts";
 import type { RedFlagDetector } from "./redflag.ts";
 import { alternatives, bookingRef, idempotencyKey, isFull } from "./slots.ts";
 import type { StreamEvent } from "./sse.ts";
@@ -266,6 +266,13 @@ export async function runTurn(
       }
     }
 
+    if (!text.trim()) {
+      const shown = events.some((e) =>
+        e.event === "package_cards" || e.event === "booking_confirmed" || e.event === "slot_unavailable"
+      );
+      text = shown ? FALLBACK_REPLY[locale] : EMPTY_REPLY[locale];
+      record("text_delta", { text });
+    }
     if (looksLikeDiagnosis(text)) {
       console.warn(`diagnosis-like output flagged for message ${messageId}`);
       record("text_delta", { text: DISCLAIMER[locale] });

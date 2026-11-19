@@ -134,3 +134,14 @@ Deno.test("decider: threshold boundaries", () => {
   assertEquals(escalation({ emergency: 0.24, mental_health_crisis: 0.24, routine: 0.52 }), null);
   assertEquals(escalation({ emergency: 0.3, mental_health_crisis: 0.9, routine: 0 }), "urgent");
 });
+
+Deno.test("chat adapter: sends fallback models after the primary", async () => {
+  let sent: Record<string, unknown> = {};
+  const model = new OpenRouterChat("k", "primary:free", (_u, init) => {
+    sent = JSON.parse(init!.body as string);
+    return Promise.resolve(sseResponse(["[DONE]"]));
+  }, ["backup:free"]);
+  await collect(model.stream({ messages: [] }));
+  assertEquals([sent.model, sent.models], ["primary:free", ["primary:free", "backup:free"]]);
+  assertEquals(sent.provider, { require_parameters: true });
+});

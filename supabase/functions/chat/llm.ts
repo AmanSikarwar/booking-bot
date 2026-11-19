@@ -55,6 +55,7 @@ export class OpenRouterChat implements ChatModel {
     private readonly apiKey: string,
     readonly model: string,
     private readonly fetchFn: typeof fetch = fetch,
+    private readonly fallbacks: string[] = [],
   ) {}
 
   async *stream(req: ChatRequest): AsyncGenerator<ChatChunk> {
@@ -100,11 +101,13 @@ export class OpenRouterChat implements ChatModel {
   async #post(req: ChatRequest, started: number): Promise<Response> {
     const body = JSON.stringify({
       model: this.model,
+      ...(this.fallbacks.length ? { models: [this.model, ...this.fallbacks] } : {}),
       messages: req.messages,
       ...(req.tools?.length ? { tools: req.tools, tool_choice: "auto" } : {}),
       stream: true,
       temperature: 0.2,
-      max_tokens: 400,
+      max_tokens: 1000,
+      reasoning: { effort: "minimal", exclude: true },
       provider: { require_parameters: true },
     });
     for (let attempt = 0;; attempt++) {

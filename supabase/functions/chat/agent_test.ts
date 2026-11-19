@@ -304,3 +304,12 @@ Deno.test("mock chat books from a structured slot action", async () => {
   assert(names.includes("booking_confirmed"));
   assertEquals(store.bookings[0].patient_name, "Priya");
 });
+
+Deno.test("empty model text after cards falls back to the template reply", async () => {
+  const chat = new ScriptedChat([[call("search_packages", { query: "sugar" })], []]);
+  const { deps } = setup({ chat });
+  const { events } = await turn(deps, input("पापा के लिए शुगर टेस्ट", { locale: "hi" }));
+  const last = events.at(-2)!;
+  assertEquals(last.event, "text_delta");
+  assert((last.data.text as string).includes("आमतौर पर"));
+});
