@@ -1260,6 +1260,917 @@ $LocalizedCopyWith<$Res> get packageName {
 }
 }
 
+
+/// @nodoc
+mixin _$SlotRequest {
+
+ String get date; String get timeWindow; String get addressLabel; String get patientName;
+/// Create a copy of SlotRequest
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$SlotRequestCopyWith<SlotRequest> get copyWith => _$SlotRequestCopyWithImpl<SlotRequest>(this as SlotRequest, _$identity);
+
+  /// Serializes this SlotRequest to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as SlotRequest;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SlotRequest&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.timeWindow, _this.timeWindow) || other.timeWindow == _this.timeWindow)&&(identical(other.addressLabel, _this.addressLabel) || other.addressLabel == _this.addressLabel)&&(identical(other.patientName, _this.patientName) || other.patientName == _this.patientName));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as SlotRequest;
+  return Object.hash(runtimeType,_this.date,_this.timeWindow,_this.addressLabel,_this.patientName);
+}
+
+@override
+String toString() {
+  final _this = this as SlotRequest;
+  return 'SlotRequest(date: ${_this.date}, timeWindow: ${_this.timeWindow}, addressLabel: ${_this.addressLabel}, patientName: ${_this.patientName})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $SlotRequestCopyWith<$Res>  {
+  factory $SlotRequestCopyWith(SlotRequest value, $Res Function(SlotRequest) _then) = _$SlotRequestCopyWithImpl;
+@useResult
+$Res call({
+ String date, String timeWindow, String addressLabel, String patientName
+});
+
+
+
+
+}
+/// @nodoc
+class _$SlotRequestCopyWithImpl<$Res>
+    implements $SlotRequestCopyWith<$Res> {
+  _$SlotRequestCopyWithImpl(this._self, this._then);
+
+  final SlotRequest _self;
+  final $Res Function(SlotRequest) _then;
+
+/// Create a copy of SlotRequest
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? date = null,Object? timeWindow = null,Object? addressLabel = null,Object? patientName = null,}) {
+  return _then(SlotRequest(
+date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as String,timeWindow: null == timeWindow ? _self.timeWindow : timeWindow // ignore: cast_nullable_to_non_nullable
+as String,addressLabel: null == addressLabel ? _self.addressLabel : addressLabel // ignore: cast_nullable_to_non_nullable
+as String,patientName: null == patientName ? _self.patientName : patientName // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [SlotRequest].
+extension SlotRequestPatterns on SlotRequest {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _SlotRequest value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _SlotRequest() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _SlotRequest value)  $default,){
+final _that = this;
+switch (_that) {
+case _SlotRequest():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _SlotRequest value)?  $default,){
+final _that = this;
+switch (_that) {
+case _SlotRequest() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String date,  String timeWindow,  String addressLabel,  String patientName)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _SlotRequest() when $default != null:
+return $default(_that.date,_that.timeWindow,_that.addressLabel,_that.patientName);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String date,  String timeWindow,  String addressLabel,  String patientName)  $default,) {final _that = this;
+switch (_that) {
+case _SlotRequest():
+return $default(_that.date,_that.timeWindow,_that.addressLabel,_that.patientName);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String date,  String timeWindow,  String addressLabel,  String patientName)?  $default,) {final _that = this;
+switch (_that) {
+case _SlotRequest() when $default != null:
+return $default(_that.date,_that.timeWindow,_that.addressLabel,_that.patientName);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _SlotRequest implements SlotRequest {
+  const _SlotRequest({required this.date, required this.timeWindow, required this.addressLabel, required this.patientName});
+  factory _SlotRequest.fromJson(Map<String, dynamic> json) => _$SlotRequestFromJson(json);
+
+@override final  String date;
+@override final  String timeWindow;
+@override final  String addressLabel;
+@override final  String patientName;
+
+/// Create a copy of SlotRequest
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SlotRequestCopyWith<_SlotRequest> get copyWith => __$SlotRequestCopyWithImpl<_SlotRequest>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$SlotRequestToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SlotRequest&&(identical(other.date, date) || other.date == date)&&(identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow)&&(identical(other.addressLabel, addressLabel) || other.addressLabel == addressLabel)&&(identical(other.patientName, patientName) || other.patientName == patientName));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,date,timeWindow,addressLabel,patientName);
+}
+
+@override
+String toString() {
+    return 'SlotRequest(date: $date, timeWindow: $timeWindow, addressLabel: $addressLabel, patientName: $patientName)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SlotRequestCopyWith<$Res> implements $SlotRequestCopyWith<$Res> {
+  factory _$SlotRequestCopyWith(_SlotRequest value, $Res Function(_SlotRequest) _then) = __$SlotRequestCopyWithImpl;
+@override @useResult
+$Res call({
+ String date, String timeWindow, String addressLabel, String patientName
+});
+
+
+
+
+}
+/// @nodoc
+class __$SlotRequestCopyWithImpl<$Res>
+    implements _$SlotRequestCopyWith<$Res> {
+  __$SlotRequestCopyWithImpl(this._self, this._then);
+
+  final _SlotRequest _self;
+  final $Res Function(_SlotRequest) _then;
+
+/// Create a copy of SlotRequest
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? date = null,Object? timeWindow = null,Object? addressLabel = null,Object? patientName = null,}) {
+  return _then(_SlotRequest(
+date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as String,timeWindow: null == timeWindow ? _self.timeWindow : timeWindow // ignore: cast_nullable_to_non_nullable
+as String,addressLabel: null == addressLabel ? _self.addressLabel : addressLabel // ignore: cast_nullable_to_non_nullable
+as String,patientName: null == patientName ? _self.patientName : patientName // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$FormPrefill {
+
+ String? get date; String? get timeWindow; String? get addressLabel; String? get patientName;
+/// Create a copy of FormPrefill
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FormPrefillCopyWith<FormPrefill> get copyWith => _$FormPrefillCopyWithImpl<FormPrefill>(this as FormPrefill, _$identity);
+
+  /// Serializes this FormPrefill to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as FormPrefill;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FormPrefill&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.timeWindow, _this.timeWindow) || other.timeWindow == _this.timeWindow)&&(identical(other.addressLabel, _this.addressLabel) || other.addressLabel == _this.addressLabel)&&(identical(other.patientName, _this.patientName) || other.patientName == _this.patientName));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as FormPrefill;
+  return Object.hash(runtimeType,_this.date,_this.timeWindow,_this.addressLabel,_this.patientName);
+}
+
+@override
+String toString() {
+  final _this = this as FormPrefill;
+  return 'FormPrefill(date: ${_this.date}, timeWindow: ${_this.timeWindow}, addressLabel: ${_this.addressLabel}, patientName: ${_this.patientName})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FormPrefillCopyWith<$Res>  {
+  factory $FormPrefillCopyWith(FormPrefill value, $Res Function(FormPrefill) _then) = _$FormPrefillCopyWithImpl;
+@useResult
+$Res call({
+ String? date, String? timeWindow, String? addressLabel, String? patientName
+});
+
+
+
+
+}
+/// @nodoc
+class _$FormPrefillCopyWithImpl<$Res>
+    implements $FormPrefillCopyWith<$Res> {
+  _$FormPrefillCopyWithImpl(this._self, this._then);
+
+  final FormPrefill _self;
+  final $Res Function(FormPrefill) _then;
+
+/// Create a copy of FormPrefill
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? date = freezed,Object? timeWindow = freezed,Object? addressLabel = freezed,Object? patientName = freezed,}) {
+  return _then(FormPrefill(
+date: freezed == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as String?,timeWindow: freezed == timeWindow ? _self.timeWindow : timeWindow // ignore: cast_nullable_to_non_nullable
+as String?,addressLabel: freezed == addressLabel ? _self.addressLabel : addressLabel // ignore: cast_nullable_to_non_nullable
+as String?,patientName: freezed == patientName ? _self.patientName : patientName // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [FormPrefill].
+extension FormPrefillPatterns on FormPrefill {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FormPrefill value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FormPrefill() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FormPrefill value)  $default,){
+final _that = this;
+switch (_that) {
+case _FormPrefill():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FormPrefill value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FormPrefill() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? date,  String? timeWindow,  String? addressLabel,  String? patientName)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FormPrefill() when $default != null:
+return $default(_that.date,_that.timeWindow,_that.addressLabel,_that.patientName);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? date,  String? timeWindow,  String? addressLabel,  String? patientName)  $default,) {final _that = this;
+switch (_that) {
+case _FormPrefill():
+return $default(_that.date,_that.timeWindow,_that.addressLabel,_that.patientName);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? date,  String? timeWindow,  String? addressLabel,  String? patientName)?  $default,) {final _that = this;
+switch (_that) {
+case _FormPrefill() when $default != null:
+return $default(_that.date,_that.timeWindow,_that.addressLabel,_that.patientName);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _FormPrefill implements FormPrefill {
+  const _FormPrefill({this.date, this.timeWindow, this.addressLabel, this.patientName});
+  factory _FormPrefill.fromJson(Map<String, dynamic> json) => _$FormPrefillFromJson(json);
+
+@override final  String? date;
+@override final  String? timeWindow;
+@override final  String? addressLabel;
+@override final  String? patientName;
+
+/// Create a copy of FormPrefill
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FormPrefillCopyWith<_FormPrefill> get copyWith => __$FormPrefillCopyWithImpl<_FormPrefill>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FormPrefillToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FormPrefill&&(identical(other.date, date) || other.date == date)&&(identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow)&&(identical(other.addressLabel, addressLabel) || other.addressLabel == addressLabel)&&(identical(other.patientName, patientName) || other.patientName == patientName));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,date,timeWindow,addressLabel,patientName);
+}
+
+@override
+String toString() {
+    return 'FormPrefill(date: $date, timeWindow: $timeWindow, addressLabel: $addressLabel, patientName: $patientName)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FormPrefillCopyWith<$Res> implements $FormPrefillCopyWith<$Res> {
+  factory _$FormPrefillCopyWith(_FormPrefill value, $Res Function(_FormPrefill) _then) = __$FormPrefillCopyWithImpl;
+@override @useResult
+$Res call({
+ String? date, String? timeWindow, String? addressLabel, String? patientName
+});
+
+
+
+
+}
+/// @nodoc
+class __$FormPrefillCopyWithImpl<$Res>
+    implements _$FormPrefillCopyWith<$Res> {
+  __$FormPrefillCopyWithImpl(this._self, this._then);
+
+  final _FormPrefill _self;
+  final $Res Function(_FormPrefill) _then;
+
+/// Create a copy of FormPrefill
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? date = freezed,Object? timeWindow = freezed,Object? addressLabel = freezed,Object? patientName = freezed,}) {
+  return _then(_FormPrefill(
+date: freezed == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
+as String?,timeWindow: freezed == timeWindow ? _self.timeWindow : timeWindow // ignore: cast_nullable_to_non_nullable
+as String?,addressLabel: freezed == addressLabel ? _self.addressLabel : addressLabel // ignore: cast_nullable_to_non_nullable
+as String?,patientName: freezed == patientName ? _self.patientName : patientName // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$BookingFormData {
+
+ String get packageId; Localized get packageName; int get fastingHours; FormPrefill get prefill; Map<String, List<String>>? get availability; SlotRequest? get submitted;
+/// Create a copy of BookingFormData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BookingFormDataCopyWith<BookingFormData> get copyWith => _$BookingFormDataCopyWithImpl<BookingFormData>(this as BookingFormData, _$identity);
+
+  /// Serializes this BookingFormData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as BookingFormData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BookingFormData&&(identical(other.packageId, _this.packageId) || other.packageId == _this.packageId)&&(identical(other.packageName, _this.packageName) || other.packageName == _this.packageName)&&(identical(other.fastingHours, _this.fastingHours) || other.fastingHours == _this.fastingHours)&&(identical(other.prefill, _this.prefill) || other.prefill == _this.prefill)&&const DeepCollectionEquality().equals(other.availability, _this.availability)&&(identical(other.submitted, _this.submitted) || other.submitted == _this.submitted));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as BookingFormData;
+  return Object.hash(runtimeType,_this.packageId,_this.packageName,_this.fastingHours,_this.prefill,const DeepCollectionEquality().hash(_this.availability),_this.submitted);
+}
+
+@override
+String toString() {
+  final _this = this as BookingFormData;
+  return 'BookingFormData(packageId: ${_this.packageId}, packageName: ${_this.packageName}, fastingHours: ${_this.fastingHours}, prefill: ${_this.prefill}, availability: ${_this.availability}, submitted: ${_this.submitted})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $BookingFormDataCopyWith<$Res>  {
+  factory $BookingFormDataCopyWith(BookingFormData value, $Res Function(BookingFormData) _then) = _$BookingFormDataCopyWithImpl;
+@useResult
+$Res call({
+ String packageId, Localized packageName, int fastingHours, FormPrefill prefill, Map<String, List<String>>? availability, SlotRequest? submitted
+});
+
+
+$LocalizedCopyWith<$Res> get packageName;$FormPrefillCopyWith<$Res> get prefill;$SlotRequestCopyWith<$Res>? get submitted;
+
+}
+/// @nodoc
+class _$BookingFormDataCopyWithImpl<$Res>
+    implements $BookingFormDataCopyWith<$Res> {
+  _$BookingFormDataCopyWithImpl(this._self, this._then);
+
+  final BookingFormData _self;
+  final $Res Function(BookingFormData) _then;
+
+/// Create a copy of BookingFormData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? packageId = null,Object? packageName = null,Object? fastingHours = null,Object? prefill = null,Object? availability = freezed,Object? submitted = freezed,}) {
+  return _then(BookingFormData(
+packageId: null == packageId ? _self.packageId : packageId // ignore: cast_nullable_to_non_nullable
+as String,packageName: null == packageName ? _self.packageName : packageName // ignore: cast_nullable_to_non_nullable
+as Localized,fastingHours: null == fastingHours ? _self.fastingHours : fastingHours // ignore: cast_nullable_to_non_nullable
+as int,prefill: null == prefill ? _self.prefill : prefill // ignore: cast_nullable_to_non_nullable
+as FormPrefill,availability: freezed == availability ? _self.availability : availability // ignore: cast_nullable_to_non_nullable
+as Map<String, List<String>>?,submitted: freezed == submitted ? _self.submitted : submitted // ignore: cast_nullable_to_non_nullable
+as SlotRequest?,
+  ));
+}
+/// Create a copy of BookingFormData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocalizedCopyWith<$Res> get packageName {
+  
+  return $LocalizedCopyWith<$Res>(_self.packageName, (value) {
+    return _then(_self.copyWith(packageName: value));
+  });
+}/// Create a copy of BookingFormData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FormPrefillCopyWith<$Res> get prefill {
+  
+  return $FormPrefillCopyWith<$Res>(_self.prefill, (value) {
+    return _then(_self.copyWith(prefill: value));
+  });
+}/// Create a copy of BookingFormData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SlotRequestCopyWith<$Res>? get submitted {
+    if (_self.submitted == null) {
+    return null;
+  }
+
+  return $SlotRequestCopyWith<$Res>(_self.submitted!, (value) {
+    return _then(_self.copyWith(submitted: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [BookingFormData].
+extension BookingFormDataPatterns on BookingFormData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _BookingFormData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _BookingFormData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _BookingFormData value)  $default,){
+final _that = this;
+switch (_that) {
+case _BookingFormData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _BookingFormData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _BookingFormData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String packageId,  Localized packageName,  int fastingHours,  FormPrefill prefill,  Map<String, List<String>>? availability,  SlotRequest? submitted)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _BookingFormData() when $default != null:
+return $default(_that.packageId,_that.packageName,_that.fastingHours,_that.prefill,_that.availability,_that.submitted);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String packageId,  Localized packageName,  int fastingHours,  FormPrefill prefill,  Map<String, List<String>>? availability,  SlotRequest? submitted)  $default,) {final _that = this;
+switch (_that) {
+case _BookingFormData():
+return $default(_that.packageId,_that.packageName,_that.fastingHours,_that.prefill,_that.availability,_that.submitted);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String packageId,  Localized packageName,  int fastingHours,  FormPrefill prefill,  Map<String, List<String>>? availability,  SlotRequest? submitted)?  $default,) {final _that = this;
+switch (_that) {
+case _BookingFormData() when $default != null:
+return $default(_that.packageId,_that.packageName,_that.fastingHours,_that.prefill,_that.availability,_that.submitted);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _BookingFormData implements BookingFormData {
+  const _BookingFormData({required this.packageId, required this.packageName, this.fastingHours = 0, this.prefill = const FormPrefill(),  Map<String, List<String>>? availability, this.submitted}): _availability = availability;
+  factory _BookingFormData.fromJson(Map<String, dynamic> json) => _$BookingFormDataFromJson(json);
+
+@override final  String packageId;
+@override final  Localized packageName;
+@override@JsonKey() final  int fastingHours;
+@override@JsonKey() final  FormPrefill prefill;
+ final  Map<String, List<String>>? _availability;
+@override Map<String, List<String>>? get availability {
+  final value = _availability;
+  if (value == null) return null;
+  if (_availability is EqualUnmodifiableMapView) return _availability;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
+@override final  SlotRequest? submitted;
+
+/// Create a copy of BookingFormData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BookingFormDataCopyWith<_BookingFormData> get copyWith => __$BookingFormDataCopyWithImpl<_BookingFormData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$BookingFormDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BookingFormData&&(identical(other.packageId, packageId) || other.packageId == packageId)&&(identical(other.packageName, packageName) || other.packageName == packageName)&&(identical(other.fastingHours, fastingHours) || other.fastingHours == fastingHours)&&(identical(other.prefill, prefill) || other.prefill == prefill)&&const DeepCollectionEquality().equals(other.availability, _availability)&&(identical(other.submitted, submitted) || other.submitted == submitted));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,packageId,packageName,fastingHours,prefill,const DeepCollectionEquality().hash(_availability),submitted);
+}
+
+@override
+String toString() {
+    return 'BookingFormData(packageId: $packageId, packageName: $packageName, fastingHours: $fastingHours, prefill: $prefill, availability: $availability, submitted: $submitted)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BookingFormDataCopyWith<$Res> implements $BookingFormDataCopyWith<$Res> {
+  factory _$BookingFormDataCopyWith(_BookingFormData value, $Res Function(_BookingFormData) _then) = __$BookingFormDataCopyWithImpl;
+@override @useResult
+$Res call({
+ String packageId, Localized packageName, int fastingHours, FormPrefill prefill, Map<String, List<String>>? availability, SlotRequest? submitted
+});
+
+
+@override $LocalizedCopyWith<$Res> get packageName;@override $FormPrefillCopyWith<$Res> get prefill;@override $SlotRequestCopyWith<$Res>? get submitted;
+
+}
+/// @nodoc
+class __$BookingFormDataCopyWithImpl<$Res>
+    implements _$BookingFormDataCopyWith<$Res> {
+  __$BookingFormDataCopyWithImpl(this._self, this._then);
+
+  final _BookingFormData _self;
+  final $Res Function(_BookingFormData) _then;
+
+/// Create a copy of BookingFormData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? packageId = null,Object? packageName = null,Object? fastingHours = null,Object? prefill = null,Object? availability = freezed,Object? submitted = freezed,}) {
+  return _then(_BookingFormData(
+packageId: null == packageId ? _self.packageId : packageId // ignore: cast_nullable_to_non_nullable
+as String,packageName: null == packageName ? _self.packageName : packageName // ignore: cast_nullable_to_non_nullable
+as Localized,fastingHours: null == fastingHours ? _self.fastingHours : fastingHours // ignore: cast_nullable_to_non_nullable
+as int,prefill: null == prefill ? _self.prefill : prefill // ignore: cast_nullable_to_non_nullable
+as FormPrefill,availability: freezed == availability ? _self._availability : availability // ignore: cast_nullable_to_non_nullable
+as Map<String, List<String>>?,submitted: freezed == submitted ? _self.submitted : submitted // ignore: cast_nullable_to_non_nullable
+as SlotRequest?,
+  ));
+}
+
+/// Create a copy of BookingFormData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$LocalizedCopyWith<$Res> get packageName {
+  
+  return $LocalizedCopyWith<$Res>(_self.packageName, (value) {
+    return _then(_self.copyWith(packageName: value));
+  });
+}/// Create a copy of BookingFormData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FormPrefillCopyWith<$Res> get prefill {
+  
+  return $FormPrefillCopyWith<$Res>(_self.prefill, (value) {
+    return _then(_self.copyWith(prefill: value));
+  });
+}/// Create a copy of BookingFormData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SlotRequestCopyWith<$Res>? get submitted {
+    if (_self.submitted == null) {
+    return null;
+  }
+
+  return $SlotRequestCopyWith<$Res>(_self.submitted!, (value) {
+    return _then(_self.copyWith(submitted: value));
+  });
+}
+}
+
 ChatCard _$ChatCardFromJson(
   Map<String, dynamic> json
 ) {
@@ -1282,6 +2193,10 @@ ChatCard _$ChatCardFromJson(
           );
                 case 'crisis':
           return CrisisCard.fromJson(
+            json
+          );
+                case 'bookingForm':
+          return BookingFormCard.fromJson(
             json
           );
         
@@ -1342,7 +2257,7 @@ extension ChatCardPatterns on ChatCard {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PackagesCard value)?  packages,TResult Function( BookingCardData value)?  booking,TResult Function( SlotsCard value)?  slots,TResult Function( UrgentCard value)?  urgent,TResult Function( CrisisCard value)?  crisis,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PackagesCard value)?  packages,TResult Function( BookingCardData value)?  booking,TResult Function( SlotsCard value)?  slots,TResult Function( UrgentCard value)?  urgent,TResult Function( CrisisCard value)?  crisis,TResult Function( BookingFormCard value)?  bookingForm,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case PackagesCard() when packages != null:
@@ -1350,7 +2265,8 @@ return packages(_that);case BookingCardData() when booking != null:
 return booking(_that);case SlotsCard() when slots != null:
 return slots(_that);case UrgentCard() when urgent != null:
 return urgent(_that);case CrisisCard() when crisis != null:
-return crisis(_that);case _:
+return crisis(_that);case BookingFormCard() when bookingForm != null:
+return bookingForm(_that);case _:
   return orElse();
 
 }
@@ -1368,7 +2284,7 @@ return crisis(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PackagesCard value)  packages,required TResult Function( BookingCardData value)  booking,required TResult Function( SlotsCard value)  slots,required TResult Function( UrgentCard value)  urgent,required TResult Function( CrisisCard value)  crisis,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PackagesCard value)  packages,required TResult Function( BookingCardData value)  booking,required TResult Function( SlotsCard value)  slots,required TResult Function( UrgentCard value)  urgent,required TResult Function( CrisisCard value)  crisis,required TResult Function( BookingFormCard value)  bookingForm,}){
 final _that = this;
 switch (_that) {
 case PackagesCard():
@@ -1376,7 +2292,8 @@ return packages(_that);case BookingCardData():
 return booking(_that);case SlotsCard():
 return slots(_that);case UrgentCard():
 return urgent(_that);case CrisisCard():
-return crisis(_that);}
+return crisis(_that);case BookingFormCard():
+return bookingForm(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -1390,7 +2307,7 @@ return crisis(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PackagesCard value)?  packages,TResult? Function( BookingCardData value)?  booking,TResult? Function( SlotsCard value)?  slots,TResult? Function( UrgentCard value)?  urgent,TResult? Function( CrisisCard value)?  crisis,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PackagesCard value)?  packages,TResult? Function( BookingCardData value)?  booking,TResult? Function( SlotsCard value)?  slots,TResult? Function( UrgentCard value)?  urgent,TResult? Function( CrisisCard value)?  crisis,TResult? Function( BookingFormCard value)?  bookingForm,}){
 final _that = this;
 switch (_that) {
 case PackagesCard() when packages != null:
@@ -1398,7 +2315,8 @@ return packages(_that);case BookingCardData() when booking != null:
 return booking(_that);case SlotsCard() when slots != null:
 return slots(_that);case UrgentCard() when urgent != null:
 return urgent(_that);case CrisisCard() when crisis != null:
-return crisis(_that);case _:
+return crisis(_that);case BookingFormCard() when bookingForm != null:
+return bookingForm(_that);case _:
   return null;
 
 }
@@ -1415,14 +2333,15 @@ return crisis(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<PackageSummary> packages)?  packages,TResult Function( BookingInfo booking)?  booking,TResult Function( SlotOffer offer)?  slots,TResult Function( String category)?  urgent,TResult Function( String category)?  crisis,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( List<PackageSummary> packages)?  packages,TResult Function( BookingInfo booking)?  booking,TResult Function( SlotOffer offer)?  slots,TResult Function( String category)?  urgent,TResult Function( String category)?  crisis,TResult Function( BookingFormData form)?  bookingForm,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case PackagesCard() when packages != null:
 return packages(_that.packages);case BookingCardData() when booking != null:
 return booking(_that.booking);case SlotsCard() when slots != null:
 return slots(_that.offer);case UrgentCard() when urgent != null:
 return urgent(_that.category);case CrisisCard() when crisis != null:
-return crisis(_that.category);case _:
+return crisis(_that.category);case BookingFormCard() when bookingForm != null:
+return bookingForm(_that.form);case _:
   return orElse();
 
 }
@@ -1440,14 +2359,15 @@ return crisis(_that.category);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<PackageSummary> packages)  packages,required TResult Function( BookingInfo booking)  booking,required TResult Function( SlotOffer offer)  slots,required TResult Function( String category)  urgent,required TResult Function( String category)  crisis,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( List<PackageSummary> packages)  packages,required TResult Function( BookingInfo booking)  booking,required TResult Function( SlotOffer offer)  slots,required TResult Function( String category)  urgent,required TResult Function( String category)  crisis,required TResult Function( BookingFormData form)  bookingForm,}) {final _that = this;
 switch (_that) {
 case PackagesCard():
 return packages(_that.packages);case BookingCardData():
 return booking(_that.booking);case SlotsCard():
 return slots(_that.offer);case UrgentCard():
 return urgent(_that.category);case CrisisCard():
-return crisis(_that.category);}
+return crisis(_that.category);case BookingFormCard():
+return bookingForm(_that.form);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -1461,14 +2381,15 @@ return crisis(_that.category);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<PackageSummary> packages)?  packages,TResult? Function( BookingInfo booking)?  booking,TResult? Function( SlotOffer offer)?  slots,TResult? Function( String category)?  urgent,TResult? Function( String category)?  crisis,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( List<PackageSummary> packages)?  packages,TResult? Function( BookingInfo booking)?  booking,TResult? Function( SlotOffer offer)?  slots,TResult? Function( String category)?  urgent,TResult? Function( String category)?  crisis,TResult? Function( BookingFormData form)?  bookingForm,}) {final _that = this;
 switch (_that) {
 case PackagesCard() when packages != null:
 return packages(_that.packages);case BookingCardData() when booking != null:
 return booking(_that.booking);case SlotsCard() when slots != null:
 return slots(_that.offer);case UrgentCard() when urgent != null:
 return urgent(_that.category);case CrisisCard() when crisis != null:
-return crisis(_that.category);case _:
+return crisis(_that.category);case BookingFormCard() when bookingForm != null:
+return bookingForm(_that.form);case _:
   return null;
 
 }
@@ -1873,6 +2794,90 @@ as String,
 }
 
 
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class BookingFormCard implements ChatCard {
+  const BookingFormCard(this.form, { String? $type}): $type = $type ?? 'bookingForm';
+  factory BookingFormCard.fromJson(Map<String, dynamic> json) => _$BookingFormCardFromJson(json);
+
+ final  BookingFormData form;
+
+@JsonKey(name: 'type')
+final String $type;
+
+
+/// Create a copy of ChatCard
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BookingFormCardCopyWith<BookingFormCard> get copyWith => _$BookingFormCardCopyWithImpl<BookingFormCard>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$BookingFormCardToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is BookingFormCard&&(identical(other.form, form) || other.form == form));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,form);
+}
+
+@override
+String toString() {
+    return 'ChatCard.bookingForm(form: $form)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $BookingFormCardCopyWith<$Res> implements $ChatCardCopyWith<$Res> {
+  factory $BookingFormCardCopyWith(BookingFormCard value, $Res Function(BookingFormCard) _then) = _$BookingFormCardCopyWithImpl;
+@useResult
+$Res call({
+ BookingFormData form
+});
+
+
+$BookingFormDataCopyWith<$Res> get form;
+
+}
+/// @nodoc
+class _$BookingFormCardCopyWithImpl<$Res>
+    implements $BookingFormCardCopyWith<$Res> {
+  _$BookingFormCardCopyWithImpl(this._self, this._then);
+
+  final BookingFormCard _self;
+  final $Res Function(BookingFormCard) _then;
+
+/// Create a copy of ChatCard
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? form = null,}) {
+  return _then(BookingFormCard(
+null == form ? _self.form : form // ignore: cast_nullable_to_non_nullable
+as BookingFormData,
+  ));
+}
+
+/// Create a copy of ChatCard
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BookingFormDataCopyWith<$Res> get form {
+  
+  return $BookingFormDataCopyWith<$Res>(_self.form, (value) {
+    return _then(_self.copyWith(form: value));
+  });
+}
 }
 
 // dart format on

@@ -398,6 +398,15 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, Message> {
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _displayMeta = const VerificationMeta('display');
+  @override
+  late final GeneratedColumn<String> display = GeneratedColumn<String>(
+    'display',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   late final GeneratedColumnWithTypeConverter<List<ChatCard>, String> cards =
       GeneratedColumn<String>(
@@ -480,6 +489,7 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, Message> {
     kind,
     locale,
     body,
+    display,
     cards,
     status,
     replyTo,
@@ -516,6 +526,9 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, Message> {
     }
     if (data.containsKey('body')) {
       context.handle(_bodyMeta, body.isAcceptableOrUnknown(data['body']!, _bodyMeta));
+    }
+    if (data.containsKey('display')) {
+      context.handle(_displayMeta, display.isAcceptableOrUnknown(data['display']!, _displayMeta));
     }
     if (data.containsKey('reply_to')) {
       context.handle(_replyToMeta, replyTo.isAcceptableOrUnknown(data['reply_to']!, _replyToMeta));
@@ -574,6 +587,10 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, Message> {
         data['${effectivePrefix}locale'],
       )!,
       body: attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}body'])!,
+      display: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display'],
+      ),
       cards: $MessagesTable.$convertercards.fromSql(
         attachedDatabase.typeMapping.read(DriftSqlType.string, data['${effectivePrefix}cards'])!,
       ),
@@ -628,6 +645,7 @@ class Message extends DataClass implements Insertable<Message> {
   final MessageKind kind;
   final String locale;
   final String body;
+  final String? display;
   final List<ChatCard> cards;
   final MessageStatus status;
   final String? replyTo;
@@ -643,6 +661,7 @@ class Message extends DataClass implements Insertable<Message> {
     required this.kind,
     required this.locale,
     required this.body,
+    this.display,
     required this.cards,
     required this.status,
     this.replyTo,
@@ -665,6 +684,9 @@ class Message extends DataClass implements Insertable<Message> {
     }
     map['locale'] = Variable<String>(locale);
     map['body'] = Variable<String>(body);
+    if (!nullToAbsent || display != null) {
+      map['display'] = Variable<String>(display);
+    }
     {
       map['cards'] = Variable<String>($MessagesTable.$convertercards.toSql(cards));
     }
@@ -696,6 +718,7 @@ class Message extends DataClass implements Insertable<Message> {
       kind: Value(kind),
       locale: Value(locale),
       body: Value(body),
+      display: display == null && nullToAbsent ? const Value.absent() : Value(display),
       cards: Value(cards),
       status: Value(status),
       replyTo: replyTo == null && nullToAbsent ? const Value.absent() : Value(replyTo),
@@ -718,6 +741,7 @@ class Message extends DataClass implements Insertable<Message> {
       kind: $MessagesTable.$converterkind.fromJson(serializer.fromJson<String>(json['kind'])),
       locale: serializer.fromJson<String>(json['locale']),
       body: serializer.fromJson<String>(json['body']),
+      display: serializer.fromJson<String?>(json['display']),
       cards: serializer.fromJson<List<ChatCard>>(json['cards']),
       status: $MessagesTable.$converterstatus.fromJson(serializer.fromJson<String>(json['status'])),
       replyTo: serializer.fromJson<String?>(json['replyTo']),
@@ -738,6 +762,7 @@ class Message extends DataClass implements Insertable<Message> {
       'kind': serializer.toJson<String>($MessagesTable.$converterkind.toJson(kind)),
       'locale': serializer.toJson<String>(locale),
       'body': serializer.toJson<String>(body),
+      'display': serializer.toJson<String?>(display),
       'cards': serializer.toJson<List<ChatCard>>(cards),
       'status': serializer.toJson<String>($MessagesTable.$converterstatus.toJson(status)),
       'replyTo': serializer.toJson<String?>(replyTo),
@@ -756,6 +781,7 @@ class Message extends DataClass implements Insertable<Message> {
     MessageKind? kind,
     String? locale,
     String? body,
+    Value<String?> display = const Value.absent(),
     List<ChatCard>? cards,
     MessageStatus? status,
     Value<String?> replyTo = const Value.absent(),
@@ -771,6 +797,7 @@ class Message extends DataClass implements Insertable<Message> {
     kind: kind ?? this.kind,
     locale: locale ?? this.locale,
     body: body ?? this.body,
+    display: display.present ? display.value : this.display,
     cards: cards ?? this.cards,
     status: status ?? this.status,
     replyTo: replyTo.present ? replyTo.value : this.replyTo,
@@ -788,6 +815,7 @@ class Message extends DataClass implements Insertable<Message> {
       kind: data.kind.present ? data.kind.value : this.kind,
       locale: data.locale.present ? data.locale.value : this.locale,
       body: data.body.present ? data.body.value : this.body,
+      display: data.display.present ? data.display.value : this.display,
       cards: data.cards.present ? data.cards.value : this.cards,
       status: data.status.present ? data.status.value : this.status,
       replyTo: data.replyTo.present ? data.replyTo.value : this.replyTo,
@@ -808,6 +836,7 @@ class Message extends DataClass implements Insertable<Message> {
           ..write('kind: $kind, ')
           ..write('locale: $locale, ')
           ..write('body: $body, ')
+          ..write('display: $display, ')
           ..write('cards: $cards, ')
           ..write('status: $status, ')
           ..write('replyTo: $replyTo, ')
@@ -828,6 +857,7 @@ class Message extends DataClass implements Insertable<Message> {
     kind,
     locale,
     body,
+    display,
     cards,
     status,
     replyTo,
@@ -847,6 +877,7 @@ class Message extends DataClass implements Insertable<Message> {
           other.kind == this.kind &&
           other.locale == this.locale &&
           other.body == this.body &&
+          other.display == this.display &&
           other.cards == this.cards &&
           other.status == this.status &&
           other.replyTo == this.replyTo &&
@@ -864,6 +895,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
   final Value<MessageKind> kind;
   final Value<String> locale;
   final Value<String> body;
+  final Value<String?> display;
   final Value<List<ChatCard>> cards;
   final Value<MessageStatus> status;
   final Value<String?> replyTo;
@@ -880,6 +912,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     this.kind = const Value.absent(),
     this.locale = const Value.absent(),
     this.body = const Value.absent(),
+    this.display = const Value.absent(),
     this.cards = const Value.absent(),
     this.status = const Value.absent(),
     this.replyTo = const Value.absent(),
@@ -897,6 +930,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     this.kind = const Value.absent(),
     this.locale = const Value.absent(),
     this.body = const Value.absent(),
+    this.display = const Value.absent(),
     this.cards = const Value.absent(),
     required MessageStatus status,
     this.replyTo = const Value.absent(),
@@ -918,6 +952,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     Expression<String>? kind,
     Expression<String>? locale,
     Expression<String>? body,
+    Expression<String>? display,
     Expression<String>? cards,
     Expression<String>? status,
     Expression<String>? replyTo,
@@ -935,6 +970,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       if (kind != null) 'kind': kind,
       if (locale != null) 'locale': locale,
       if (body != null) 'body': body,
+      if (display != null) 'display': display,
       if (cards != null) 'cards': cards,
       if (status != null) 'status': status,
       if (replyTo != null) 'reply_to': replyTo,
@@ -954,6 +990,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     Value<MessageKind>? kind,
     Value<String>? locale,
     Value<String>? body,
+    Value<String?>? display,
     Value<List<ChatCard>>? cards,
     Value<MessageStatus>? status,
     Value<String?>? replyTo,
@@ -971,6 +1008,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       kind: kind ?? this.kind,
       locale: locale ?? this.locale,
       body: body ?? this.body,
+      display: display ?? this.display,
       cards: cards ?? this.cards,
       status: status ?? this.status,
       replyTo: replyTo ?? this.replyTo,
@@ -1003,6 +1041,9 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     }
     if (body.present) {
       map['body'] = Variable<String>(body.value);
+    }
+    if (display.present) {
+      map['display'] = Variable<String>(display.value);
     }
     if (cards.present) {
       map['cards'] = Variable<String>($MessagesTable.$convertercards.toSql(cards.value));
@@ -1043,6 +1084,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
           ..write('kind: $kind, ')
           ..write('locale: $locale, ')
           ..write('body: $body, ')
+          ..write('display: $display, ')
           ..write('cards: $cards, ')
           ..write('status: $status, ')
           ..write('replyTo: $replyTo, ')
@@ -2155,6 +2197,7 @@ typedef $$MessagesTableCreateCompanionBuilder = MessagesCompanion Function({
   Value<MessageKind> kind,
   Value<String> locale,
   Value<String> body,
+  Value<String?> display,
   Value<List<ChatCard>> cards,
   required MessageStatus status,
   Value<String?> replyTo,
@@ -2172,6 +2215,7 @@ typedef $$MessagesTableUpdateCompanionBuilder = MessagesCompanion Function({
   Value<MessageKind> kind,
   Value<String> locale,
   Value<String> body,
+  Value<String?> display,
   Value<List<ChatCard>> cards,
   Value<MessageStatus> status,
   Value<String?> replyTo,
@@ -2229,6 +2273,9 @@ class $$MessagesTableFilterComposer extends Composer<_$AppDatabase, $MessagesTab
 
   ColumnFilters<String> get body =>
       $composableBuilder(column: $table.body, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get display =>
+      $composableBuilder(column: $table.display, builder: (column) => ColumnFilters(column));
 
   ColumnWithTypeConverterFilters<List<ChatCard>, List<ChatCard>, String> get cards =>
       $composableBuilder(
@@ -2302,6 +2349,9 @@ class $$MessagesTableOrderingComposer extends Composer<_$AppDatabase, $MessagesT
   ColumnOrderings<String> get body =>
       $composableBuilder(column: $table.body, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get display =>
+      $composableBuilder(column: $table.display, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get cards =>
       $composableBuilder(column: $table.cards, builder: (column) => ColumnOrderings(column));
 
@@ -2369,6 +2419,9 @@ class $$MessagesTableAnnotationComposer extends Composer<_$AppDatabase, $Message
 
   GeneratedColumn<String> get body =>
       $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<String> get display =>
+      $composableBuilder(column: $table.display, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<List<ChatCard>, String> get cards =>
       $composableBuilder(column: $table.cards, builder: (column) => column);
@@ -2445,6 +2498,7 @@ class $$MessagesTableTableManager
                 Value<MessageKind> kind = const Value.absent(),
                 Value<String> locale = const Value.absent(),
                 Value<String> body = const Value.absent(),
+                Value<String?> display = const Value.absent(),
                 Value<List<ChatCard>> cards = const Value.absent(),
                 Value<MessageStatus> status = const Value.absent(),
                 Value<String?> replyTo = const Value.absent(),
@@ -2461,6 +2515,7 @@ class $$MessagesTableTableManager
                 kind: kind,
                 locale: locale,
                 body: body,
+                display: display,
                 cards: cards,
                 status: status,
                 replyTo: replyTo,
@@ -2479,6 +2534,7 @@ class $$MessagesTableTableManager
                 Value<MessageKind> kind = const Value.absent(),
                 Value<String> locale = const Value.absent(),
                 Value<String> body = const Value.absent(),
+                Value<String?> display = const Value.absent(),
                 Value<List<ChatCard>> cards = const Value.absent(),
                 required MessageStatus status,
                 Value<String?> replyTo = const Value.absent(),
@@ -2495,6 +2551,7 @@ class $$MessagesTableTableManager
                 kind: kind,
                 locale: locale,
                 body: body,
+                display: display,
                 cards: cards,
                 status: status,
                 replyTo: replyTo,

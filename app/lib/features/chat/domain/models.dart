@@ -60,6 +60,44 @@ abstract class SlotOffer with _$SlotOffer {
   factory SlotOffer.fromJson(Map<String, Object?> json) => _$SlotOfferFromJson(json);
 }
 
+@freezed
+abstract class SlotRequest with _$SlotRequest {
+  const factory SlotRequest({
+    required String date,
+    required String timeWindow,
+    required String addressLabel,
+    required String patientName,
+  }) = _SlotRequest;
+
+  factory SlotRequest.fromJson(Map<String, Object?> json) => _$SlotRequestFromJson(json);
+}
+
+@freezed
+abstract class FormPrefill with _$FormPrefill {
+  const factory FormPrefill({
+    String? date,
+    String? timeWindow,
+    String? addressLabel,
+    String? patientName,
+  }) = _FormPrefill;
+
+  factory FormPrefill.fromJson(Map<String, Object?> json) => _$FormPrefillFromJson(json);
+}
+
+@freezed
+abstract class BookingFormData with _$BookingFormData {
+  const factory BookingFormData({
+    required String packageId,
+    required Localized packageName,
+    @Default(0) int fastingHours,
+    @Default(FormPrefill()) FormPrefill prefill,
+    Map<String, List<String>>? availability,
+    SlotRequest? submitted,
+  }) = _BookingFormData;
+
+  factory BookingFormData.fromJson(Map<String, Object?> json) => _$BookingFormDataFromJson(json);
+}
+
 @Freezed(unionKey: 'type')
 sealed class ChatCard with _$ChatCard {
   const factory ChatCard.packages(List<PackageSummary> packages) = PackagesCard;
@@ -67,6 +105,7 @@ sealed class ChatCard with _$ChatCard {
   const factory ChatCard.slots(SlotOffer offer) = SlotsCard;
   const factory ChatCard.urgent(String category) = UrgentCard;
   const factory ChatCard.crisis(String category) = CrisisCard;
+  const factory ChatCard.bookingForm(BookingFormData form) = BookingFormCard;
 
   factory ChatCard.fromJson(Map<String, Object?> json) => _$ChatCardFromJson(json);
 }

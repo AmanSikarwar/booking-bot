@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../core/db/database.dart';
 import '../data/chat_repository.dart';
+import '../domain/models.dart';
 
 part 'chat_cubit.freezed.dart';
 
@@ -30,14 +31,47 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> newChat(String locale) async => _open(await _repo.newConversation(locale));
 
-  Future<void> send(String text, String locale, {MessageKind kind = MessageKind.text}) async {
+  Future<void> send(
+    String text,
+    String locale, {
+    MessageKind kind = MessageKind.text,
+    String? display,
+  }) async {
     final id = state.conversationId;
     final trimmed = text.trim();
     if (id == null || trimmed.isEmpty) return;
-    await _repo.submit(conversationId: id, text: trimmed, locale: locale, kind: kind);
+    await _repo.submit(
+      conversationId: id,
+      text: trimmed,
+      locale: locale,
+      kind: kind,
+      display: display,
+    );
   }
 
   Future<void> retry(String messageId) => _repo.retry(messageId);
+
+  Future<void> openBookingForm(BookingFormData form, String locale) async {
+    final id = state.conversationId;
+    if (id == null) return;
+    await _repo.openBookingForm(conversationId: id, form: form, locale: locale);
+  }
+
+  Future<void> submitBookingForm({
+    required String rowId,
+    required int cardIndex,
+    required SlotRequest request,
+    required String text,
+    required String locale,
+    String? display,
+  }) => _repo.submitBookingForm(
+    rowId: rowId,
+    cardIndex: cardIndex,
+    request: request,
+    text: text,
+    locale: locale,
+    display: display,
+  );
 
   Future<void> _open(String id) async {
     await _messages?.cancel();

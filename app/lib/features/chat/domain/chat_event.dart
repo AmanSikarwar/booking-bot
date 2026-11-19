@@ -27,6 +27,7 @@ sealed class ChatEvent with _$ChatEvent {
     ),
     'booking_confirmed' => ChatEvent.card(ChatCard.booking(BookingInfo.fromJson(d))),
     'slot_unavailable' => ChatEvent.card(ChatCard.slots(SlotOffer.fromJson(d))),
+    'booking_form' => ChatEvent.card(ChatCard.bookingForm(BookingFormData.fromJson(d))),
     'urgent_care' => ChatEvent.card(ChatCard.urgent(d['category'] as String? ?? '')),
     'crisis_support' => ChatEvent.card(ChatCard.crisis(d['category'] as String? ?? '')),
     'error' => ChatEvent.error(

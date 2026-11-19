@@ -60,7 +60,6 @@
     "understood": "I understand"
   },
   "actions": {
-    "bookPackage": "I want to book {name}",
     "bookSlot": "Book {name} ({id}) on {date} {window} at {address} for {patient}."
   },
   "bookings": {
@@ -107,5 +106,26 @@
     "newChat": "New chat",
     "packages": "All packages",
     "bookings": "My bookings"
+  },
+  "form": {
+    "title": "Book home collection",
+    "date": "Date",
+    "time": "Time window",
+    "address": "Collection address",
+    "home": "Home",
+    "office": "Office",
+    "other": "Other",
+    "otherHint": "e.g. Papa's house",
+    "patient": "Patient name",
+    "patientHint": "Who is the sample for?",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "full": "Full",
+    "fasting": "Fast for {h} hours before collection",
+    "confirm": "Confirm booking",
+    "required": "Required",
+    "pickDate": "Pick a date",
+    "pickTime": "Pick a time window",
+    "sent": "Details sent"
   }
 }

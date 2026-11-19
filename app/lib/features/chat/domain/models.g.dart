@@ -82,6 +82,58 @@ Map<String, dynamic> _$SlotOfferToJson(_SlotOffer instance) => <String, dynamic>
   'patient_name': instance.patientName,
 };
 
+_SlotRequest _$SlotRequestFromJson(Map<String, dynamic> json) => _SlotRequest(
+  date: json['date'] as String,
+  timeWindow: json['time_window'] as String,
+  addressLabel: json['address_label'] as String,
+  patientName: json['patient_name'] as String,
+);
+
+Map<String, dynamic> _$SlotRequestToJson(_SlotRequest instance) => <String, dynamic>{
+  'date': instance.date,
+  'time_window': instance.timeWindow,
+  'address_label': instance.addressLabel,
+  'patient_name': instance.patientName,
+};
+
+_FormPrefill _$FormPrefillFromJson(Map<String, dynamic> json) => _FormPrefill(
+  date: json['date'] as String?,
+  timeWindow: json['time_window'] as String?,
+  addressLabel: json['address_label'] as String?,
+  patientName: json['patient_name'] as String?,
+);
+
+Map<String, dynamic> _$FormPrefillToJson(_FormPrefill instance) => <String, dynamic>{
+  'date': instance.date,
+  'time_window': instance.timeWindow,
+  'address_label': instance.addressLabel,
+  'patient_name': instance.patientName,
+};
+
+_BookingFormData _$BookingFormDataFromJson(Map<String, dynamic> json) => _BookingFormData(
+  packageId: json['package_id'] as String,
+  packageName: Localized.fromJson(json['package_name'] as Map<String, dynamic>),
+  fastingHours: (json['fasting_hours'] as num?)?.toInt() ?? 0,
+  prefill: json['prefill'] == null
+      ? const FormPrefill()
+      : FormPrefill.fromJson(json['prefill'] as Map<String, dynamic>),
+  availability: (json['availability'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
+  ),
+  submitted: json['submitted'] == null
+      ? null
+      : SlotRequest.fromJson(json['submitted'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$BookingFormDataToJson(_BookingFormData instance) => <String, dynamic>{
+  'package_id': instance.packageId,
+  'package_name': instance.packageName.toJson(),
+  'fasting_hours': instance.fastingHours,
+  'prefill': instance.prefill.toJson(),
+  'availability': instance.availability,
+  'submitted': instance.submitted?.toJson(),
+};
+
 PackagesCard _$PackagesCardFromJson(Map<String, dynamic> json) => PackagesCard(
   (json['packages'] as List<dynamic>)
       .map((e) => PackageSummary.fromJson(e as Map<String, dynamic>))
@@ -127,5 +179,15 @@ CrisisCard _$CrisisCardFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CrisisCardToJson(CrisisCard instance) => <String, dynamic>{
   'category': instance.category,
+  'type': instance.$type,
+};
+
+BookingFormCard _$BookingFormCardFromJson(Map<String, dynamic> json) => BookingFormCard(
+  BookingFormData.fromJson(json['form'] as Map<String, dynamic>),
+  $type: json['type'] as String?,
+);
+
+Map<String, dynamic> _$BookingFormCardToJson(BookingFormCard instance) => <String, dynamic>{
+  'form': instance.form.toJson(),
   'type': instance.$type,
 };

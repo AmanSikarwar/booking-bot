@@ -56,6 +56,20 @@ void main() {
       'address_label': 'Home',
       'patient_name': 'Priya',
     }),
+    sse('booking_form', {
+      'package_id': 'pkg_thyroid_profile',
+      'package_name': pkg['name'],
+      'fasting_hours': 0,
+      'prefill': {
+        'date': '2026-11-22',
+        'time_window': '07-09',
+        'address_label': null,
+        'patient_name': 'Priya',
+      },
+      'availability': {
+        '2026-11-22': ['07-09', '09-11'],
+      },
+    }),
     sse('urgent_care', {
       'category': 'cardiac',
       'helplines': ['112', '108'],
@@ -89,13 +103,19 @@ void main() {
       ((events[4] as CardEvent).card as SlotsCard).offer.alternatives.single.timeWindow,
       '09-11',
     );
-    expect((events[5] as CardEvent).card, const ChatCard.urgent('cardiac'));
+    expect((events[6] as CardEvent).card, const ChatCard.urgent('cardiac'));
     expect(
-      events[6],
+      events[7],
       const ChatEvent.error(code: 'quota_exhausted', retryable: true, retryAfter: 600),
     );
-    expect(events[7], const ChatEvent.done());
-    expect(events.length, 8, reason: 'non-JSON multi-line data is ignored');
+    final form = ((events[5] as CardEvent).card as BookingFormCard).form;
+    expect(
+      [form.prefill.patientName, form.prefill.timeWindow, form.prefill.addressLabel],
+      ['Priya', '07-09', null],
+    );
+    expect(form.availability!['2026-11-22'], ['07-09', '09-11']);
+    expect(events[8], const ChatEvent.done());
+    expect(events.length, 9, reason: 'non-JSON multi-line data is ignored');
   });
 
   test('multi-line data joins with newlines', () async {

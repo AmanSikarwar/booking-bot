@@ -20,7 +20,7 @@ List<fc.Message> toChatItems(List<Message> rows, {required bool online}) {
         fc.Message.text(
           id: r.id,
           authorId: meId,
-          text: r.body,
+          text: r.display ?? r.body,
           createdAt: at,
           metadata: {'status': r.status.name, 'error': r.error, 'kind': r.kind.name},
         ),
@@ -57,7 +57,7 @@ List<fc.Message> toChatItems(List<Message> rows, {required bool online}) {
           id: '${r.id}#card$i',
           authorId: saathiId,
           createdAt: tick(i + 2),
-          metadata: {'kind': 'card', 'card': card.toJson(), 'conversationId': r.conversationId},
+          metadata: {'kind': 'card', 'card': card.toJson(), 'rowId': r.id, 'index': i},
         ),
       );
     }

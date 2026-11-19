@@ -43,6 +43,7 @@ class ChatRepository {
     required String text,
     required String locale,
     MessageKind kind = MessageKind.text,
+    String? display,
   }) async {
     final id = _uuid.v4();
     final now = _clock.now();
@@ -55,6 +56,7 @@ class ChatRepository {
         kind: Value(kind),
         locale: Value(locale),
         body: Value(text),
+        display: Value(display),
         status: MessageStatus.queued,
         createdAt: now,
       ),
@@ -81,6 +83,50 @@ class ChatRepository {
       await _db.flagConversation(conversationId);
     }
     _outbox.kick();
+  }
+
+  Future<void> openBookingForm({
+    required String conversationId,
+    required BookingFormData form,
+    required String locale,
+  }) async {
+    final now = _clock.now();
+    await _db.ensureConversation(conversationId, locale, now);
+    await _db.upsertMessage(
+      MessagesCompanion.insert(
+        id: 'form:${_uuid.v4()}',
+        conversationId: conversationId,
+        role: MessageRole.assistant,
+        locale: Value(locale),
+        cards: Value([ChatCard.bookingForm(form)]),
+        status: MessageStatus.sent,
+        createdAt: now,
+      ),
+    );
+  }
+
+  Future<void> submitBookingForm({
+    required String rowId,
+    required int cardIndex,
+    required SlotRequest request,
+    required String text,
+    required String locale,
+    String? display,
+  }) async {
+    final row = await _db.message(rowId);
+    if (row == null) return;
+    final cards = [...row.cards];
+    final card = cards[cardIndex];
+    if (card is! BookingFormCard || card.form.submitted != null) return;
+    cards[cardIndex] = ChatCard.bookingForm(card.form.copyWith(submitted: request));
+    await _db.patchMessage(rowId, MessagesCompanion(cards: Value(cards)));
+    await submit(
+      conversationId: row.conversationId,
+      text: text,
+      locale: locale,
+      kind: MessageKind.action,
+      display: display,
+    );
   }
 
   Future<void> retry(String messageId) async {

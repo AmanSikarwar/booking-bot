@@ -60,7 +60,6 @@
     "understood": "समझ आया"
   },
   "actions": {
-    "bookPackage": "मुझे {name} बुक करना है",
     "bookSlot": "{name} ({id}) {date} को {window} बजे, {address} पर, {patient} के लिए बुक करें।"
   },
   "bookings": {
@@ -107,5 +106,26 @@
     "newChat": "नई चैट",
     "packages": "सभी पैकेज",
     "bookings": "मेरी बुकिंग"
+  },
+  "form": {
+    "title": "घर से सैंपल बुक करें",
+    "date": "तारीख़",
+    "time": "समय",
+    "address": "सैंपल का पता",
+    "home": "घर",
+    "office": "ऑफ़िस",
+    "other": "दूसरा",
+    "otherHint": "जैसे पापा का घर",
+    "patient": "मरीज़ का नाम",
+    "patientHint": "सैंपल किसका है?",
+    "today": "आज",
+    "tomorrow": "कल",
+    "full": "भरा",
+    "fasting": "सैंपल से पहले {h} घंटे खाली पेट रहें",
+    "confirm": "बुकिंग पक्की करें",
+    "required": "ज़रूरी है",
+    "pickDate": "तारीख़ चुनें",
+    "pickTime": "समय चुनें",
+    "sent": "जानकारी भेज दी"
   }
 }

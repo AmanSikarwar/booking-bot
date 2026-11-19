@@ -43,6 +43,7 @@ class Messages extends Table {
   TextColumn get kind => textEnum<MessageKind>().withDefault(const Constant('text'))();
   TextColumn get locale => text().withDefault(const Constant('en'))();
   TextColumn get body => text().withDefault(const Constant(''))();
+  TextColumn get display => text().nullable()();
   TextColumn get cards => text().map(const CardListConverter()).withDefault(const Constant('[]'))();
   TextColumn get status => textEnum<MessageStatus>()();
   TextColumn get replyTo => text().nullable()();
@@ -99,7 +100,14 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) await m.addColumn(messages, messages.display);
+    },
+  );
 
   Future<String?> meta(String key) async =>
       (await (select(appMeta)..where((m) => m.key.equals(key))).getSingleOrNull())?.value;

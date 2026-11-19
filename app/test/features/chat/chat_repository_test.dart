@@ -8,6 +8,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:saathi/core/config.dart';
 import 'package:saathi/core/db/database.dart';
 import 'package:saathi/features/chat/data/chat_repository.dart';
+import 'package:saathi/features/catalog/package.dart';
 import 'package:saathi/features/chat/data/outbox.dart';
 import 'package:saathi/features/chat/domain/models.dart';
 import 'package:saathi/features/safety/red_flag_detector.dart';
@@ -89,5 +90,40 @@ void main() {
     await repo.retry(id);
     final m = (await db.message(id))!;
     expect([m.status, m.attempts], [MessageStatus.queued, 0]);
+  });
+
+  test('booking form opens locally, submits once, and queues the structured action', () async {
+    final c = await repo.newConversation('en');
+    await repo.openBookingForm(
+      conversationId: c,
+      form: const BookingFormData(
+        packageId: 'pkg_thyroid_profile',
+        packageName: Localized(en: 'Thyroid Profile', hi: 'थायरॉइड प्रोफाइल'),
+      ),
+      locale: 'en',
+    );
+    final formRow = (await repo.watchMessages(c).first).single;
+    expect(formRow.role, MessageRole.assistant);
+    const request = SlotRequest(
+      date: '2026-11-22',
+      timeWindow: '07-09',
+      addressLabel: 'Home',
+      patientName: 'Priya',
+    );
+    for (var i = 0; i < 2; i++) {
+      await repo.submitBookingForm(
+        rowId: formRow.id,
+        cardIndex: 0,
+        request: request,
+        text: 'Book Thyroid Profile (pkg_thyroid_profile) on 2026-11-22 07-09 at Home for Priya.',
+        locale: 'en',
+      );
+    }
+    final rows = await repo.watchMessages(c).first;
+    expect((rows.first.cards.single as BookingFormCard).form.submitted, request);
+    final sent = rows.where((r) => r.role == MessageRole.user).toList();
+    expect(sent.single.kind, MessageKind.action);
+    expect(sent.single.status, MessageStatus.queued);
+    verify(() => outbox.kick()).called(1);
   });
 }

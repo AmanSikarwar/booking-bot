@@ -68,6 +68,7 @@ class TranslationsHi extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$settings$hi settings = _Translations$settings$hi._(_root);
 	@override late final _Translations$tubes$hi tubes = _Translations$tubes$hi._(_root);
 	@override late final _Translations$menu$hi menu = _Translations$menu$hi._(_root);
+	@override late final _Translations$form$hi form = _Translations$form$hi._(_root);
 }
 
 // Path: chat
@@ -192,7 +193,6 @@ class _Translations$actions$hi extends Translations$actions$en {
 	final TranslationsHi _root; // ignore: unused_field
 
 	// Translations
-	@override String bookPackage({required Object name}) => 'मुझे ${name} बुक करना है';
 	@override String bookSlot({required Object name, required Object id, required Object date, required Object window, required Object address, required Object patient}) => '${name} (${id}) ${date} को ${window} बजे, ${address} पर, ${patient} के लिए बुक करें।';
 }
 
@@ -270,6 +270,34 @@ class _Translations$menu$hi extends Translations$menu$en {
 	@override String get bookings => 'मेरी बुकिंग';
 }
 
+// Path: form
+class _Translations$form$hi extends Translations$form$en {
+	_Translations$form$hi._(TranslationsHi root) : this._root = root, super.internal(root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'घर से सैंपल बुक करें';
+	@override String get date => 'तारीख़';
+	@override String get time => 'समय';
+	@override String get address => 'सैंपल का पता';
+	@override String get home => 'घर';
+	@override String get office => 'ऑफ़िस';
+	@override String get other => 'दूसरा';
+	@override String get otherHint => 'जैसे पापा का घर';
+	@override String get patient => 'मरीज़ का नाम';
+	@override String get patientHint => 'सैंपल किसका है?';
+	@override String get today => 'आज';
+	@override String get tomorrow => 'कल';
+	@override String get full => 'भरा';
+	@override String fasting({required Object h}) => 'सैंपल से पहले ${h} घंटे खाली पेट रहें';
+	@override String get confirm => 'बुकिंग पक्की करें';
+	@override String get required => 'ज़रूरी है';
+	@override String get pickDate => 'तारीख़ चुनें';
+	@override String get pickTime => 'समय चुनें';
+	@override String get sent => 'जानकारी भेज दी';
+}
+
 /// The flat map containing all translations for locale <hi>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -320,7 +348,6 @@ extension on TranslationsHi {
 			'urgent.call108' => '108 पर कॉल करें',
 			'urgent.call14416' => '14416 पर कॉल करें',
 			'urgent.understood' => 'समझ आया',
-			'actions.bookPackage' => ({required Object name}) => 'मुझे ${name} बुक करना है',
 			'actions.bookSlot' => ({required Object name, required Object id, required Object date, required Object window, required Object address, required Object patient}) => '${name} (${id}) ${date} को ${window} बजे, ${address} पर, ${patient} के लिए बुक करें।',
 			'bookings.title' => 'मेरी बुकिंग',
 			'bookings.empty' => 'अभी कोई बुकिंग नहीं है। घर से सैंपल के लिए साथी से कहें।',
@@ -353,6 +380,25 @@ extension on TranslationsHi {
 			'menu.newChat' => 'नई चैट',
 			'menu.packages' => 'सभी पैकेज',
 			'menu.bookings' => 'मेरी बुकिंग',
+			'form.title' => 'घर से सैंपल बुक करें',
+			'form.date' => 'तारीख़',
+			'form.time' => 'समय',
+			'form.address' => 'सैंपल का पता',
+			'form.home' => 'घर',
+			'form.office' => 'ऑफ़िस',
+			'form.other' => 'दूसरा',
+			'form.otherHint' => 'जैसे पापा का घर',
+			'form.patient' => 'मरीज़ का नाम',
+			'form.patientHint' => 'सैंपल किसका है?',
+			'form.today' => 'आज',
+			'form.tomorrow' => 'कल',
+			'form.full' => 'भरा',
+			'form.fasting' => ({required Object h}) => 'सैंपल से पहले ${h} घंटे खाली पेट रहें',
+			'form.confirm' => 'बुकिंग पक्की करें',
+			'form.required' => 'ज़रूरी है',
+			'form.pickDate' => 'तारीख़ चुनें',
+			'form.pickTime' => 'समय चुनें',
+			'form.sent' => 'जानकारी भेज दी',
 			_ => null,
 		};
 	}

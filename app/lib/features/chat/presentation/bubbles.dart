@@ -42,11 +42,18 @@ class _DropletPainter extends CustomPainter {
 }
 
 class UserBubble extends StatelessWidget {
-  const UserBubble({super.key, required this.text, required this.status, this.onRetry});
+  const UserBubble({
+    super.key,
+    required this.text,
+    required this.status,
+    this.onRetry,
+    this.isAction = false,
+  });
 
   final String text;
   final MessageStatus status;
   final VoidCallback? onRetry;
+  final bool isAction;
 
   @override
   Widget build(BuildContext context) {
@@ -67,18 +74,36 @@ class UserBubble extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: const BoxDecoration(
-                color: Palette.lavender,
-                borderRadius: BorderRadiusDirectional.only(
+              decoration: BoxDecoration(
+                color: isAction ? Palette.lavenderSoft : Palette.lavender,
+                border: isAction ? Border.all(color: Palette.lavender.withAlpha(60)) : null,
+                borderRadius: const BorderRadiusDirectional.only(
                   topStart: Radius.circular(18),
                   topEnd: Radius.circular(18),
                   bottomStart: Radius.circular(18),
                   bottomEnd: Radius.circular(4),
                 ),
               ),
-              child: Text(
-                text,
-                style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.35),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (isAction)
+                    const Padding(
+                      padding: EdgeInsetsDirectional.only(end: 6, top: 2),
+                      child: Icon(Icons.touch_app_outlined, size: 16, color: Palette.lavender),
+                    ),
+                  Flexible(
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        color: isAction ? Palette.lavender : Colors.white,
+                        fontSize: isAction ? 14 : 15,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             if (label != null)

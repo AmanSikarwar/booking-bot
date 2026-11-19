@@ -14,6 +14,7 @@ Message row(
   List<ChatCard> cards = const [],
   String? tool,
   String? error,
+  String? display,
   int at = 0,
 }) => Message(
   id: id,
@@ -22,6 +23,7 @@ Message row(
   kind: MessageKind.text,
   locale: 'en',
   body: body,
+  display: display,
   cards: cards,
   status: status,
   activeTool: tool,
@@ -90,5 +92,18 @@ void main() {
     expect(ids(c.messages), ['b']);
     expect((c.messages.single as fc.TextMessage).text, 'two');
     c.dispose();
+  });
+
+  test('action bubbles show the friendly display text, not the structured body', () {
+    final item =
+        toChatItems([
+              row(
+                'a',
+                body: 'Book X (pkg_x) on 2026-11-21 07-09 at Home for Priya.',
+                display: 'X · Sat 21 Nov',
+              ),
+            ], online: true).single
+            as fc.TextMessage;
+    expect(item.text, 'X · Sat 21 Nov');
   });
 }

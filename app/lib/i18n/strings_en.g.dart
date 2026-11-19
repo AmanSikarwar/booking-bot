@@ -73,6 +73,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$settings$en settings = Translations$settings$en.internal(_root);
 	late final Translations$tubes$en tubes = Translations$tubes$en.internal(_root);
 	late final Translations$menu$en menu = Translations$menu$en.internal(_root);
+	late final Translations$form$en form = Translations$form$en.internal(_root);
 }
 
 // Path: chat
@@ -273,9 +274,6 @@ class Translations$actions$en {
 
 	// Translations
 
-	/// en: 'I want to book {name}'
-	String bookPackage({required Object name}) => 'I want to book ${name}';
-
 	/// en: 'Book {name} ({id}) on {date} {window} at {address} for {patient}.'
 	String bookSlot({required Object name, required Object id, required Object date, required Object window, required Object address, required Object patient}) => 'Book ${name} (${id}) on ${date} ${window} at ${address} for ${patient}.';
 }
@@ -394,6 +392,72 @@ class Translations$menu$en {
 	String get bookings => 'My bookings';
 }
 
+// Path: form
+class Translations$form$en {
+	Translations$form$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Book home collection'
+	String get title => 'Book home collection';
+
+	/// en: 'Date'
+	String get date => 'Date';
+
+	/// en: 'Time window'
+	String get time => 'Time window';
+
+	/// en: 'Collection address'
+	String get address => 'Collection address';
+
+	/// en: 'Home'
+	String get home => 'Home';
+
+	/// en: 'Office'
+	String get office => 'Office';
+
+	/// en: 'Other'
+	String get other => 'Other';
+
+	/// en: 'e.g. Papa's house'
+	String get otherHint => 'e.g. Papa\'s house';
+
+	/// en: 'Patient name'
+	String get patient => 'Patient name';
+
+	/// en: 'Who is the sample for?'
+	String get patientHint => 'Who is the sample for?';
+
+	/// en: 'Today'
+	String get today => 'Today';
+
+	/// en: 'Tomorrow'
+	String get tomorrow => 'Tomorrow';
+
+	/// en: 'Full'
+	String get full => 'Full';
+
+	/// en: 'Fast for {h} hours before collection'
+	String fasting({required Object h}) => 'Fast for ${h} hours before collection';
+
+	/// en: 'Confirm booking'
+	String get confirm => 'Confirm booking';
+
+	/// en: 'Required'
+	String get required => 'Required';
+
+	/// en: 'Pick a date'
+	String get pickDate => 'Pick a date';
+
+	/// en: 'Pick a time window'
+	String get pickTime => 'Pick a time window';
+
+	/// en: 'Details sent'
+	String get sent => 'Details sent';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -444,7 +508,6 @@ extension on Translations {
 			'urgent.call108' => 'Call 108',
 			'urgent.call14416' => 'Call 14416',
 			'urgent.understood' => 'I understand',
-			'actions.bookPackage' => ({required Object name}) => 'I want to book ${name}',
 			'actions.bookSlot' => ({required Object name, required Object id, required Object date, required Object window, required Object address, required Object patient}) => 'Book ${name} (${id}) on ${date} ${window} at ${address} for ${patient}.',
 			'bookings.title' => 'My bookings',
 			'bookings.empty' => 'No bookings yet. Ask Saathi to book a home collection.',
@@ -477,6 +540,25 @@ extension on Translations {
 			'menu.newChat' => 'New chat',
 			'menu.packages' => 'All packages',
 			'menu.bookings' => 'My bookings',
+			'form.title' => 'Book home collection',
+			'form.date' => 'Date',
+			'form.time' => 'Time window',
+			'form.address' => 'Collection address',
+			'form.home' => 'Home',
+			'form.office' => 'Office',
+			'form.other' => 'Other',
+			'form.otherHint' => 'e.g. Papa\'s house',
+			'form.patient' => 'Patient name',
+			'form.patientHint' => 'Who is the sample for?',
+			'form.today' => 'Today',
+			'form.tomorrow' => 'Tomorrow',
+			'form.full' => 'Full',
+			'form.fasting' => ({required Object h}) => 'Fast for ${h} hours before collection',
+			'form.confirm' => 'Confirm booking',
+			'form.required' => 'Required',
+			'form.pickDate' => 'Pick a date',
+			'form.pickTime' => 'Pick a time window',
+			'form.sent' => 'Details sent',
 			_ => null,
 		};
 	}

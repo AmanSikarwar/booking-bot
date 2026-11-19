@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../core/db/database.dart';
 import '../../core/di.dart';
 import '../../core/layout.dart';
 import '../../core/router.dart';
@@ -93,10 +92,13 @@ class _CatalogListState extends State<CatalogList> {
                             ? null
                             : () {
                                 unawaited(
-                                  context.read<ChatCubit>().send(
-                                    t.actions.bookPackage(name: p.name.of(lang)),
+                                  context.read<ChatCubit>().openBookingForm(
+                                    BookingFormData(
+                                      packageId: p.id,
+                                      packageName: p.name,
+                                      fastingHours: p.fastingHours,
+                                    ),
                                     lang,
-                                    kind: MessageKind.action,
                                   ),
                                 );
                                 widget.onBooked?.call();

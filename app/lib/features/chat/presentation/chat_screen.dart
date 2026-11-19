@@ -17,6 +17,7 @@ import '../../catalog/catalog_screen.dart';
 import '../../catalog/package.dart';
 import '../../settings/locale_cubit.dart';
 import '../domain/models.dart';
+import 'booking_form.dart';
 import 'bubbles.dart';
 import 'cards.dart';
 import 'chat_cubit.dart';
@@ -58,8 +59,16 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  void _send(String text, {MessageKind kind = MessageKind.text}) =>
-      unawaited(context.read<ChatCubit>().send(text, _locale, kind: kind));
+  void _send(String text, {MessageKind kind = MessageKind.text, String? display}) =>
+      unawaited(context.read<ChatCubit>().send(text, _locale, kind: kind, display: display));
+
+  String _slotSummary(Localized name, Slot slot, String address, String patient) => [
+    name.of(_locale),
+    dateLabel(context, slot.date),
+    windowLabel(context, slot.timeWindow),
+    address,
+    context.t.booking.forPatient(name: patient),
+  ].join(' · ');
 
   void _newChat() => unawaited(context.read<ChatCubit>().newChat(_locale));
 
@@ -115,6 +124,7 @@ class _ChatScreenState extends State<ChatScreen> {
             return UserBubble(
               text: m.text,
               status: status,
+              isAction: m.metadata?['kind'] == 'action',
               onRetry: () => unawaited(context.read<ChatCubit>().retry(m.id)),
             );
           }
@@ -179,12 +189,31 @@ class _ChatScreenState extends State<ChatScreen> {
           },
         ),
       ),
-      'card' => _card(context, ChatCard.fromJson(meta['card'] as Map<String, Object?>), flagged),
+      'card' => _card(
+        context,
+        ChatCard.fromJson(meta['card'] as Map<String, Object?>),
+        flagged,
+        meta,
+      ),
       _ => const SizedBox.shrink(),
     };
   }
 
-  Widget _card(BuildContext context, ChatCard card, bool flagged) {
+  void _openForm(String packageId, Localized name) {
+    final pkg = getIt<Catalog>().packages.where((p) => p.id == packageId).firstOrNull;
+    unawaited(
+      context.read<ChatCubit>().openBookingForm(
+        BookingFormData(
+          packageId: packageId,
+          packageName: name,
+          fastingHours: pkg?.fastingHours ?? 0,
+        ),
+        _locale,
+      ),
+    );
+  }
+
+  Widget _card(BuildContext context, ChatCard card, bool flagged, Map<String, Object?> meta) {
     final t = context.t;
     return switch (card) {
       PackagesCard(:final packages) => SaathiBubble(
@@ -199,12 +228,7 @@ class _ChatScreenState extends State<ChatScreen> {
               PackageCardView(
                 pkg: p,
                 allTests: _testsById[p.id] ?? const [],
-                onBook: flagged
-                    ? null
-                    : () => _send(
-                        t.actions.bookPackage(name: p.name.of(_locale)),
-                        kind: MessageKind.action,
-                      ),
+                onBook: flagged ? null : () => _openForm(p.id, p.name),
               ),
           ],
         ),
@@ -237,6 +261,44 @@ class _ChatScreenState extends State<ChatScreen> {
                     patient: offer.patientName,
                   ),
                   kind: MessageKind.action,
+                  display: _slotSummary(
+                    offer.packageName,
+                    s,
+                    offer.addressLabel,
+                    offer.patientName,
+                  ),
+                ),
+        ),
+      ),
+      BookingFormCard(:final form) => SaathiBubble(
+        showAvatar: false,
+        maxWidth: 480,
+        fullBleedOnCompact: true,
+        child: BookingFormView(
+          form: form,
+          onSubmit: flagged
+              ? null
+              : (r) => unawaited(
+                  context.read<ChatCubit>().submitBookingForm(
+                    rowId: meta['rowId']! as String,
+                    cardIndex: meta['index']! as int,
+                    request: r,
+                    locale: _locale,
+                    display: _slotSummary(
+                      form.packageName,
+                      Slot(date: r.date, timeWindow: r.timeWindow),
+                      r.addressLabel,
+                      r.patientName,
+                    ),
+                    text: t.actions.bookSlot(
+                      name: form.packageName.of(_locale),
+                      id: form.packageId,
+                      date: r.date,
+                      window: r.timeWindow,
+                      address: r.addressLabel,
+                      patient: r.patientName,
+                    ),
+                  ),
                 ),
         ),
       ),
