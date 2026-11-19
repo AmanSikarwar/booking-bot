@@ -168,11 +168,12 @@ The quota guard runs after layer 1, so keyword red flags work even with the quot
 
 - Model from the `LLM_MODEL` environment variable (default `google/gemma-4-26b-a4b-it:free`).
 - Streaming on. Tool-call arguments arrive in fragments and are assembled before parsing.
-- Temperature 0.2, maximum 400 output tokens.
-- Reasoning off or at low effort, to keep first-token latency down.
+- Temperature 0.2, maximum 1000 output tokens. Reasoning tokens count against this cap, and Devanagari costs more tokens per word; reply length is held under 80 words by the prompt, not the cap.
+- Reasoning at `effort: "minimal"` with `exclude: true`, to keep first-token latency down (`"none"` is rejected by models with mandatory reasoning).
 - `provider.require_parameters: true`, so OpenRouter never routes to a provider that drops tool support.
 - The system prompt (persona plus rules) is sent as a system message.
-- An optional fallback-model list through OpenRouter. Off by default; see §13.
+- **Free fallback models** through OpenRouter's `models` array, from `LLM_FALLBACK_MODELS` (default `google/gemma-4-31b-it:free`, `nvidia/nemotron-3.5-super-vl:free`, all with tools and tool choice). The free Gemma variant has a single provider (Google AI Studio) whose shared free pool is often rate-limited; fallbacks keep the app answering at ₹0. `llm_usage.model` records which model actually served.
+- If a turn ends with no visible text (for example, a reasoning model spends its budget), Saathi sends a fixed template reply so cards never arrive in silence.
 
 ### System prompt rules (summary)
 
@@ -658,7 +659,7 @@ That's far above 50 a day. **Decision:** buy $10 of OpenRouter credits once, to 
 - **Rate limit:** 20 requests a minute is plenty for a demo. Rate-limited requests return a retryable error with a retry-after time, and the outbox handles it.
 - **Quota savers:** the keyword check, skipping the decider on card actions, and replay all avoid unnecessary model requests.
 - **Paid fallback (off by default):** if enabled, OpenRouter falls back to a paid chat model when the free one is rate-limited. The API key carries a hard credit limit of $3 (about ₹300), so spend stays under ₹500 even in the worst case.
-- **Prompt size:** history is trimmed to 10 turns and output capped at 400 tokens, keeping each request under 5K tokens including the persona prompt.
+- **Prompt size:** history is trimmed to 10 turns and output capped at 1000 tokens, keeping each request under 5K input tokens including the persona prompt.
 - **Infrastructure costs ₹0:** Supabase free tier, plus a free static host for the web build.
 
 **Production note (for discussion):** the free tier isn't a production option, at 20 requests a minute and with prompts possibly logged. In production I'd use paid endpoints with a zero-data-retention provider behind the same adapters. Cost would then come from token pricing, and the keyword fast path, replay, and keeping the catalogue out of the prompt keep it low.
@@ -687,7 +688,7 @@ That's far above 50 a day. **Decision:** buy $10 of OpenRouter credits once, to 
 | Decider misclassifies an emergency as routine | Deterministic keyword floor, low thresholds, prompt rules as a third layer, measured on paraphrased eval cases |
 | Decisions API is an alpha endpoint and may change | Isolated adapter, mock for tests, fail-open handling, model set by environment variable |
 | Free daily quota runs out during review | 1,000/day tier, a 900-request global guard, per-user caps, quota savers, Saathi's fixed quota copy, offline catalogue browser |
-| Free model is rate-limited or removed from OpenRouter | Model ids set by environment variables; optional fallback list; provider adapters; mock mode keeps the app demoable |
+| Free model is rate-limited or removed from OpenRouter | Model ids set by environment variables; free fallback list on by default; provider adapters; mock mode keeps the app demoable. Seen in practice: the free Gemma pool returned 429 (`upstream_provider_shared_pool`) on day one |
 | Free endpoints may log prompts | Synthetic data only (also required by the brief); zero-retention paid provider in production |
 | SSE doesn't stream on Flutter Web (the default client buffers) | Use `fetch_client` on web; fall back to non-streamed rendering if unsupported |
 | Stream drops on weak networks | Server finishes the turn regardless (`waitUntil`); client persists partial text, resends with the same id, server replays |
