@@ -10,7 +10,13 @@
     "newChat": "New chat",
     "findingPackages": "Finding packages…",
     "bookingSlot": "Booking your slot…",
-    "flaggedNote": "Booking is paused in this chat. Start a new chat for a routine checkup."
+    "flaggedNote": "Booking is paused in this chat. Start a new chat for a routine checkup.",
+    "suggestions": [
+      "Check my thyroid",
+      "Full body checkup",
+      "Sugar test for Papa",
+      "I feel tired all the time"
+    ]
   },
   "status": {
     "queued": "Queued",
@@ -88,5 +94,17 @@
   "settings": {
     "language": "Language",
     "switchTo": "हिन्दी"
+  },
+  "tubes": {
+    "label": "Sample tubes: {names}",
+    "lavender": "lavender",
+    "grey": "grey",
+    "gold": "gold",
+    "urine": "urine cup"
+  },
+  "menu": {
+    "newChat": "New chat",
+    "packages": "All packages",
+    "bookings": "My bookings"
   }
 }

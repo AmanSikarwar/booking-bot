@@ -1,0 +1,243 @@
+import 'package:material_ui/material_ui.dart';
+
+import '../../../core/db/database.dart';
+import '../../../core/theme.dart';
+import '../../../i18n/strings.g.dart';
+
+class SaathiAvatar extends StatelessWidget {
+  const SaathiAvatar({super.key, this.size = 32});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: const BoxDecoration(color: Palette.lavenderSoft, shape: BoxShape.circle),
+        child: CustomPaint(painter: _DropletPainter()),
+      ),
+    );
+  }
+}
+
+class _DropletPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final path = Path()
+      ..moveTo(w * .5, h * .2)
+      ..cubicTo(w * .5, h * .2, w * .26, h * .5, w * .26, h * .62)
+      ..arcToPoint(Offset(w * .74, h * .62), radius: Radius.circular(w * .24), clockwise: false)
+      ..cubicTo(w * .74, h * .5, w * .5, h * .2, w * .5, h * .2)
+      ..close();
+    canvas.drawPath(path, Paint()..color = Palette.lavender);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class UserBubble extends StatelessWidget {
+  const UserBubble({super.key, required this.text, required this.status, this.onRetry});
+
+  final String text;
+  final MessageStatus status;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final failed = status == MessageStatus.failed;
+    final label = switch (status) {
+      MessageStatus.queued => context.t.status.queued,
+      MessageStatus.sending || MessageStatus.streaming => context.t.status.sending,
+      MessageStatus.failed => context.t.status.failed,
+      MessageStatus.incomplete => context.t.status.incomplete,
+      MessageStatus.sent => null,
+    };
+    return Align(
+      alignment: AlignmentDirectional.centerEnd,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: const BoxDecoration(
+                color: Palette.lavender,
+                borderRadius: BorderRadiusDirectional.only(
+                  topStart: Radius.circular(18),
+                  topEnd: Radius.circular(18),
+                  bottomStart: Radius.circular(18),
+                  bottomEnd: Radius.circular(4),
+                ),
+              ),
+              child: Text(
+                text,
+                style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.35),
+              ),
+            ),
+            if (label != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: InkWell(
+                  onTap: failed ? onRetry : null,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          switch (status) {
+                            MessageStatus.failed => Icons.refresh,
+                            MessageStatus.queued => Icons.schedule,
+                            _ => Icons.more_horiz,
+                          },
+                          size: 14,
+                          color: failed ? Palette.urgent : Palette.inkMuted,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: failed ? Palette.urgent : Palette.inkMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SaathiBubble extends StatelessWidget {
+  const SaathiBubble({super.key, required this.child, this.showAvatar = true});
+
+  final Widget child;
+  final bool showAvatar;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(width: 32, child: showAvatar ? const SaathiAvatar() : null),
+        const SizedBox(width: 8),
+        Flexible(
+          child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 360), child: child),
+        ),
+      ],
+    );
+  }
+}
+
+class SaathiText extends StatelessWidget {
+  const SaathiText({super.key, required this.text, this.interrupted = false});
+
+  final String text;
+  final bool interrupted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Palette.surface,
+        border: Border.all(color: Palette.line),
+        borderRadius: const BorderRadiusDirectional.only(
+          topStart: Radius.circular(4),
+          topEnd: Radius.circular(18),
+          bottomStart: Radius.circular(18),
+          bottomEnd: Radius.circular(18),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(text, style: const TextStyle(color: Palette.ink, fontSize: 15, height: 1.4)),
+          if (interrupted)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                context.t.status.incomplete,
+                style: const TextStyle(fontSize: 12, color: Palette.inkMuted),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class ActivityChip extends StatelessWidget {
+  const ActivityChip({super.key, required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Palette.lavenderSoft,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox.square(
+              dimension: 14,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Palette.lavender),
+            ),
+            const SizedBox(width: 8),
+            Text(label, style: const TextStyle(fontSize: 13, color: Palette.lavender)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class NoticeBubble extends StatelessWidget {
+  const NoticeBubble({super.key, required this.text, this.icon = Icons.wifi_off});
+
+  final String text;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Palette.paper,
+        border: Border.all(color: Palette.line),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: Palette.inkMuted),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14, color: Palette.ink, height: 1.4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

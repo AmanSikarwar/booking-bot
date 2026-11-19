@@ -1,0 +1,121 @@
+import 'package:flutter_chat_core/flutter_chat_core.dart' as fc;
+
+import '../../../core/db/database.dart';
+
+const meId = 'me';
+const saathiId = 'saathi';
+
+const _noticeCodes = {'quota_exhausted', 'user_daily_limit'};
+
+List<fc.Message> toChatItems(List<Message> rows, {required bool online}) {
+  final items = <fc.Message>[];
+  final lastQueued = rows.lastWhereOrNull(
+    (r) => r.role == MessageRole.user && r.status == MessageStatus.queued,
+  );
+  for (final r in rows) {
+    final at = r.createdAt;
+    DateTime tick(int n) => at.add(Duration(microseconds: n));
+    if (r.role == MessageRole.user) {
+      items.add(
+        fc.Message.text(
+          id: r.id,
+          authorId: meId,
+          text: r.body,
+          createdAt: at,
+          metadata: {'status': r.status.name, 'error': r.error, 'kind': r.kind.name},
+        ),
+      );
+      final notice = _noticeCodes.contains(r.error)
+          ? r.error
+          : (!online && r.id == lastQueued?.id ? 'queued_offline' : null);
+      if (notice != null) {
+        items.add(
+          fc.Message.custom(
+            id: '${r.id}#notice',
+            authorId: saathiId,
+            createdAt: tick(1),
+            metadata: {'kind': 'notice', 'code': notice},
+          ),
+        );
+      }
+      continue;
+    }
+    if (r.body.isNotEmpty) {
+      items.add(
+        fc.Message.text(
+          id: r.id,
+          authorId: saathiId,
+          text: r.body,
+          createdAt: at,
+          metadata: {'status': r.status.name},
+        ),
+      );
+    }
+    for (final (i, card) in r.cards.indexed) {
+      items.add(
+        fc.Message.custom(
+          id: '${r.id}#card$i',
+          authorId: saathiId,
+          createdAt: tick(i + 2),
+          metadata: {'kind': 'card', 'card': card.toJson(), 'conversationId': r.conversationId},
+        ),
+      );
+    }
+    if (r.activeTool != null) {
+      items.add(
+        fc.Message.custom(
+          id: '${r.id}#tool',
+          authorId: saathiId,
+          createdAt: tick(100),
+          metadata: {'kind': 'tool', 'tool': r.activeTool},
+        ),
+      );
+    } else if (r.status == MessageStatus.streaming && r.body.isEmpty && r.cards.isEmpty) {
+      items.add(
+        fc.Message.custom(
+          id: '${r.id}#typing',
+          authorId: saathiId,
+          createdAt: tick(100),
+          metadata: {'kind': 'typing'},
+        ),
+      );
+    }
+  }
+  return items;
+}
+
+class SyncedChatController extends fc.InMemoryChatController {
+  Future<void> _pending = Future.value();
+
+  void sync(List<fc.Message> next) {
+    _pending = _pending.then((_) => _apply(next));
+  }
+
+  Future<void> _apply(List<fc.Message> next) async {
+    if (messages.isEmpty || next.isEmpty) {
+      await setMessages(next, animated: false);
+      return;
+    }
+    final nextIds = {for (final m in next) m.id};
+    for (final gone in messages.where((m) => !nextIds.contains(m.id)).toList()) {
+      await removeMessage(gone);
+    }
+    for (final (i, m) in next.indexed) {
+      final at = messages.indexWhere((c) => c.id == m.id);
+      if (at == -1) {
+        await insertMessage(m, index: i);
+      } else if (messages[at] != m) {
+        await updateMessage(messages[at], m);
+      }
+    }
+  }
+}
+
+extension<T> on List<T> {
+  T? lastWhereOrNull(bool Function(T) test) {
+    for (var i = length - 1; i >= 0; i--) {
+      if (test(this[i])) return this[i];
+    }
+    return null;
+  }
+}

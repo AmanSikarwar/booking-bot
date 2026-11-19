@@ -51,9 +51,23 @@ class TranslationsHi extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$actions$hi actions = _Translations$actions$hi._(_root);
 	@override late final _Translations$bookings$hi bookings = _Translations$bookings$hi._(_root);
 	@override late final _Translations$catalog$hi catalog = _Translations$catalog$hi._(_root);
-	@override late final _Translations$categories$hi categories = _Translations$categories$hi._(_root);
+	@override Map<String, String> get categories => {
+		'general': 'सामान्य',
+		'diabetes': 'डायबिटीज़',
+		'thyroid': 'थायरॉइड',
+		'heart': 'दिल',
+		'liver': 'लिवर',
+		'kidney': 'किडनी',
+		'vitamins': 'विटामिन',
+		'women': 'महिला',
+		'senior': 'बुज़ुर्ग',
+		'fever': 'बुखार',
+		'fitness': 'फिटनेस',
+	};
 	@override late final _Translations$windows$hi windows = _Translations$windows$hi._(_root);
 	@override late final _Translations$settings$hi settings = _Translations$settings$hi._(_root);
+	@override late final _Translations$tubes$hi tubes = _Translations$tubes$hi._(_root);
+	@override late final _Translations$menu$hi menu = _Translations$menu$hi._(_root);
 }
 
 // Path: chat
@@ -73,6 +87,12 @@ class _Translations$chat$hi extends Translations$chat$en {
 	@override String get findingPackages => 'पैकेज ढूँढ रहा हूँ…';
 	@override String get bookingSlot => 'स्लॉट बुक कर रहा हूँ…';
 	@override String get flaggedNote => 'इस चैट में बुकिंग रोकी गई है। रूटीन जाँच के लिए नई चैट शुरू करें।';
+	@override List<String> get suggestions => [
+		'थायरॉइड की जाँच',
+		'फुल बॉडी चेकअप',
+		'पापा के लिए शुगर टेस्ट',
+		'मुझे हर समय थकान रहती है',
+	];
 }
 
 // Path: status
@@ -199,26 +219,6 @@ class _Translations$catalog$hi extends Translations$catalog$en {
 	@override String get askSaathi => 'साथी से पूछें';
 }
 
-// Path: categories
-class _Translations$categories$hi extends Translations$categories$en {
-	_Translations$categories$hi._(TranslationsHi root) : this._root = root, super.internal(root);
-
-	final TranslationsHi _root; // ignore: unused_field
-
-	// Translations
-	@override String get general => 'सामान्य';
-	@override String get diabetes => 'डायबिटीज़';
-	@override String get thyroid => 'थायरॉइड';
-	@override String get heart => 'दिल';
-	@override String get liver => 'लिवर';
-	@override String get kidney => 'किडनी';
-	@override String get vitamins => 'विटामिन';
-	@override String get women => 'महिला';
-	@override String get senior => 'बुज़ुर्ग';
-	@override String get fever => 'बुखार';
-	@override String get fitness => 'फिटनेस';
-}
-
 // Path: windows
 class _Translations$windows$hi extends Translations$windows$en {
 	_Translations$windows$hi._(TranslationsHi root) : this._root = root, super.internal(root);
@@ -243,6 +243,32 @@ class _Translations$settings$hi extends Translations$settings$en {
 	@override String get switchTo => 'English';
 }
 
+// Path: tubes
+class _Translations$tubes$hi extends Translations$tubes$en {
+	_Translations$tubes$hi._(TranslationsHi root) : this._root = root, super.internal(root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String label({required Object names}) => 'सैंपल ट्यूब: ${names}';
+	@override String get lavender => 'बैंगनी';
+	@override String get grey => 'स्लेटी';
+	@override String get gold => 'सुनहरी';
+	@override String get urine => 'यूरिन कप';
+}
+
+// Path: menu
+class _Translations$menu$hi extends Translations$menu$en {
+	_Translations$menu$hi._(TranslationsHi root) : this._root = root, super.internal(root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get newChat => 'नई चैट';
+	@override String get packages => 'सभी पैकेज';
+	@override String get bookings => 'मेरी बुकिंग';
+}
+
 /// The flat map containing all translations for locale <hi>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -262,6 +288,10 @@ extension on TranslationsHi {
 			'chat.findingPackages' => 'पैकेज ढूँढ रहा हूँ…',
 			'chat.bookingSlot' => 'स्लॉट बुक कर रहा हूँ…',
 			'chat.flaggedNote' => 'इस चैट में बुकिंग रोकी गई है। रूटीन जाँच के लिए नई चैट शुरू करें।',
+			'chat.suggestions.0' => 'थायरॉइड की जाँच',
+			'chat.suggestions.1' => 'फुल बॉडी चेकअप',
+			'chat.suggestions.2' => 'पापा के लिए शुगर टेस्ट',
+			'chat.suggestions.3' => 'मुझे हर समय थकान रहती है',
 			'status.queued' => 'कतार में',
 			'status.sending' => 'भेज रहा हूँ',
 			'status.failed' => 'नहीं भेजा गया · दोबारा भेजने के लिए टैप करें',
@@ -313,6 +343,14 @@ extension on TranslationsHi {
 			'windows.w1618' => 'शाम 4–6',
 			'settings.language' => 'भाषा',
 			'settings.switchTo' => 'English',
+			'tubes.label' => ({required Object names}) => 'सैंपल ट्यूब: ${names}',
+			'tubes.lavender' => 'बैंगनी',
+			'tubes.grey' => 'स्लेटी',
+			'tubes.gold' => 'सुनहरी',
+			'tubes.urine' => 'यूरिन कप',
+			'menu.newChat' => 'नई चैट',
+			'menu.packages' => 'सभी पैकेज',
+			'menu.bookings' => 'मेरी बुकिंग',
 			_ => null,
 		};
 	}

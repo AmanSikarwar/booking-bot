@@ -16,6 +16,8 @@ targets:
           string_interpolation: braces
           timestamp: false
           statistics: false
+          maps:
+            - categories
       drift_dev:
         options:
           store_date_time_values_as_text: true

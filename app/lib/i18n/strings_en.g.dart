@@ -56,9 +56,23 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$actions$en actions = Translations$actions$en.internal(_root);
 	late final Translations$bookings$en bookings = Translations$bookings$en.internal(_root);
 	late final Translations$catalog$en catalog = Translations$catalog$en.internal(_root);
-	late final Translations$categories$en categories = Translations$categories$en.internal(_root);
+	Map<String, String> get categories => {
+		'general': 'General',
+		'diabetes': 'Diabetes',
+		'thyroid': 'Thyroid',
+		'heart': 'Heart',
+		'liver': 'Liver',
+		'kidney': 'Kidney',
+		'vitamins': 'Vitamins',
+		'women': 'Women',
+		'senior': 'Senior',
+		'fever': 'Fever',
+		'fitness': 'Fitness',
+	};
 	late final Translations$windows$en windows = Translations$windows$en.internal(_root);
 	late final Translations$settings$en settings = Translations$settings$en.internal(_root);
+	late final Translations$tubes$en tubes = Translations$tubes$en.internal(_root);
+	late final Translations$menu$en menu = Translations$menu$en.internal(_root);
 }
 
 // Path: chat
@@ -98,6 +112,13 @@ class Translations$chat$en {
 
 	/// en: 'Booking is paused in this chat. Start a new chat for a routine checkup.'
 	String get flaggedNote => 'Booking is paused in this chat. Start a new chat for a routine checkup.';
+
+	List<String> get suggestions => [
+		'Check my thyroid',
+		'Full body checkup',
+		'Sugar test for Papa',
+		'I feel tired all the time',
+	];
 }
 
 // Path: status
@@ -292,48 +313,6 @@ class Translations$catalog$en {
 	String get askSaathi => 'Ask Saathi';
 }
 
-// Path: categories
-class Translations$categories$en {
-	Translations$categories$en.internal(this._root);
-
-	final Translations _root; // ignore: unused_field
-
-	// Translations
-
-	/// en: 'General'
-	String get general => 'General';
-
-	/// en: 'Diabetes'
-	String get diabetes => 'Diabetes';
-
-	/// en: 'Thyroid'
-	String get thyroid => 'Thyroid';
-
-	/// en: 'Heart'
-	String get heart => 'Heart';
-
-	/// en: 'Liver'
-	String get liver => 'Liver';
-
-	/// en: 'Kidney'
-	String get kidney => 'Kidney';
-
-	/// en: 'Vitamins'
-	String get vitamins => 'Vitamins';
-
-	/// en: 'Women'
-	String get women => 'Women';
-
-	/// en: 'Senior'
-	String get senior => 'Senior';
-
-	/// en: 'Fever'
-	String get fever => 'Fever';
-
-	/// en: 'Fitness'
-	String get fitness => 'Fitness';
-}
-
 // Path: windows
 class Translations$windows$en {
 	Translations$windows$en.internal(this._root);
@@ -370,6 +349,48 @@ class Translations$settings$en {
 	String get switchTo => 'हिन्दी';
 }
 
+// Path: tubes
+class Translations$tubes$en {
+	Translations$tubes$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Sample tubes: {names}'
+	String label({required Object names}) => 'Sample tubes: ${names}';
+
+	/// en: 'lavender'
+	String get lavender => 'lavender';
+
+	/// en: 'grey'
+	String get grey => 'grey';
+
+	/// en: 'gold'
+	String get gold => 'gold';
+
+	/// en: 'urine cup'
+	String get urine => 'urine cup';
+}
+
+// Path: menu
+class Translations$menu$en {
+	Translations$menu$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'New chat'
+	String get newChat => 'New chat';
+
+	/// en: 'All packages'
+	String get packages => 'All packages';
+
+	/// en: 'My bookings'
+	String get bookings => 'My bookings';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -389,6 +410,10 @@ extension on Translations {
 			'chat.findingPackages' => 'Finding packages…',
 			'chat.bookingSlot' => 'Booking your slot…',
 			'chat.flaggedNote' => 'Booking is paused in this chat. Start a new chat for a routine checkup.',
+			'chat.suggestions.0' => 'Check my thyroid',
+			'chat.suggestions.1' => 'Full body checkup',
+			'chat.suggestions.2' => 'Sugar test for Papa',
+			'chat.suggestions.3' => 'I feel tired all the time',
 			'status.queued' => 'Queued',
 			'status.sending' => 'Sending',
 			'status.failed' => 'Failed · tap to retry',
@@ -440,6 +465,14 @@ extension on Translations {
 			'windows.w1618' => '4–6 pm',
 			'settings.language' => 'Language',
 			'settings.switchTo' => 'हिन्दी',
+			'tubes.label' => ({required Object names}) => 'Sample tubes: ${names}',
+			'tubes.lavender' => 'lavender',
+			'tubes.grey' => 'grey',
+			'tubes.gold' => 'gold',
+			'tubes.urine' => 'urine cup',
+			'menu.newChat' => 'New chat',
+			'menu.packages' => 'All packages',
+			'menu.bookings' => 'My bookings',
 			_ => null,
 		};
 	}

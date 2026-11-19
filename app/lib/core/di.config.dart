@@ -14,15 +14,19 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:http/http.dart' as _i519;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:saathi/core/config.dart' as _i961;
+import 'package:saathi/core/connectivity/connectivity_cubit.dart' as _i111;
 import 'package:saathi/core/connectivity/connectivity_service.dart' as _i370;
 import 'package:saathi/core/db/database.dart' as _i537;
 import 'package:saathi/core/di.dart' as _i800;
+import 'package:saathi/features/bookings/bookings_cubit.dart' as _i87;
 import 'package:saathi/features/catalog/package.dart' as _i518;
 import 'package:saathi/features/chat/data/chat_api.dart' as _i960;
 import 'package:saathi/features/chat/data/chat_repository.dart' as _i971;
 import 'package:saathi/features/chat/data/outbox.dart' as _i415;
 import 'package:saathi/features/chat/data/session.dart' as _i468;
+import 'package:saathi/features/chat/presentation/chat_cubit.dart' as _i863;
 import 'package:saathi/features/safety/red_flag_detector.dart' as _i891;
+import 'package:saathi/features/settings/locale_cubit.dart' as _i567;
 import 'package:supabase_flutter/supabase_flutter.dart' as _i454;
 import 'package:uuid/uuid.dart' as _i706;
 
@@ -51,6 +55,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i468.SessionTokens>(
       () => _i468.SupabaseSessionTokens(gh<_i454.SupabaseClient>()),
     );
+    gh.factory<_i87.BookingsCubit>(
+      () => _i87.BookingsCubit(gh<_i537.AppDatabase>()),
+    );
+    gh.factory<_i567.LocaleCubit>(
+      () => _i567.LocaleCubit(gh<_i537.AppDatabase>()),
+    );
     gh.lazySingleton<_i960.ChatApi>(
       () => _i960.ChatApi(
         gh<_i519.Client>(),
@@ -71,6 +81,9 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       dispose: (i) => i.dispose(),
     );
+    gh.factory<_i111.ConnectivityCubit>(
+      () => _i111.ConnectivityCubit(gh<_i370.ConnectivityService>()),
+    );
     gh.lazySingleton<_i971.ChatRepository>(
       () => _i971.ChatRepository(
         gh<_i537.AppDatabase>(),
@@ -79,6 +92,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i961.Clock>(),
         gh<_i706.Uuid>(),
       ),
+    );
+    gh.factory<_i863.ChatCubit>(
+      () => _i863.ChatCubit(gh<_i971.ChatRepository>()),
     );
     return this;
   }

@@ -168,8 +168,9 @@ void main() {
       if (before.nextAttemptAt != null) clock.current = before.nextAttemptAt!;
       await outbox.drainOnce();
       final after = await msg('m1');
-      if (after.nextAttemptAt != null)
+      if (after.nextAttemptAt != null) {
         waits.add(after.nextAttemptAt!.difference(clock.now()).inSeconds);
+      }
     }
     expect(waits, [1, 2, 4, 8]);
     final m = await msg('m1');
