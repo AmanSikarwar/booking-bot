@@ -20,7 +20,7 @@ Today, users have to browse long test lists they don't understand, or call the l
 | Works on a bad network | Past chats and bookings open with no network; offline messages send on reconnect, each exactly once |
 | Safe | 100% of red-flag eval cases (keyword and paraphrased) show the urgent-care card and never a booking |
 | Consistent voice | Replies stay under 80 words, contain no diagnosis language, and keep Saathi's persona in both languages (checked in evals) |
-| Cheap | ₹0 LLM token spend, using free models; request usage is logged and reported in the README |
+| Cheap | Under ₹50 total LLM spend for the take-home (paid chat model at ~₹0.04 per search turn; decider free); request usage and actual spend are logged and reported in the README |
 
 ---
 
@@ -100,7 +100,7 @@ Today, users have to browse long test lists they don't understand, or call the l
            │                              │                               │
    ┌───────▼────────┐        ┌────────────▼──────────────┐   ┌────────────▼──────────────────┐
    │ Postgres + RLS │        │ OpenRouter Decisions API  │   │ OpenRouter Chat Completions   │
-   │ conversations  │        │ (alpha)                   │   │ google/gemma-4-26b-a4b-it:free│
+   │ conversations  │        │ (alpha)                   │   │ deepseek-v4.1-flash-1017      │
    │ messages       │        │ perplexity/               │   │ tools + streaming             │
    │ bookings       │        │ pplx-decider-flash-       │   └───────────────────────────────┘
    │ safety_checks  │        │ v1.3:free                 │
@@ -115,7 +115,7 @@ Today, users have to browse long test lists they don't understand, or call the l
 | Backend | Supabase (Edge Functions, Postgres, anonymous auth, RLS) | No LLM key in the app; auth, database, access rules and serverless functions in one place on a free tier; the same pattern I run in production (MyItihas) |
 | Backend alternative considered | Railway (always-on container) | Better for long-running workers or persistent connections, but it means building auth and access rules by hand. Not needed for short request/response chat turns |
 | LLM gateway | OpenRouter | OpenAI-compatible API, one key, model switched by environment variable, fallback models without code changes |
-| Chat model | `google/gemma-4-26b-a4b-it:free` | ₹0 per token, supports tools, tool choice and streaming, 262K context (we use under 5K). A mixture-of-experts model with ~4B active parameters, so it's fast |
+| Chat model | `deepseek/deepseek-v4.1-flash-1017`, with free fallbacks (Gemma 4 26B, Nemotron 3.5) | Picked after a live comparison on the same turns: free Gemma was rate-limited upstream, Nemotron spent most tokens on hidden reasoning (7–9 s to first text), GLM 5.3 Flash listed test names in text and under-recommended. DeepSeek followed Saathi's rules best in English and Hindi, at ~1–2 s per request and ~$0.0005 per search turn. ~50 providers serve it, all with tools and tool choice |
 | Red-flag triage | Keyword check + `perplexity/pplx-decider-flash-v1.3:free`, escalate-only | Keywords give a deterministic, offline-capable floor; the decision model catches paraphrases at very low latency and returns probabilities that code can threshold |
 | Agent persona | Saathi: a named, consistent voice, with safety-critical messages as fixed copy | Builds trust and a recognisable experience, while the model's personality never softens a safety message |
 | Tools execute on the server | Yes | The client can't fake a booking, the safety gate can block `book_slot`, arguments are validated, and the catalogue stays out of the prompt |
@@ -166,13 +166,13 @@ The quota guard runs after layer 1, so keyword red flags work even with the quot
 
 ### Chat model settings
 
-- Model from the `LLM_MODEL` environment variable (default `google/gemma-4-26b-a4b-it:free`).
+- Model from the `LLM_MODEL` environment variable (default `deepseek/deepseek-v4.1-flash-1017`).
 - Streaming on. Tool-call arguments arrive in fragments and are assembled before parsing.
 - Temperature 0.2, maximum 1000 output tokens. Reasoning tokens count against this cap, and Devanagari costs more tokens per word; reply length is held under 80 words by the prompt, not the cap.
 - Reasoning at `effort: "minimal"` with `exclude: true`, to keep first-token latency down (`"none"` is rejected by models with mandatory reasoning).
 - `provider.require_parameters: true`, so OpenRouter never routes to a provider that drops tool support.
 - The system prompt (persona plus rules) is sent as a system message.
-- **Free fallback models** through OpenRouter's `models` array, from `LLM_FALLBACK_MODELS` (default `google/gemma-4-31b-it:free`, `nvidia/nemotron-3.5-super-vl:free`, all with tools and tool choice). The free Gemma variant has a single provider (Google AI Studio) whose shared free pool is often rate-limited; fallbacks keep the app answering at ₹0. `llm_usage.model` records which model actually served.
+- **Fallback models** through OpenRouter's `models` array, from `LLM_FALLBACK_MODELS` (default `google/gemma-4-26b-a4b-it:free`, `nvidia/nemotron-3.5-super-vl:free`, all with tools and tool choice; OpenRouter allows at most 3 entries including the primary). They answer at ₹0 if the primary is down. `llm_usage.model` records which model actually served.
 - If a turn ends with no visible text (for example, a reasoning model spends its budget), Saathi sends a fixed template reply so cards never arrive in silence.
 
 ### System prompt rules (summary)
@@ -614,25 +614,29 @@ Generated Dart files (`*.g.dart`, `*.freezed.dart`, `*.config.dart`, slang and f
 
 ### Pricing
 
-Both models are OpenRouter `:free` models: **$0 per input and output token**. The real constraint is the **request quota** on free models:
+| Model | Role | Price per million tokens (input / output) |
+|---|---|---|
+| `deepseek/deepseek-v4.1-flash-1017` | Chat (primary) | $0.15 / $0.60 list; cheaper providers from $0.03 / $0.25 |
+| `google/gemma-4-26b-a4b-it:free`, `nvidia/nemotron-3.5-super-vl:free` | Chat (fallbacks) | $0 |
+| `perplexity/pplx-decider-flash-v1.3:free` | Red-flag triage | $0 |
 
-| Account state | Requests per minute | Requests per day |
+Measured on live turns: a search turn is 2 chat requests, ~2.9K input and ~140 output tokens in total, about **$0.0005 (≈ ₹0.04)**. Free models are still limited by OpenRouter's free request quota, which applies to the decider and to the chat fallbacks:
+
+| Account state | Free requests per minute | Free requests per day |
 |---|---|---|
 | Under $10 of lifetime credit purchases | 20 | 50 |
 | $10 or more of lifetime credit purchases (permanent) | 20 | 1,000 |
 
 - The daily counter resets at **00:00 UTC = 05:30 IST**.
 - **Failed attempts count** toward the limit, so retries are capped (§7, rule 10).
-- Remaining quota can be read from OpenRouter's key-status endpoint.
-- Decision requests are assumed to count against the same free quota.
 
 ### Requests per turn
 
 | Turn type | Model requests | Token cost |
 |---|---|---|
-| Free-text tool turn (search or book) | 1 decision + 2 chat (up to 3 with a validation retry) | ₹0 |
-| Free-text, text-only turn | 1 decision + 1 chat | ₹0 |
-| Card action (Book button, slot chip) | 2 chat (decider skipped) | ₹0 |
+| Free-text tool turn (search or book) | 1 decision + 2 chat (up to 3 with a validation retry) | ~₹0.04 |
+| Free-text, text-only turn | 1 decision + 1 chat | ~₹0.02 |
+| Card action (Book button, slot chip) | 2 chat (decider skipped) | ~₹0.04 |
 | Keyword red-flag turn | 0 (stopped by layer 1) | ₹0 |
 | Decider red-flag turn | 1 decision (chat model not called) | ₹0 |
 | Replayed turn (reconnect) | 0 (served from the DB) | ₹0 |
@@ -647,22 +651,19 @@ Both models are OpenRouter `:free` models: **$0 per input and output token**. Th
 | Reviewers using the deployed build | ~450 |
 | **Total, across two UTC days** | **~1,060** |
 
-That's far above 50 a day. **Decision:** buy $10 of OpenRouter credits once, to unlock the permanent 1,000-requests-a-day tier. Because only free models are used, the credits aren't consumed.
-
-- **Actual LLM spend: ₹0**, verified from `llm_usage` and the OpenRouter activity page.
-- The one-time credit purchase is reported separately in the README.
+About two thirds are chat requests, at ~$0.00025 each: **~$0.20 (≈ ₹17) expected**. The one-time $10 credit purchase unlocks the 1,000-a-day free tier for the decider and the free fallbacks, and pays for the DeepSeek tokens. Actual spend is summed from `llm_usage.cost_usd` and checked against the OpenRouter activity page in the README.
 
 ### Guards
 
-- **Global daily request budget:** the quota guard counts today's requests (UTC) and stops at **900**, leaving headroom below the 1,000 limit. Over budget, the app gets "quota exhausted". This is the hard limit.
+- **Global daily request budget:** the quota guard counts today's requests (UTC) and stops at **900**, leaving headroom below the 1,000 free limit and capping daily paid spend at well under ₹50. Over budget, the app gets "quota exhausted". This is the hard limit.
 - **Per-user cap:** 25 turns a day per anonymous user, so one reviewer can't exhaust the day's quota. It's a soft cap: a fresh anonymous sign-in gets a new user id. Supabase's per-IP rate limit on anonymous sign-ins slows that down, and the global budget still holds.
 - **Rate limit:** 20 requests a minute is plenty for a demo. Rate-limited requests return a retryable error with a retry-after time, and the outbox handles it.
 - **Quota savers:** the keyword check, skipping the decider on card actions, and replay all avoid unnecessary model requests.
-- **Paid fallback (off by default):** if enabled, OpenRouter falls back to a paid chat model when the free one is rate-limited. The API key carries a hard credit limit of $3 (about ₹300), so spend stays under ₹500 even in the worst case.
+- **Spend cap:** the API key carries a hard credit limit of $3 (about ₹300), so spend stays under ₹500 even if every guard fails.
 - **Prompt size:** history is trimmed to 10 turns and output capped at 1000 tokens, keeping each request under 5K input tokens including the persona prompt.
 - **Infrastructure costs ₹0:** Supabase free tier, plus a free static host for the web build.
 
-**Production note (for discussion):** the free tier isn't a production option, at 20 requests a minute and with prompts possibly logged. In production I'd use paid endpoints with a zero-data-retention provider behind the same adapters. Cost would then come from token pricing, and the keyword fast path, replay, and keeping the catalogue out of the prompt keep it low.
+**Production note (for discussion):** free endpoints and unpinned providers may log prompts. In production I'd pin zero-data-retention providers (`provider.zdr`) behind the same adapters. Cost would then come from token pricing, and the keyword fast path, replay, and keeping the catalogue out of the prompt keep it low.
 
 ---
 
