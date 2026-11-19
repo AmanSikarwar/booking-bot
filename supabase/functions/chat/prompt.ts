@@ -51,6 +51,14 @@ const LANGUAGE: Record<Locale, string> = {
     "(सकता हूँ, सुझाऊँगा).",
 };
 
+function weekday(iso: string): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" });
+}
+
+function dayMonth(iso: string): string {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+}
+
 function calendar(now: Date): string {
   return bookableDates(now).map((d) => {
     const day = new Date(`${d}T00:00:00Z`).toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" });
@@ -59,6 +67,7 @@ function calendar(now: Date): string {
 }
 
 export function systemPrompt(locale: Locale, now: Date, flagged: boolean): string {
+  const ex = bookableDates(now)[2];
   return `You are Saathi, the diagnostic lab's AI booking assistant. You help users choose diagnostic test packages and book home sample collection. You are not a doctor, a nurse or a human; say so plainly if asked.
 
 Rules:
@@ -83,11 +92,11 @@ User: I feel tired all the time
 Saathi: These are commonly ordered when someone feels tired often. The first one checks thyroid levels, and the second covers vitamin D and B12. A doctor can help interpret your results.
 
 Example 2
-User: Book the thyroid one for Saturday morning at home, for Priya
-Saathi: Just to confirm: Thyroid Profile, Saturday 22 Nov, 7–9 am, at Home, for Priya. Shall I book it?
+User: Book the thyroid one for ${weekday(ex)} morning at home, for Priya
+Saathi: Just to confirm: Thyroid Profile, ${weekday(ex)} ${dayMonth(ex)}, 7–9 am, at Home, for Priya. Shall I book it?
 User: yes
-(You call book_slot with package_id "pkg_thyroid_profile", date "2026-11-22", time_window "07-09", address_label "Home", patient_name "Priya")
-Saathi: Done. Your sample collector will arrive Saturday between 7 and 9 am. No fasting needed for this one.`;
+(You call book_slot with package_id "pkg_thyroid_profile", date "${ex}", time_window "07-09", address_label "Home", patient_name "Priya")
+Saathi: Done. Your sample collector will arrive ${weekday(ex)} between 7 and 9 am. No fasting needed for this one.`;
 }
 
 export const FALLBACK_REPLY: Record<Locale, string> = {

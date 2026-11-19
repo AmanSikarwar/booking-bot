@@ -51,7 +51,7 @@ export interface PackageResult {
 }
 
 const n = (s: string) => normalize(s, {});
-const has = (padded: string, term: string) => term !== "" && padded.includes(` ${term}`);
+const has = (padded: string, term: string) => term !== "" && padded.includes(` ${term} `);
 
 export class Catalog {
   readonly version: number;
@@ -67,7 +67,7 @@ export class Catalog {
   }
 
   search(query: string, opts: SearchOptions = {}): PackageResult[] {
-    const padded = ` ${n(query)}`;
+    const padded = ` ${n(query)} `;
     const limit = Math.min(Math.max(opts.limit ?? 3, 1), 3);
     const pool = this.packages.filter((p) =>
       (!opts.category || p.category === opts.category) &&

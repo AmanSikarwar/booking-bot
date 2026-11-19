@@ -114,3 +114,8 @@ Deno.test("sse: parser handles chunk boundaries, comments and multi-line data", 
     { event: undefined, data: "line1\nline2" },
   ]);
 });
+
+Deno.test("search: tags match whole words, so 'fat' does not match 'fatigue'", () => {
+  const ids = catalog.search("tired all the time fatigue hair fall").map((r) => r.id);
+  assert(!ids.includes("pkg_lipid_profile"), ids.join());
+});

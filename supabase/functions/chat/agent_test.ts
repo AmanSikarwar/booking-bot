@@ -4,6 +4,7 @@ import { Catalog } from "./catalog.ts";
 import type { Triage } from "./decider.ts";
 import type { ChatChunk, ChatModel, ChatRequest } from "./llm.ts";
 import { MockChat, MockDecider } from "./mocks.ts";
+import { systemPrompt } from "./prompt.ts";
 import { RedFlagDetector } from "./redflag.ts";
 import { isFull, TIME_WINDOWS } from "./slots.ts";
 import type { StreamEvent } from "./sse.ts";
@@ -312,4 +313,12 @@ Deno.test("empty model text after cards falls back to the template reply", async
   const last = events.at(-2)!;
   assertEquals(last.event, "text_delta");
   assert((last.data.text as string).includes("आमतौर पर"));
+});
+
+Deno.test("few-shot booking example uses a real bookable date with the matching weekday", () => {
+  const prompt = systemPrompt("en", NOW, false);
+  const m = prompt.match(/Thyroid Profile, (\w+) (\d+) (\w+), 7–9 am[\s\S]*?date "(\d{4}-\d{2}-\d{2})"/)!;
+  const [, day, , , iso] = m;
+  assertEquals(day, new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" }));
+  assertEquals(iso, "2026-11-22");
 });
