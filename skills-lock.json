@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "skills": {
+    "dart-use-doc-examples": {
+      "source": "flutter/agent-plugins",
+      "commit": "ff6d472ee66dbed566c4500edee460c94fde0a02",
+      "sourceType": "github",
+      "skillPath": "skills/dart-use-doc-examples/SKILL.md",
+      "computedHash": "d96eca027e535f535117ca54c7672eeaa3e99fbccb4e7c1f305ae2f984daa159"
+    },
+    "dart-use-path-package": {
+      "source": "flutter/agent-plugins",
+      "commit": "ff6d472ee66dbed566c4500edee460c94fde0a02",
+      "sourceType": "github",
+      "skillPath": "skills/dart-use-path-package/SKILL.md",
+      "computedHash": "a06659a5b85e4cb810aa79a8a4c3337589efc55974a144fefdcf5fe5e9b54791"
+    },
+    "dart-use-primary-constructors": {
+      "source": "flutter/agent-plugins",
+      "commit": "ff6d472ee66dbed566c4500edee460c94fde0a02",
+      "sourceType": "github",
+      "skillPath": "skills/dart-use-primary-constructors/SKILL.md",
+      "computedHash": "c3f9417434d97b846d1b7e02575af550c4656984cdb8d949821be7af4e57440b"
+    },
+    "dart-write-documentation": {
+      "source": "flutter/agent-plugins",
+      "commit": "ff6d472ee66dbed566c4500edee460c94fde0a02",
+      "sourceType": "github",
+      "skillPath": "skills/dart-write-documentation/SKILL.md",
+      "computedHash": "672d8e9e5dc290c11eaf58da617a1d07349d0b728f0440cfcf22bf644a50dba6"
+    }
+  }
+}
