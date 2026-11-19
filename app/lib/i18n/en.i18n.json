@@ -1,0 +1,92 @@
+{
+  "appTitle": "Saathi",
+  "chat": {
+    "name": "Saathi",
+    "subtitle": "Lab booking assistant",
+    "aiBadge": "AI",
+    "greeting": "Hi, I'm Saathi from the lab. Tell me what you'd like to check, or how you've been feeling, and I'll suggest the right tests.",
+    "inputHint": "Describe a symptom or a test",
+    "send": "Send",
+    "newChat": "New chat",
+    "findingPackages": "Finding packages…",
+    "bookingSlot": "Booking your slot…",
+    "flaggedNote": "Booking is paused in this chat. Start a new chat for a routine checkup."
+  },
+  "status": {
+    "queued": "Queued",
+    "sending": "Sending",
+    "failed": "Failed · tap to retry",
+    "incomplete": "Interrupted · resuming"
+  },
+  "fixed": {
+    "urgentCare": "This could need urgent medical care. Please don't wait for a lab test. Call 112 or 108 now, or go to the nearest emergency room.",
+    "crisisSupport": "I'm really sorry you're going through this. You don't have to face it alone. Tele-MANAS is free and available 24/7 at 14416.",
+    "queuedOffline": "You're offline. I'll send this as soon as you're back online.",
+    "quotaExhausted": "I'm taking a short break and will be back at 5:30 am. You can still browse all packages meanwhile.",
+    "userLimit": "You've reached today's message limit. I'll be back at 5:30 am. You can still browse all packages meanwhile.",
+    "errorRetrying": "That didn't go through. Trying again…"
+  },
+  "offline": {
+    "banner": "Offline · messages will send when you're back"
+  },
+  "package": {
+    "tests": "{n} tests",
+    "fasting": "Fasting {h} hrs",
+    "noFasting": "No fasting",
+    "report": "Report in {h} hrs",
+    "book": "Book home collection",
+    "viewTests": "View tests",
+    "hideTests": "Hide tests"
+  },
+  "booking": {
+    "confirmed": "Booking confirmed",
+    "savedOffline": "Saved offline",
+    "viewAll": "View all bookings",
+    "forPatient": "for {name}"
+  },
+  "slots": {
+    "full": "That slot is full. Closest open slots:"
+  },
+  "urgent": {
+    "call112": "Call 112",
+    "call108": "Call 108",
+    "call14416": "Call 14416",
+    "understood": "I understand"
+  },
+  "actions": {
+    "bookPackage": "I want to book {name}",
+    "bookSlot": "Book {name} ({id}) on {date} {window} at {address} for {patient}."
+  },
+  "bookings": {
+    "title": "My bookings",
+    "empty": "No bookings yet. Ask Saathi to book a home collection."
+  },
+  "catalog": {
+    "title": "All packages",
+    "all": "All",
+    "askSaathi": "Ask Saathi"
+  },
+  "categories": {
+    "general": "General",
+    "diabetes": "Diabetes",
+    "thyroid": "Thyroid",
+    "heart": "Heart",
+    "liver": "Liver",
+    "kidney": "Kidney",
+    "vitamins": "Vitamins",
+    "women": "Women",
+    "senior": "Senior",
+    "fever": "Fever",
+    "fitness": "Fitness"
+  },
+  "windows": {
+    "w0709": "7–9 am",
+    "w0911": "9–11 am",
+    "w1113": "11 am–1 pm",
+    "w1618": "4–6 pm"
+  },
+  "settings": {
+    "language": "Language",
+    "switchTo": "हिन्दी"
+  }
+}

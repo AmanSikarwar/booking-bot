@@ -1,0 +1,24 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          field_rename: snake
+          explicit_to_json: true
+      slang_build_runner:
+        options:
+          base_locale: en
+          fallback_strategy: base_locale
+          input_directory: lib/i18n
+          input_file_pattern: .i18n.json
+          output_directory: lib/i18n
+          output_file_name: strings.g.dart
+          string_interpolation: braces
+          timestamp: false
+          statistics: false
+      drift_dev:
+        options:
+          store_date_time_values_as_text: true
+      go_router_builder:
+        options:
+          duplicate_route_paths: error

@@ -6,3 +6,21 @@ analyzer:
     - android/**
     - ios/**
     - web/**
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.config.dart"
+    - lib/gen/**
+  errors:
+    invalid_annotation_target: ignore
+  language:
+    strict-inference: true
+
+linter:
+  rules:
+    - prefer_single_quotes
+    - always_declare_return_types
+    - avoid_dynamic_calls
+    - unawaited_futures
+    - prefer_final_locals
+    - no_raw_types
+    - no_dynamic_casts
