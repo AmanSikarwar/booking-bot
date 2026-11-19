@@ -84,9 +84,9 @@ Today, users have to browse long test lists they don't understand, or call the l
 │   1. Verify JWT → user_id; check conversation ownership                                    │
 │   2. Idempotency check (client_message_id) → replay if already completed                  │
 │   3. Safety layer 1: keyword red-flag check (same list as app) → urgent_care, stop         │
-│   4. Safety layer 2: decision-model triage (Decider Flash) → urgent_care, stop             │
+│   4. Quota guard: per-user turn cap + global daily request budget                          │
+│   5. Safety layer 2: decision-model triage (Decider Flash) → urgent_care, stop             │
 │      (skipped for kind = action)                                                           │
-│   5. Quota guard: per-user turn cap + global daily request budget                          │
 │   6. Load trimmed history (last 10 turns) + locale + Saathi persona prompt                 │
 │   7. Agent loop (max 3 tool rounds), streaming, run under EdgeRuntime.waitUntil so it      │
 │      finishes and persists even if the client disconnects                                  │
@@ -155,11 +155,13 @@ Today, users have to browse long test lists they don't understand, or call the l
 ```
 user message
   └─► layer 1: keyword red-flag check ──match──► urgent_care, flag conversation, done (0 model requests)
+  └─► quota guard ──exhausted──► error event (user_daily_limit / quota_exhausted), done
   └─► layer 2: Decider Flash triage (text only) ──P ≥ threshold──► urgent_care / crisis card, flag, done (1 decision request)
-  └─► quota guard ──exhausted──► error: quota_exhausted, done
   └─► chat request 1 (stream) ──text──► text_delta…
                               └─tool_calls─► validate ─► run tool ─► card event ─► chat request 2 (stream) ─► text_delta… ─► done
   (max 3 tool rounds, then a forced final text answer with tools disabled)
+
+The quota guard runs after layer 1, so keyword red flags work even with the quota exhausted, and before layer 2, so an over-budget turn spends no decision request.
 ```
 
 ### Chat model settings
@@ -542,7 +544,7 @@ Each event has a type and a JSON payload.
 | slot_unavailable | The requested slot and up to 3 alternatives | Rendered as slot chips |
 | urgent_care | Category (cardiac, respiratory and so on) and helplines (112, 108) | Rendered with the fixed urgent-care copy from the app |
 | crisis_support | Helpline (Tele-MANAS 14416) | Rendered with the fixed crisis-support copy from the app |
-| error | Error code, message, whether it's retryable, optional retry-after seconds | e.g. llm_unavailable, rate_limited, quota_exhausted |
+| error | Error code, message, whether it's retryable, optional retry-after seconds | `llm_unavailable`, `rate_limited` (retry with backoff); `user_daily_limit` (friendly message, keep queued); `quota_exhausted` (Saathi's fixed quota copy, back at 5:30 am IST, keep queued, offer the offline catalogue). The user message is marked failed on the server, so a resend is processed again |
 | done | Assistant message id; usage (model requests, input and output tokens) | Always last |
 
 ### Errors before the stream starts
@@ -553,9 +555,9 @@ Each event has a type and a JSON payload.
 | 401 | unauthorized | Refresh the anonymous session, then retry once |
 | 403 | forbidden | Conversation belongs to another user; mark failed |
 | 409 | in_progress | The same message is still processing; retry with backoff |
-| 429 | user_daily_limit | Show a friendly message; keep the message queued |
-| 503 | quota_exhausted | Show Saathi's fixed quota copy (back at 5:30 am IST), keep the message queued, and offer the offline catalogue browser |
 | 5xx | server_error | Retry with backoff |
+
+Quota errors arrive as `error` events after `ack`, not as HTTP statuses, because safety layer 1 must run first.
 
 ### Idempotency guarantees
 
