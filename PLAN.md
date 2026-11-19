@@ -238,6 +238,16 @@ These messages are written once, reviewed, and shown exactly as written: in Saat
 | Quota exhausted | I'm taking a short break and will be back at 5:30 am. You can still browse all packages meanwhile. | मैं थोड़ी देर के लिए रुका हूँ, सुबह 5:30 बजे वापस आऊँगा। तब तक आप सभी पैकेज देख सकते हैं। |
 | Error, retrying | That didn't go through. Trying again… | यह नहीं पहुँचा। फिर से कोशिश कर रहा हूँ… |
 
+#### Responsive layout
+
+| Window | Layout |
+|---|---|
+| Compact (< 600 px) | Single column; cards use the full width; header shows icons and a menu; subtitle hides at large text sizes |
+| Medium (600–1199 px) | Conversation centred in a 760 px column with the composer aligned to it; package cards two per row; labelled header actions |
+| Expanded (≥ 1200 px) | Two panes: chat, plus a side panel with **My bookings** and **All packages** tabs, so booking and browsing never leave the chat |
+
+The catalogue and bookings screens use a responsive grid (up to 3 columns). A widget test renders every card in both languages at 280–1440 px and 1×–2× text scale and fails on any overflow.
+
 #### Visual identity
 
 - **Avatar:** a simple rounded test-tube or droplet mark in the lab's brand colour, never a human face, so users don't mistake Saathi for a person.
@@ -289,7 +299,7 @@ The chat model doesn't enforce JSON schemas, so every tool call is checked on th
 
 | Card | Shows | Actions |
 |---|---|---|
-| PackageCard | Name, test count, top tests, price and MRP, fasting needed, report time, match reason | **Book home collection** (sends a structured "I want to book {package}" message with `kind: action`), **View tests** (expands) |
+| PackageCard | Name, sample-tube caps, match reason, test count / fasting / report time (tap to expand the full test list), price and MRP | **Book home collection** (sends a structured "I want to book {package}" message with `kind: action`) |
 | BookingCard | Booking reference, package, date and window, address label, patient name, status, "Saved offline" badge | **View all bookings** |
 | SlotAlternatives | 2–3 alternative slots as chips | Tapping a chip sends a confirmation message (`kind: action`) |
 | UrgentCareCard | Red, high-contrast fixed urgent-care copy, no avatar | **Call 112**, **Call 108** (phone links), "I understand" |
@@ -369,7 +379,7 @@ The conversation is marked as flagged, and booking stays blocked in that convers
 1. **The local DB is what the UI reads.** Every screen renders from Drift streams; the network only writes into the DB.
 2. **Every user message gets a `client_message_id` (UUIDv4) at creation**, offline or online. This is the idempotency key end to end.
 3. **Outbox:** a message saved while offline is stored as *queued*. The outbox worker sends queued messages **in creation order, one at a time per conversation**, so Saathi sees them in sequence.
-4. **Triggers to send:** connectivity regained (`connectivity_plus` plus a lightweight reachability ping to the function, since "connected to Wi-Fi" doesn't mean "online"), app resumed, or a manual retry.
+4. **Triggers to send:** connectivity regained (`connectivity_plus` plus a lightweight reachability ping to Supabase's always-warm `/auth/v1/health`, so edge-function cold starts never read as offline, since "connected to Wi-Fi" doesn't mean "online"), app resumed, or a manual retry.
 5. **Backoff:** exponential, 1 s → 2 s → 4 s … capped at 60 s, with jitter. After 5 failures the message is marked *failed*, with a *Tap to retry* chip. A "quota exhausted" error doesn't burn retries: the message stays queued, and the app shows the fixed quota copy.
 6. **Mid-stream drop:** the partial assistant text is kept but marked *incomplete*. The server keeps running the turn (`EdgeRuntime.waitUntil`) and persists it. On reconnect the same `client_message_id` is resent:
    - If the server already completed it → it **replays** the stored events, with no new model request and no second booking.
@@ -516,7 +526,7 @@ The anonymous session itself is persisted by `supabase_flutter`.
 
 ### Endpoint
 
-`POST /functions/v1/chat`, with a Supabase anonymous-session token in the Authorization header. The response is a server-sent event stream. `HEAD /functions/v1/chat` returns 204 and serves as the app's reachability ping.
+`POST /functions/v1/chat`, with a Supabase anonymous-session token in the Authorization header. The response is a server-sent event stream. `HEAD /functions/v1/chat` returns 204 for manual health checks; the app's reachability ping uses `/auth/v1/health` instead, which stays warm across function deploys.
 
 ### Request fields
 
