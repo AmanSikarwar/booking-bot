@@ -1,0 +1,320 @@
+{
+  "version": 1,
+  "packages": [
+    {
+      "id": "pkg_basic_wellness",
+      "name": { "en": "Basic Wellness", "hi": "बेसिक वेलनेस" },
+      "category": "general",
+      "tests": ["CBC", "Fasting Blood Sugar", "Lipid Profile", "SGPT", "Creatinine", "Urine Routine"],
+      "test_count": 6,
+      "price_inr": 799,
+      "mrp_inr": 1499,
+      "fasting_hours": 10,
+      "sample_type": "blood, urine",
+      "report_tat_hours": 24,
+      "tags": {
+        "en": ["routine", "checkup", "health check", "annual", "basic", "general", "wellness", "preventive"],
+        "hi": ["रूटीन", "जाँच", "चेकअप", "सामान्य", "स्वास्थ्य जाँच"],
+        "hinglish": ["routine checkup", "normal checkup", "health check", "jaanch", "janch"]
+      },
+      "description": {
+        "en": "A short routine checkup covering blood count, sugar, cholesterol, liver and kidney basics.",
+        "hi": "खून, शुगर, कोलेस्ट्रॉल, लिवर और किडनी की बुनियादी जाँच वाला छोटा रूटीन चेकअप।"
+      }
+    },
+    {
+      "id": "pkg_full_body",
+      "name": { "en": "Comprehensive Full Body", "hi": "कम्प्रीहेन्सिव फुल बॉडी" },
+      "category": "general",
+      "tests": ["CBC", "HbA1c", "Fasting Blood Sugar", "Lipid Profile", "Liver Function Test", "Kidney Function Test", "Thyroid Profile", "Vitamin D", "Vitamin B12", "Iron Studies", "Urine Routine"],
+      "test_count": 11,
+      "price_inr": 2499,
+      "mrp_inr": 4999,
+      "fasting_hours": 10,
+      "sample_type": "blood, urine",
+      "report_tat_hours": 48,
+      "tags": {
+        "en": ["full body", "complete", "comprehensive", "everything", "annual", "checkup", "master", "tired", "tiredness", "fatigue"],
+        "hi": ["फुल बॉडी", "पूरी जाँच", "पूरा शरीर", "थकान"],
+        "hinglish": ["full body checkup", "poora checkup", "sab test", "thakan"]
+      },
+      "description": {
+        "en": "A wide checkup that covers sugar, heart, liver, kidney, thyroid, vitamins and iron in one visit.",
+        "hi": "एक ही बार में शुगर, दिल, लिवर, किडनी, थायरॉइड, विटामिन और आयरन की बड़ी जाँच।"
+      }
+    },
+    {
+      "id": "pkg_diabetes_care",
+      "name": { "en": "Diabetes Care (FBS, PPBS, HbA1c)", "hi": "डायबिटीज़ केयर (FBS, PPBS, HbA1c)" },
+      "category": "diabetes",
+      "tests": ["Fasting Blood Sugar", "Post-Prandial Blood Sugar", "HbA1c", "Urine Microalbumin"],
+      "test_count": 4,
+      "price_inr": 599,
+      "mrp_inr": 999,
+      "fasting_hours": 10,
+      "sample_type": "blood, urine",
+      "report_tat_hours": 24,
+      "tags": {
+        "en": ["diabetes", "sugar", "blood sugar", "glucose", "hba1c", "fbs", "ppbs", "thirst", "frequent urination", "insulin"],
+        "hi": ["शुगर", "डायबिटीज़", "मधुमेह", "प्यास", "बार बार पेशाब"],
+        "hinglish": ["sugar test", "sugar", "madhumeh", "diabetes test", "pyaas", "baar baar peshab"]
+      },
+      "description": {
+        "en": "Commonly ordered to check blood sugar levels and the 3-month sugar average.",
+        "hi": "खून में शुगर और पिछले 3 महीने की औसत शुगर देखने के लिए आमतौर पर करवाया जाता है।"
+      }
+    },
+    {
+      "id": "pkg_thyroid_profile",
+      "name": { "en": "Thyroid Profile (T3, T4, TSH)", "hi": "थायरॉइड प्रोफाइल (T3, T4, TSH)" },
+      "category": "thyroid",
+      "tests": ["T3", "T4", "TSH"],
+      "test_count": 3,
+      "price_inr": 499,
+      "mrp_inr": 799,
+      "fasting_hours": 0,
+      "sample_type": "blood",
+      "report_tat_hours": 24,
+      "tags": {
+        "en": ["thyroid", "tsh", "t3", "t4", "tired", "tiredness", "fatigue", "hair fall", "weight gain", "weight loss"],
+        "hi": ["थायरॉइड", "थकान", "बाल झड़ना", "वज़न बढ़ना", "वजन"],
+        "hinglish": ["thyroid", "thakan", "baal jhadna", "baal girna", "wajan badhna"]
+      },
+      "description": {
+        "en": "Commonly ordered to check thyroid function.",
+        "hi": "थायरॉइड की कार्यक्षमता देखने के लिए आमतौर पर करवाया जाता है।"
+      }
+    },
+    {
+      "id": "pkg_lipid_profile",
+      "name": { "en": "Lipid Profile", "hi": "लिपिड प्रोफाइल" },
+      "category": "heart",
+      "tests": ["Total Cholesterol", "HDL", "LDL", "VLDL", "Triglycerides"],
+      "test_count": 5,
+      "price_inr": 399,
+      "mrp_inr": 699,
+      "fasting_hours": 12,
+      "sample_type": "blood",
+      "report_tat_hours": 24,
+      "tags": {
+        "en": ["cholesterol", "lipid", "triglycerides", "hdl", "ldl", "fat", "heart"],
+        "hi": ["कोलेस्ट्रॉल", "चर्बी", "दिल"],
+        "hinglish": ["cholesterol", "charbi", "dil"]
+      },
+      "description": {
+        "en": "Commonly ordered to check cholesterol and blood fats.",
+        "hi": "कोलेस्ट्रॉल और खून की चर्बी देखने के लिए आमतौर पर करवाया जाता है।"
+      }
+    },
+    {
+      "id": "pkg_liver_function",
+      "name": { "en": "Liver Function Test", "hi": "लिवर फंक्शन टेस्ट" },
+      "category": "liver",
+      "tests": ["SGOT", "SGPT", "ALP", "GGT", "Bilirubin", "Total Protein", "Albumin"],
+      "test_count": 7,
+      "price_inr": 549,
+      "mrp_inr": 899,
+      "fasting_hours": 8,
+      "sample_type": "blood",
+      "report_tat_hours": 24,
+      "tags": {
+        "en": ["liver", "lft", "jaundice", "alcohol", "fatty liver", "sgpt", "bilirubin"],
+        "hi": ["लिवर", "जिगर", "पीलिया"],
+        "hinglish": ["liver", "jigar", "piliya"]
+      },
+      "description": {
+        "en": "Commonly ordered to check how the liver is working.",
+        "hi": "लिवर के काम को देखने के लिए आमतौर पर करवाया जाता है।"
+      }
+    },
+    {
+      "id": "pkg_kidney_function",
+      "name": { "en": "Kidney Function Test", "hi": "किडनी फंक्शन टेस्ट" },
+      "category": "kidney",
+      "tests": ["Creatinine", "Urea", "BUN", "Uric Acid", "Sodium", "Potassium", "Chloride"],
+      "test_count": 7,
+      "price_inr": 549,
+      "mrp_inr": 899,
+      "fasting_hours": 0,
+      "sample_type": "blood",
+      "report_tat_hours": 24,
+      "tags": {
+        "en": ["kidney", "kft", "rft", "creatinine", "uric acid", "swelling feet", "urine"],
+        "hi": ["किडनी", "गुर्दा", "यूरिक एसिड", "पैरों में सूजन"],
+        "hinglish": ["kidney", "gurda", "uric acid", "pair me sujan"]
+      },
+      "description": {
+        "en": "Commonly ordered to check how the kidneys are working.",
+        "hi": "किडनी के काम को देखने के लिए आमतौर पर करवाया जाता है।"
+      }
+    },
+    {
+      "id": "pkg_vitamin_d_b12",
+      "name": { "en": "Vitamin D & B12", "hi": "विटामिन D और B12" },
+      "category": "vitamins",
+      "tests": ["Vitamin D (25-OH)", "Vitamin B12"],
+      "test_count": 2,
+      "price_inr": 999,
+      "mrp_inr": 1799,
+      "fasting_hours": 0,
+      "sample_type": "blood",
+      "report_tat_hours": 24,
+      "tags": {
+        "en": ["vitamin", "vitamin d", "b12", "deficiency", "bone pain", "body pain", "tired", "tiredness", "fatigue", "tingling", "numbness in feet"],
+        "hi": ["विटामिन", "कमी", "हड्डियों में दर्द", "बदन दर्द", "थकान"],
+        "hinglish": ["vitamin", "vitamin ki kami", "haddi dard", "badan dard", "thakan"]
+      },
+      "description": {
+        "en": "Commonly ordered to check two vitamins that are often low.",
+        "hi": "उन दो विटामिन की जाँच जो अक्सर कम पाए जाते हैं।"
+      }
+    },
+    {
+      "id": "pkg_anemia_panel",
+      "name": { "en": "Anemia Panel (CBC, Iron Studies)", "hi": "एनीमिया पैनल (CBC, आयरन)" },
+      "category": "general",
+      "tests": ["CBC", "Serum Iron", "TIBC", "Ferritin", "Transferrin Saturation"],
+      "test_count": 5,
+      "price_inr": 699,
+      "mrp_inr": 1199,
+      "fasting_hours": 0,
+      "sample_type": "blood",
+      "report_tat_hours": 24,
+      "tags": {
+        "en": ["anemia", "anaemia", "iron", "hemoglobin", "haemoglobin", "pale", "weakness", "tired", "tiredness", "fatigue", "dizziness", "cbc"],
+        "hi": ["खून की कमी", "आयरन", "कमज़ोरी", "थकान", "हीमोग्लोबिन"],
+        "hinglish": ["khoon ki kami", "kamzori", "kamjori", "thakan", "iron", "hb"]
+      },
+      "description": {
+        "en": "Commonly ordered to check haemoglobin and iron levels.",
+        "hi": "हीमोग्लोबिन और आयरन देखने के लिए आमतौर पर करवाया जाता है।"
+      }
+    },
+    {
+      "id": "pkg_fever_panel",
+      "name": { "en": "Fever Panel (CBC, Dengue, Malaria, Typhoid)", "hi": "फीवर पैनल (CBC, डेंगू, मलेरिया, टाइफाइड)" },
+      "category": "fever",
+      "tests": ["CBC", "Dengue NS1", "Malaria Antigen", "Typhidot", "CRP"],
+      "test_count": 5,
+      "price_inr": 1199,
+      "mrp_inr": 1999,
+      "fasting_hours": 0,
+      "sample_type": "blood",
+      "report_tat_hours": 12,
+      "tags": {
+        "en": ["fever", "dengue", "malaria", "typhoid", "platelets", "chills", "body ache"],
+        "hi": ["बुखार", "डेंगू", "मलेरिया", "टाइफाइड", "ठंड लगना"],
+        "hinglish": ["bukhar", "dengue", "malaria", "typhoid", "thand lagna"]
+      },
+      "description": {
+        "en": "Commonly ordered when someone has had a fever for a few days.",
+        "hi": "जब कुछ दिनों से बुखार हो, तब आमतौर पर करवाया जाता है।"
+      }
+    },
+    {
+      "id": "pkg_womens_wellness",
+      "name": { "en": "Women's Wellness", "hi": "महिला वेलनेस" },
+      "category": "women",
+      "tests": ["CBC", "Thyroid Profile", "Vitamin D", "Iron Studies", "Calcium", "Fasting Blood Sugar", "Urine Routine"],
+      "test_count": 7,
+      "price_inr": 1499,
+      "mrp_inr": 2799,
+      "fasting_hours": 10,
+      "sample_type": "blood, urine",
+      "report_tat_hours": 24,
+      "tags": {
+        "en": ["women", "woman", "female", "ladies", "wife", "mother", "calcium", "tired", "hair fall"],
+        "hi": ["महिला", "औरत", "पत्नी", "माँ", "कैल्शियम"],
+        "hinglish": ["mahila", "ladies", "wife", "mummy", "calcium"]
+      },
+      "description": {
+        "en": "A routine checkup for women covering thyroid, iron, vitamin D and calcium.",
+        "hi": "महिलाओं के लिए रूटीन जाँच, जिसमें थायरॉइड, आयरन, विटामिन D और कैल्शियम शामिल हैं।"
+      }
+    },
+    {
+      "id": "pkg_pcos_panel",
+      "name": { "en": "PCOS Panel", "hi": "PCOS पैनल" },
+      "category": "women",
+      "tests": ["LH", "FSH", "Prolactin", "Testosterone", "TSH", "Fasting Insulin", "Fasting Blood Sugar"],
+      "test_count": 7,
+      "price_inr": 1899,
+      "mrp_inr": 3299,
+      "fasting_hours": 10,
+      "sample_type": "blood",
+      "report_tat_hours": 48,
+      "tags": {
+        "en": ["pcos", "pcod", "irregular periods", "periods", "hormones", "acne", "facial hair"],
+        "hi": ["पीसीओएस", "पीरियड्स", "माहवारी", "अनियमित पीरियड्स", "हार्मोन"],
+        "hinglish": ["pcod", "pcos", "periods", "period late", "mahwari", "hormone"]
+      },
+      "description": {
+        "en": "Hormone tests commonly ordered when periods are irregular.",
+        "hi": "पीरियड्स अनियमित होने पर आमतौर पर करवाए जाने वाले हार्मोन टेस्ट।"
+      }
+    },
+    {
+      "id": "pkg_senior_care",
+      "name": { "en": "Senior Citizen Care", "hi": "सीनियर सिटिज़न केयर" },
+      "category": "senior",
+      "tests": ["CBC", "HbA1c", "Lipid Profile", "Kidney Function Test", "Liver Function Test", "Thyroid Profile", "Vitamin D", "Vitamin B12", "Calcium", "PSA or Calcium Profile", "Urine Routine"],
+      "test_count": 11,
+      "price_inr": 2299,
+      "mrp_inr": 4499,
+      "fasting_hours": 10,
+      "sample_type": "blood, urine",
+      "report_tat_hours": 48,
+      "tags": {
+        "en": ["senior", "elderly", "old", "parents", "father", "mother", "grandfather", "grandmother", "60", "above 60"],
+        "hi": ["बुज़ुर्ग", "माता पिता", "पापा", "मम्मी", "दादा", "दादी"],
+        "hinglish": ["papa", "mummy", "maa", "dadaji", "dadi", "nana", "nani", "parents", "buzurg"]
+      },
+      "description": {
+        "en": "A wide checkup designed for people above 60.",
+        "hi": "60 साल से ऊपर के लोगों के लिए बनाई गई बड़ी जाँच।"
+      }
+    },
+    {
+      "id": "pkg_heart_risk",
+      "name": { "en": "Heart Risk Screening", "hi": "हार्ट रिस्क स्क्रीनिंग" },
+      "category": "heart",
+      "tests": ["Lipid Profile", "hs-CRP", "HbA1c", "Homocysteine", "Apolipoprotein A1/B"],
+      "test_count": 5,
+      "price_inr": 1599,
+      "mrp_inr": 2899,
+      "fasting_hours": 12,
+      "sample_type": "blood",
+      "report_tat_hours": 24,
+      "tags": {
+        "en": ["heart", "cardiac", "heart risk", "bp", "blood pressure", "family history", "cholesterol", "smoker"],
+        "hi": ["दिल", "हार्ट", "बीपी", "ब्लड प्रेशर"],
+        "hinglish": ["dil", "heart", "bp", "blood pressure"]
+      },
+      "description": {
+        "en": "Commonly ordered to screen for heart risk factors when there is a family history.",
+        "hi": "परिवार में दिल की बीमारी का इतिहास होने पर जोखिम देखने के लिए आमतौर पर करवाया जाता है।"
+      }
+    },
+    {
+      "id": "pkg_fitness",
+      "name": { "en": "Fitness & Performance", "hi": "फिटनेस और परफॉर्मेंस" },
+      "category": "fitness",
+      "tests": ["CBC", "Vitamin D", "Vitamin B12", "Testosterone", "Cortisol", "Creatine Kinase", "Lipid Profile"],
+      "test_count": 7,
+      "price_inr": 1799,
+      "mrp_inr": 3199,
+      "fasting_hours": 10,
+      "sample_type": "blood",
+      "report_tat_hours": 24,
+      "tags": {
+        "en": ["fitness", "gym", "workout", "athlete", "sports", "muscle", "performance", "running"],
+        "hi": ["फिटनेस", "जिम", "कसरत", "खेल"],
+        "hinglish": ["gym", "fitness", "kasrat", "workout"]
+      },
+      "description": {
+        "en": "Commonly ordered by people who train regularly, covering vitamins, hormones and muscle markers.",
+        "hi": "नियमित कसरत करने वालों के लिए विटामिन, हार्मोन और मांसपेशियों की जाँच।"
+      }
+    }
+  ]
+}
