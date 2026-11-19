@@ -21,9 +21,10 @@ const deps: Deps = {
   store: new SupabaseStore(admin),
   chat: mock ? new MockChat() : new OpenRouterChat(
     env("OPENROUTER_API_KEY"),
-    env("LLM_MODEL") || "google/gemma-4-26b-a4b-it:free",
+    env("LLM_MODEL") || "deepseek/deepseek-v4.1-flash-1017",
     fetch,
-    (env("LLM_FALLBACK_MODELS") || "google/gemma-4-31b-it:free,nvidia/nemotron-3.5-super-vl:free")
+    (env("LLM_FALLBACK_MODELS") ||
+      "google/gemma-4-26b-a4b-it:free,nvidia/nemotron-3.5-super-vl:free")
       .split(",").map((m) => m.trim()).filter(Boolean),
   ),
   decider: mock ? new MockDecider() : new OpenRouterDecider(

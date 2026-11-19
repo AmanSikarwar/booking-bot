@@ -145,3 +145,13 @@ Deno.test("chat adapter: sends fallback models after the primary", async () => {
   assertEquals([sent.model, sent.models], ["primary:free", ["primary:free", "backup:free"]]);
   assertEquals(sent.provider, { require_parameters: true });
 });
+
+Deno.test("chat adapter: models array is capped at 3 entries", async () => {
+  let sent: Record<string, unknown> = {};
+  const model = new OpenRouterChat("k", "p", (_u, init) => {
+    sent = JSON.parse(init!.body as string);
+    return Promise.resolve(sseResponse(["[DONE]"]));
+  }, ["a", "b", "c"]);
+  await collect(model.stream({ messages: [] }));
+  assertEquals(sent.models, ["p", "a", "b"]);
+});

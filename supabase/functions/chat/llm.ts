@@ -101,7 +101,7 @@ export class OpenRouterChat implements ChatModel {
   async #post(req: ChatRequest, started: number): Promise<Response> {
     const body = JSON.stringify({
       model: this.model,
-      ...(this.fallbacks.length ? { models: [this.model, ...this.fallbacks] } : {}),
+      ...(this.fallbacks.length ? { models: [this.model, ...this.fallbacks].slice(0, 3) } : {}),
       messages: req.messages,
       ...(req.tools?.length ? { tools: req.tools, tool_choice: "auto" } : {}),
       stream: true,
