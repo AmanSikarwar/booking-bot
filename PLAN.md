@@ -1,9 +1,5 @@
 # Saathi, the Lab Booking Companion: Plan
 
-> First commit. This document is written before any code. It covers the problem, users, architecture, agent design and persona, data model, API contract, safety design, offline design, testing and cost estimate.
-
----
-
 ## 1. Problem
 
 A diagnostics lab wants its app users to:
