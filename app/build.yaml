@@ -15,6 +15,7 @@ targets:
           output_file_name: strings.g.dart
           string_interpolation: braces
           timestamp: false
+          lazy: false
           statistics: false
           maps:
             - categories

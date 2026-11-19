@@ -45,6 +45,7 @@ class TubeCaps extends StatelessWidget {
         )
         .join(', ');
     return Semantics(
+      container: true,
       label: t.label(names: names),
       child: ExcludeSemantics(
         child: Row(
