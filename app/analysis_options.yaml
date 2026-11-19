@@ -24,3 +24,6 @@ linter:
     - prefer_final_locals
     - no_raw_types
     - no_dynamic_casts
+
+formatter:
+  page_width: 100

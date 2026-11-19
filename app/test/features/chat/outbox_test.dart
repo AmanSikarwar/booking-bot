@@ -1,0 +1,223 @@
+import 'package:drift/drift.dart' show Value;
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:saathi/core/config.dart';
+import 'package:saathi/core/connectivity/connectivity_service.dart';
+import 'package:saathi/core/db/database.dart';
+import 'package:saathi/features/catalog/package.dart';
+import 'package:saathi/features/chat/data/chat_api.dart';
+import 'package:saathi/features/chat/data/outbox.dart';
+import 'package:saathi/features/chat/domain/chat_event.dart';
+import 'package:saathi/features/chat/domain/models.dart';
+
+class MockApi extends Mock implements ChatApi {}
+
+class MockConnectivity extends Mock implements ConnectivityService {}
+
+class FixedClock extends Clock {
+  DateTime current = DateTime.utc(2026, 11, 20, 4, 30);
+
+  @override
+  DateTime now() => current;
+
+  @override
+  double jitter() => 1;
+}
+
+const booking = BookingInfo(
+  bookingRef: 'LAB-7Q3K9',
+  packageId: 'pkg_thyroid_profile',
+  packageName: Localized(en: 'Thyroid Profile', hi: 'थायरॉइड प्रोफाइल'),
+  date: '2026-11-22',
+  timeWindow: '07-09',
+  addressLabel: 'Home',
+  patientName: 'Priya',
+  status: 'confirmed',
+);
+
+void main() {
+  late AppDatabase db;
+  late MockApi api;
+  late MockConnectivity connectivity;
+  late FixedClock clock;
+  late Outbox outbox;
+  final requests = <ChatRequest>[];
+
+  setUpAll(
+    () => registerFallbackValue(
+      ChatRequest(
+        conversationId: '',
+        clientMessageId: '',
+        kind: '',
+        locale: '',
+        text: '',
+        createdAt: DateTime(2026),
+      ),
+    ),
+  );
+
+  setUp(() async {
+    db = AppDatabase(NativeDatabase.memory());
+    api = MockApi();
+    connectivity = MockConnectivity();
+    clock = FixedClock();
+    when(() => connectivity.isOnline).thenReturn(true);
+    when(() => connectivity.changes).thenAnswer((_) => const Stream.empty());
+    when(() => connectivity.recheck()).thenAnswer((_) async {});
+    outbox = Outbox(db, api, connectivity, clock);
+    requests.clear();
+    await db.ensureConversation('c1', 'en', clock.now());
+  });
+
+  tearDown(() => db.close());
+
+  Future<void> queue(String id, String text, {int secondsAgo = 0}) => db.upsertMessage(
+    MessagesCompanion.insert(
+      id: id,
+      conversationId: 'c1',
+      role: MessageRole.user,
+      body: Value(text),
+      status: MessageStatus.queued,
+      createdAt: clock.now().subtract(Duration(seconds: secondsAgo)),
+    ),
+  );
+
+  void reply(List<ChatEvent> events, {Object? error}) {
+    when(() => api.send(any())).thenAnswer((inv) {
+      requests.add(inv.positionalArguments.first as ChatRequest);
+      return error != null ? Stream.error(error) : Stream.fromIterable(events);
+    });
+  }
+
+  Future<Message> msg(String id) async => (await db.message(id))!;
+
+  test('streams text and cards into the reply, saves booking, marks sent', () async {
+    await queue('m1', 'yes book it');
+    reply([
+      const ChatEvent.ack(replay: false),
+      const ChatEvent.toolStarted('book_slot'),
+      const ChatEvent.card(ChatCard.booking(booking)),
+      const ChatEvent.textDelta('Done. '),
+      const ChatEvent.textDelta('See you Saturday.'),
+      const ChatEvent.done(),
+    ]);
+    expect(await outbox.drainOnce(), isTrue);
+    expect((await msg('m1')).status, MessageStatus.sent);
+    final r = await msg(replyIdFor('m1'));
+    expect([r.body, r.status, r.activeTool], ['Done. See you Saturday.', MessageStatus.sent, null]);
+    expect(r.cards.single, isA<BookingCardData>());
+    expect((await db.watchBookings().first).single.bookingRef, 'LAB-7Q3K9');
+    expect(requests.single.clientMessageId, 'm1');
+  });
+
+  test('sends oldest first, one at a time', () async {
+    await queue('late', 'second');
+    await queue('early', 'first', secondsAgo: 30);
+    reply([const ChatEvent.ack(replay: false), const ChatEvent.done()]);
+    await outbox.drainOnce();
+    await outbox.drainOnce();
+    expect(requests.map((r) => r.clientMessageId), ['early', 'late']);
+    expect(await outbox.drainOnce(), isFalse);
+  });
+
+  test(
+    'dropped stream marks incomplete, resend with same id replays without duplicating text',
+    () async {
+      await queue('m1', 'thyroid');
+      reply([const ChatEvent.ack(replay: false), const ChatEvent.textDelta('These are ')]);
+      await outbox.drainOnce();
+      final m = await msg('m1');
+      expect([m.status, m.attempts], [MessageStatus.incomplete, 1]);
+      expect((await msg(replyIdFor('m1'))).status, MessageStatus.incomplete);
+
+      clock.current = clock.current.add(const Duration(seconds: 2));
+      reply([
+        const ChatEvent.ack(replay: true),
+        const ChatEvent.textDelta('These are '),
+        const ChatEvent.textDelta('commonly ordered.'),
+        const ChatEvent.done(),
+      ]);
+      await outbox.drainOnce();
+      expect((await msg(replyIdFor('m1'))).body, 'These are commonly ordered.');
+      expect(requests.map((r) => r.clientMessageId), ['m1', 'm1']);
+    },
+  );
+
+  test('quota exhausted keeps the message queued without burning a retry', () async {
+    await queue('m1', 'sugar');
+    reply([
+      const ChatEvent.ack(replay: false),
+      const ChatEvent.error(code: 'quota_exhausted', retryable: true, retryAfter: 600),
+      const ChatEvent.done(),
+    ]);
+    await outbox.drainOnce();
+    final m = await msg('m1');
+    expect([m.status, m.attempts, m.error], [MessageStatus.queued, 0, 'quota_exhausted']);
+    expect(m.nextAttemptAt, clock.now().add(const Duration(seconds: 600)));
+    expect(await db.message(replyIdFor('m1')), isNull);
+    expect(await outbox.drainOnce(), isFalse, reason: 'not due yet');
+  });
+
+  test('retryable errors back off exponentially, then fail after 5 attempts', () async {
+    await queue('m1', 'sugar');
+    reply(const [], error: const ChatApiException(502, 'server_error', retryable: true));
+    final waits = <int>[];
+    for (var i = 0; i < 5; i++) {
+      final before = await msg('m1');
+      if (before.nextAttemptAt != null) clock.current = before.nextAttemptAt!;
+      await outbox.drainOnce();
+      final after = await msg('m1');
+      if (after.nextAttemptAt != null)
+        waits.add(after.nextAttemptAt!.difference(clock.now()).inSeconds);
+    }
+    expect(waits, [1, 2, 4, 8]);
+    final m = await msg('m1');
+    expect([m.status, m.attempts], [MessageStatus.failed, 5]);
+  });
+
+  test('backoff caps at 60 seconds', () {
+    expect(outbox.backoff(10).inSeconds, 60);
+  });
+
+  test('invalid request fails immediately', () async {
+    await queue('m1', 'x');
+    reply(const [], error: const ChatApiException(400, 'invalid_request'));
+    await outbox.drainOnce();
+    expect((await msg('m1')).status, MessageStatus.failed);
+  });
+
+  test('in progress waits without counting an attempt', () async {
+    await queue('m1', 'x');
+    reply(const [], error: const ChatApiException(409, 'in_progress', retryable: true));
+    await outbox.drainOnce();
+    final m = await msg('m1');
+    expect([m.status, m.attempts], [MessageStatus.queued, 0]);
+  });
+
+  test('network error rechecks connectivity', () async {
+    await queue('m1', 'x');
+    reply(const [], error: Exception('socket closed'));
+    await outbox.drainOnce();
+    verify(() => connectivity.recheck()).called(1);
+    expect((await msg('m1')).error, 'network');
+  });
+
+  test('urgent card flags the conversation', () async {
+    await queue('m1', 'my arm is numb');
+    reply([
+      const ChatEvent.ack(replay: false),
+      const ChatEvent.card(ChatCard.urgent('decider')),
+      const ChatEvent.done(),
+    ]);
+    await outbox.drainOnce();
+    expect((await db.watchConversation('c1').first)!.flagged, isTrue);
+  });
+
+  test('messages stuck in flight after a restart are requeued', () async {
+    await queue('m1', 'x');
+    await db.patchMessage('m1', const MessagesCompanion(status: Value(MessageStatus.streaming)));
+    await db.resetInFlight();
+    expect((await msg('m1')).status, MessageStatus.queued);
+  });
+}

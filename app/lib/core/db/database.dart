@@ -1,0 +1,192 @@
+import 'dart:convert';
+
+import 'package:drift/drift.dart';
+import 'package:drift_flutter/drift_flutter.dart';
+
+import '../../features/chat/domain/models.dart';
+
+part 'database.g.dart';
+
+enum MessageRole { user, assistant }
+
+enum MessageKind { text, action }
+
+enum MessageStatus { queued, sending, streaming, sent, failed, incomplete }
+
+class CardListConverter extends TypeConverter<List<ChatCard>, String> {
+  const CardListConverter();
+
+  @override
+  List<ChatCard> fromSql(String fromDb) => [
+    for (final c in (jsonDecode(fromDb) as List).cast<Map<String, Object?>>()) ChatCard.fromJson(c),
+  ];
+
+  @override
+  String toSql(List<ChatCard> value) => jsonEncode([for (final c in value) c.toJson()]);
+}
+
+class Conversations extends Table {
+  TextColumn get id => text()();
+  TextColumn get locale => text()();
+  BoolColumn get flagged => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+class Messages extends Table {
+  TextColumn get id => text()();
+  TextColumn get conversationId => text().references(Conversations, #id)();
+  TextColumn get role => textEnum<MessageRole>()();
+  TextColumn get kind => textEnum<MessageKind>().withDefault(const Constant('text'))();
+  TextColumn get locale => text().withDefault(const Constant('en'))();
+  TextColumn get body => text().withDefault(const Constant(''))();
+  TextColumn get cards => text().map(const CardListConverter()).withDefault(const Constant('[]'))();
+  TextColumn get status => textEnum<MessageStatus>()();
+  TextColumn get replyTo => text().nullable()();
+  TextColumn get activeTool => text().nullable()();
+  IntColumn get attempts => integer().withDefault(const Constant(0))();
+  DateTimeColumn get nextAttemptAt => dateTime().nullable()();
+  TextColumn get error => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+class Bookings extends Table {
+  TextColumn get bookingRef => text()();
+  TextColumn get conversationId => text()();
+  TextColumn get packageId => text()();
+  TextColumn get packageNameEn => text()();
+  TextColumn get packageNameHi => text()();
+  TextColumn get slotDate => text()();
+  TextColumn get timeWindow => text()();
+  TextColumn get addressLabel => text()();
+  TextColumn get patientName => text()();
+  TextColumn get status => text()();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {bookingRef};
+}
+
+class AppMeta extends Table {
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {key};
+}
+
+String replyIdFor(String userMessageId) => 'reply:$userMessageId';
+
+@DriftDatabase(tables: [Conversations, Messages, Bookings, AppMeta])
+class AppDatabase extends _$AppDatabase {
+  AppDatabase(super.e);
+
+  AppDatabase.defaults()
+    : super(
+        driftDatabase(
+          name: 'saathi',
+          web: DriftWebOptions(
+            sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+            driftWorker: Uri.parse('drift_worker.js'),
+          ),
+        ),
+      );
+
+  @override
+  int get schemaVersion => 1;
+
+  Future<String?> meta(String key) async =>
+      (await (select(appMeta)..where((m) => m.key.equals(key))).getSingleOrNull())?.value;
+
+  Future<void> setMeta(String key, String value) =>
+      into(appMeta).insertOnConflictUpdate(AppMetaCompanion.insert(key: key, value: value));
+
+  Future<void> ensureConversation(String id, String locale, DateTime now) =>
+      into(conversations).insert(
+        ConversationsCompanion.insert(id: id, locale: locale, createdAt: now, updatedAt: now),
+        mode: InsertMode.insertOrIgnore,
+      );
+
+  Stream<Conversation?> watchConversation(String id) =>
+      (select(conversations)..where((c) => c.id.equals(id))).watchSingleOrNull();
+
+  Future<void> flagConversation(String id) => (update(
+    conversations,
+  )..where((c) => c.id.equals(id))).write(const ConversationsCompanion(flagged: Value(true)));
+
+  Stream<List<Message>> watchMessages(String conversationId) =>
+      (select(messages)
+            ..where((m) => m.conversationId.equals(conversationId))
+            ..orderBy([(m) => OrderingTerm.asc(m.createdAt)]))
+          .watch();
+
+  Future<Message?> message(String id) =>
+      (select(messages)..where((m) => m.id.equals(id))).getSingleOrNull();
+
+  Future<void> upsertMessage(MessagesCompanion m) => into(messages).insertOnConflictUpdate(m);
+
+  Future<void> patchMessage(String id, MessagesCompanion patch) =>
+      (update(messages)..where((m) => m.id.equals(id))).write(patch);
+
+  Future<Message?> nextDue(DateTime now) =>
+      (select(messages)
+            ..where(
+              (m) =>
+                  m.role.equalsValue(MessageRole.user) &
+                  m.status.isInValues([MessageStatus.queued, MessageStatus.incomplete]) &
+                  (m.nextAttemptAt.isNull() | m.nextAttemptAt.isSmallerOrEqualValue(now)),
+            )
+            ..orderBy([(m) => OrderingTerm.asc(m.createdAt)])
+            ..limit(1))
+          .getSingleOrNull();
+
+  Future<DateTime?> earliestPendingAttempt() async {
+    final row =
+        await (select(messages)
+              ..where(
+                (m) =>
+                    m.role.equalsValue(MessageRole.user) &
+                    m.status.isInValues([MessageStatus.queued, MessageStatus.incomplete]) &
+                    m.nextAttemptAt.isNotNull(),
+              )
+              ..orderBy([(m) => OrderingTerm.asc(m.nextAttemptAt)])
+              ..limit(1))
+            .getSingleOrNull();
+    return row?.nextAttemptAt;
+  }
+
+  Future<void> resetInFlight() =>
+      (update(messages)..where(
+            (m) =>
+                m.role.equalsValue(MessageRole.user) &
+                m.status.isInValues([MessageStatus.sending, MessageStatus.streaming]),
+          ))
+          .write(const MessagesCompanion(status: Value(MessageStatus.queued)));
+
+  Future<void> saveBooking(String conversationId, BookingInfo b, DateTime now) =>
+      into(bookings).insertOnConflictUpdate(
+        BookingsCompanion.insert(
+          bookingRef: b.bookingRef,
+          conversationId: conversationId,
+          packageId: b.packageId,
+          packageNameEn: b.packageName.en,
+          packageNameHi: b.packageName.hi,
+          slotDate: b.date,
+          timeWindow: b.timeWindow,
+          addressLabel: b.addressLabel,
+          patientName: b.patientName,
+          status: b.status,
+          createdAt: now,
+        ),
+      );
+
+  Stream<List<Booking>> watchBookings() => (select(
+    bookings,
+  )..orderBy([(b) => OrderingTerm.asc(b.slotDate), (b) => OrderingTerm.asc(b.timeWindow)])).watch();
+}
