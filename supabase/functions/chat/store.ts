@@ -229,6 +229,8 @@ export function assistantHistoryText(content: { text?: string; events?: StreamEv
       notes.push(`[cards shown: ${pkgs.join(", ")}]`);
     } else if (e.event === "booking_confirmed") {
       notes.push(`[booked: ${e.data.booking_ref} ${e.data.package_id} ${e.data.date} ${e.data.time_window}]`);
+    } else if (e.event === "booking_form") {
+      notes.push(`[booking form shown for ${e.data.package_id}]`);
     } else if (e.event === "slot_unavailable") {
       notes.push(`[slot full; alternatives offered: ${JSON.stringify(e.data.alternatives)}]`);
     } else if (e.event === "urgent_care" || e.event === "crisis_support") {

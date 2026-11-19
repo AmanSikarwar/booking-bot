@@ -317,8 +317,51 @@ Deno.test("empty model text after cards falls back to the template reply", async
 
 Deno.test("few-shot booking example uses a real bookable date with the matching weekday", () => {
   const prompt = systemPrompt("en", NOW, false);
-  const m = prompt.match(/Thyroid Profile, (\w+) (\d+) (\w+), 7–9 am[\s\S]*?date "(\d{4}-\d{2}-\d{2})"/)!;
-  const [, day, , , iso] = m;
+  const [, day, iso] = prompt.match(/thyroid one for (\w+) morning[\s\S]*?date "(\d{4}-\d{2}-\d{2})"/)!;
   assertEquals(day, new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" }));
   assertEquals(iso, "2026-11-22");
+  assert(prompt.includes(`on ${iso} 07-09 at Home for Priya.`));
+});
+
+Deno.test("show_booking_form emits a pre-filled form with only open slots", async () => {
+  const chat = new ScriptedChat([
+    [call("show_booking_form", {
+      package_id: "pkg_thyroid_profile",
+      patient_name: "Priya",
+      date: "2026-11-22",
+      time_window: "07–09",
+    })],
+    [text("Please check the details and tap Confirm booking.")],
+  ]);
+  const { deps } = setup({ chat });
+  const { events } = await turn(deps, input("book the thyroid test for Priya on Sunday morning"));
+  const form = events.find((e) => e.event === "booking_form")!;
+  const prefill = form.data.prefill as Record<string, unknown>;
+  assertEquals([prefill.patient_name, prefill.date, prefill.time_window], ["Priya", "2026-11-22", "07-09"]);
+  const availability = form.data.availability as Record<string, string[]>;
+  assertEquals(Object.keys(availability).length, 8);
+  for (const [d, windows] of Object.entries(availability)) {
+    assert(windows.every((w) => !isFull(d, w as typeof TIME_WINDOWS[number])), `${d} offers a full slot`);
+  }
+  assertEquals(availability["2026-11-20"].includes("07-09"), false, "past window today is not offered");
+  assertEquals(JSON.parse((chat.requests[1].messages.at(-1) as { content: string }).content).status, "form_shown");
+});
+
+Deno.test("show_booking_form drops invalid prefill but keeps the form", async () => {
+  const chat = new ScriptedChat([
+    [call("show_booking_form", { package_id: "pkg_thyroid_profile", date: "2027-01-01", time_window: "13-15" })],
+    [text("ok")],
+  ]);
+  const { deps } = setup({ chat });
+  const { events } = await turn(deps, input("book thyroid"));
+  const prefill = events.find((e) => e.event === "booking_form")!.data.prefill as Record<string, unknown>;
+  assertEquals([prefill.date, prefill.time_window], [null, null]);
+});
+
+Deno.test("show_booking_form with an unknown package is an invalid call", async () => {
+  const chat = new ScriptedChat([[call("show_booking_form", { package_id: "nope" })], [text("Let me search first.")]]);
+  const { deps } = setup({ chat });
+  const { names } = await turn(deps, input("book something"));
+  assert(!names.includes("booking_form"));
+  assert(JSON.stringify(chat.requests[1].messages.at(-1)).includes("package_id must be"));
 });

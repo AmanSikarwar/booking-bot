@@ -3,10 +3,10 @@ import { type Decider, escalation } from "./decider.ts";
 import { type ChatMessage, type ChatModel, LlmError, type ToolCall } from "./llm.ts";
 import { DISCLAIMER, EMPTY_REPLY, FALLBACK_REPLY, looksLikeDiagnosis, systemPrompt, TOOLS } from "./prompt.ts";
 import type { RedFlagDetector } from "./redflag.ts";
-import { alternatives, bookingRef, idempotencyKey, isFull } from "./slots.ts";
+import { alternatives, bookableDates, bookingRef, idempotencyKey, isBookable, isFull, TIME_WINDOWS } from "./slots.ts";
 import type { StreamEvent } from "./sse.ts";
 import type { Conversation, Store } from "./store.ts";
-import { validateBook, validateSearch } from "./validate.ts";
+import { validateBook, validateForm, validateSearch } from "./validate.ts";
 
 export interface Deps {
   store: Store;
@@ -297,6 +297,29 @@ export async function runTurn(
       const results = catalog.search(query, opts);
       record("package_cards", { query, packages: results });
       return { content: { results: forModel(results, locale) } };
+    }
+    if (call.function.name === "show_booking_form") {
+      const v = validateForm(call.function.arguments, catalog, deps.now());
+      if (!v.ok) return { content: { error: v.error }, invalid: true };
+      const f = v.value;
+      const pkg = catalog.byId(f.package_id)!;
+      const now = deps.now();
+      const availability = Object.fromEntries(
+        bookableDates(now).map((d) => [d, TIME_WINDOWS.filter((w) => isBookable(d, w, now) && !isFull(d, w))]),
+      );
+      record("booking_form", {
+        package_id: pkg.id,
+        package_name: pkg.name,
+        fasting_hours: pkg.fasting_hours,
+        prefill: {
+          date: f.date ?? null,
+          time_window: f.time_window ?? null,
+          address_label: f.address_label ?? null,
+          patient_name: f.patient_name ?? null,
+        },
+        availability,
+      });
+      return { content: { status: "form_shown" } };
     }
     if (call.function.name === "book_slot") {
       const v = validateBook(call.function.arguments, catalog, deps.now());

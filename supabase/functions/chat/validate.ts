@@ -1,5 +1,5 @@
 import { type Catalog, CATEGORIES, type SearchOptions } from "./catalog.ts";
-import { isBookable, TIME_WINDOWS, type TimeWindow } from "./slots.ts";
+import { bookableDates, isBookable, TIME_WINDOWS, type TimeWindow } from "./slots.ts";
 
 export type Validated<T> = { ok: true; value: T } | { ok: false; error: string };
 
@@ -46,6 +46,34 @@ export function validateSearch(raw: string): Validated<SearchArgs> {
       category: a.category as string | undefined,
       max_price_inr: a.max_price_inr as number | undefined,
       limit: a.limit as number | undefined,
+    },
+  };
+}
+
+export interface FormArgs {
+  package_id: string;
+  date?: string;
+  time_window?: TimeWindow;
+  address_label?: string;
+  patient_name?: string;
+}
+
+export function validateForm(raw: string, catalog: Catalog, now: Date): Validated<FormArgs> {
+  const a = parse(raw);
+  if (!a) return { ok: false, error: "arguments must be a JSON object" };
+  if (typeof a.package_id !== "string" || !catalog.byId(a.package_id)) {
+    return { ok: false, error: "package_id must be an id returned by search_packages" };
+  }
+  const window = typeof a.time_window === "string" ? a.time_window.replace(/[–—]/g, "-") : undefined;
+  const date = typeof a.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(a.date) ? a.date : undefined;
+  return {
+    ok: true,
+    value: {
+      package_id: a.package_id,
+      date: date && bookableDates(now).includes(date) ? date : undefined,
+      time_window: TIME_WINDOWS.includes(window as TimeWindow) ? window as TimeWindow : undefined,
+      address_label: text(a.address_label, 60) ? (a.address_label as string).trim() : undefined,
+      patient_name: text(a.patient_name, 80) ? (a.patient_name as string).trim() : undefined,
     },
   };
 }

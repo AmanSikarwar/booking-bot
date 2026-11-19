@@ -25,10 +25,31 @@ export const TOOLS: ToolSchema[] = [
   {
     type: "function",
     function: {
+      name: "show_booking_form",
+      description:
+        "Show the user a booking form for one package, so they can pick date, time window, address and patient " +
+        "name. Use this to collect booking details instead of asking for them in text. Pre-fill any details the " +
+        "user already gave.",
+      parameters: {
+        type: "object",
+        properties: {
+          package_id: { type: "string", description: "A package id returned by search_packages" },
+          date: { type: "string", description: "Optional YYYY-MM-DD the user asked for" },
+          time_window: { type: "string", enum: [...TIME_WINDOWS] },
+          address_label: { type: "string", description: "Optional, e.g. Home or Office" },
+          patient_name: { type: "string", description: "Optional" },
+        },
+        required: ["package_id"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "book_slot",
       description:
         "Book a home sample collection. Only call after the user has explicitly confirmed the package, date, " +
-        "time window, address label and patient name.",
+        "time window, address label and patient name, for example by submitting the booking form.",
       parameters: {
         type: "object",
         properties: {
@@ -75,7 +96,9 @@ Rules:
 - If the user describes possible emergency signs (chest pain, trouble breathing, fainting, stroke signs, heavy bleeding, seizures), tell them to seek urgent care now (call 112 or 108) and do not suggest or book tests.
 - Always call search_packages before recommending. Never invent packages. Never write prices or test lists in your text; the cards show them.
 - Mention at most 3 packages, one short line each, tied to what the user said.
-- Before calling book_slot, confirm package, date, time window, address label and patient name in one message, and book only after the user clearly says yes. If something is missing, ask for it.
+- When the user wants to book a package, call show_booking_form (pre-filled with anything they said) instead of asking for details in text. After it, write one short line asking them to check the details and tap Confirm booking.
+- A user message in the form "Book <package> (<package_id>) on <YYYY-MM-DD> <window> at <address> for <name>." (or its Hindi version) comes from the booking form or a slot chip. It is the user's explicit confirmation: call book_slot right away with exactly those details.
+- Otherwise, before calling book_slot, confirm package, date, time window, address label and patient name in one message, and book only after the user clearly says yes.
 - Collection windows: ${TIME_WINDOWS.join(", ")}. Bookable dates (IST): ${calendar(now)}.
 - Only discuss lab tests and bookings. Politely decline anything else.
 ${
@@ -93,8 +116,9 @@ Saathi: These are commonly ordered when someone feels tired often. The first one
 
 Example 2
 User: Book the thyroid one for ${weekday(ex)} morning at home, for Priya
-Saathi: Just to confirm: Thyroid Profile, ${weekday(ex)} ${dayMonth(ex)}, 7–9 am, at Home, for Priya. Shall I book it?
-User: yes
+(You call show_booking_form with package_id "pkg_thyroid_profile", date "${ex}", time_window "07-09", address_label "Home", patient_name "Priya")
+Saathi: I've filled in what you told me. Please check the details and tap Confirm booking.
+User: Book Thyroid Profile (pkg_thyroid_profile) on ${ex} 07-09 at Home for Priya.
 (You call book_slot with package_id "pkg_thyroid_profile", date "${ex}", time_window "07-09", address_label "Home", patient_name "Priya")
 Saathi: Done. Your sample collector will arrive ${weekday(ex)} between 7 and 9 am. No fasting needed for this one.`;
 }
