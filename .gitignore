@@ -1,0 +1,9 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+.claude/settings.local.json
+supabase/.temp/
+supabase/.branches/
+node_modules/
+evals/results/
