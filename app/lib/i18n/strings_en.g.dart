@@ -311,6 +311,9 @@ class Translations$catalog$en {
 
 	/// en: 'Ask Saathi'
 	String get askSaathi => 'Ask Saathi';
+
+	/// en: 'Browse all packages'
+	String get browse => 'Browse all packages';
 }
 
 // Path: windows
@@ -448,6 +451,7 @@ extension on Translations {
 			'catalog.title' => 'All packages',
 			'catalog.all' => 'All',
 			'catalog.askSaathi' => 'Ask Saathi',
+			'catalog.browse' => 'Browse all packages',
 			'categories.general' => 'General',
 			'categories.diabetes' => 'Diabetes',
 			'categories.thyroid' => 'Thyroid',

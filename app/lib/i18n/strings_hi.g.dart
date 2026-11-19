@@ -217,6 +217,7 @@ class _Translations$catalog$hi extends Translations$catalog$en {
 	@override String get title => 'सभी पैकेज';
 	@override String get all => 'सभी';
 	@override String get askSaathi => 'साथी से पूछें';
+	@override String get browse => 'सभी पैकेज देखें';
 }
 
 // Path: windows
@@ -326,6 +327,7 @@ extension on TranslationsHi {
 			'catalog.title' => 'सभी पैकेज',
 			'catalog.all' => 'सभी',
 			'catalog.askSaathi' => 'साथी से पूछें',
+			'catalog.browse' => 'सभी पैकेज देखें',
 			'categories.general' => 'सामान्य',
 			'categories.diabetes' => 'डायबिटीज़',
 			'categories.thyroid' => 'थायरॉइड',

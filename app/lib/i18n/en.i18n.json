@@ -70,7 +70,8 @@
   "catalog": {
     "title": "All packages",
     "all": "All",
-    "askSaathi": "Ask Saathi"
+    "askSaathi": "Ask Saathi",
+    "browse": "Browse all packages"
   },
   "categories": {
     "general": "General",

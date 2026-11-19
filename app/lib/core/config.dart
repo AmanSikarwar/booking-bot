@@ -14,6 +14,8 @@ class AppConfig {
   );
 
   Uri get chatUri => Uri.parse('$supabaseUrl/functions/v1/chat');
+
+  Uri get healthUri => Uri.parse('$supabaseUrl/auth/v1/health');
 }
 
 @lazySingleton

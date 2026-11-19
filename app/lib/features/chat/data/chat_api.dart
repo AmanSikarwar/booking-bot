@@ -95,8 +95,9 @@ class ChatApi {
 
   Future<bool> ping() async {
     try {
-      final req = http.Request('HEAD', _config.chatUri)..headers['apikey'] = _config.publishableKey;
-      final res = await _client.send(req).timeout(const Duration(seconds: 5));
+      final req = http.Request('GET', _config.healthUri)
+        ..headers['apikey'] = _config.publishableKey;
+      final res = await _client.send(req).timeout(const Duration(seconds: 8));
       await res.stream.drain<void>();
       return true;
     } on Object {

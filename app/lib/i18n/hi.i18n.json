@@ -70,7 +70,8 @@
   "catalog": {
     "title": "सभी पैकेज",
     "all": "सभी",
-    "askSaathi": "साथी से पूछें"
+    "askSaathi": "साथी से पूछें",
+    "browse": "सभी पैकेज देखें"
   },
   "categories": {
     "general": "सामान्य",

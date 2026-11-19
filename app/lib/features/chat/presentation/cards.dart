@@ -106,8 +106,13 @@ class _PackageCardViewState extends State<PackageCardView> {
       p.fastingHours > 0 ? t.fasting(h: p.fastingHours) : t.noFasting,
       t.report(h: p.reportTatHours),
     ].join(' · ');
-    return Card(
+    return Container(
       clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Palette.line),
+      ),
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -145,12 +150,43 @@ class _PackageCardViewState extends State<PackageCardView> {
                       p.matchReason.of(lang),
                       style: const TextStyle(fontSize: 13, color: Palette.lavender),
                     ),
-                    const SizedBox(height: 6),
-                    Text(facts, style: const TextStyle(fontSize: 13, color: Palette.inkMuted)),
-                    const SizedBox(height: 10),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
+                    const SizedBox(height: 2),
+                    Semantics(
+                      button: true,
+                      expanded: _expanded,
+                      label: _expanded ? t.hideTests : t.viewTests,
+                      child: InkWell(
+                        onTap: () => setState(() => _expanded = !_expanded),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  facts,
+                                  style: const TextStyle(fontSize: 13, color: Palette.inkMuted),
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              AnimatedRotation(
+                                turns: _expanded ? 0.5 : 0,
+                                duration: const Duration(milliseconds: 180),
+                                child: const Icon(
+                                  Icons.expand_more,
+                                  size: 18,
+                                  color: Palette.inkMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
                           formatRupees(p.priceInr),
@@ -161,7 +197,6 @@ class _PackageCardViewState extends State<PackageCardView> {
                             fontFeatures: tabular,
                           ),
                         ),
-                        const SizedBox(width: 8),
                         if (p.mrpInr > p.priceInr)
                           Text(
                             formatRupees(p.mrpInr),
@@ -202,18 +237,15 @@ class _PackageCardViewState extends State<PackageCardView> {
                           : const SizedBox(width: double.infinity),
                     ),
                     const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        if (widget.onBook != null)
-                          FilledButton(onPressed: widget.onBook, child: Text(t.book)),
-                        OutlinedButton(
-                          onPressed: () => setState(() => _expanded = !_expanded),
-                          child: Text(_expanded ? t.hideTests : t.viewTests),
+                    if (widget.onBook != null)
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: widget.onBook,
+                          icon: const Icon(Icons.home_outlined, size: 18),
+                          label: Text(t.book),
                         ),
-                      ],
-                    ),
+                      ),
                   ],
                 ),
               ),
@@ -241,15 +273,24 @@ class BookingCardView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              alignment: WrapAlignment.spaceBetween,
               children: [
-                const Icon(Icons.check_circle, color: Palette.success, size: 20),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    t.confirmed,
-                    style: const TextStyle(fontWeight: FontWeight.w600, color: Palette.success),
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check_circle, color: Palette.success, size: 20),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        t.confirmed,
+                        style: const TextStyle(fontWeight: FontWeight.w600, color: Palette.success),
+                      ),
+                    ),
+                  ],
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -262,9 +303,11 @@ class BookingCardView extends StatelessWidget {
                     children: [
                       const Icon(Icons.offline_pin_outlined, size: 13, color: Palette.inkMuted),
                       const SizedBox(width: 4),
-                      Text(
-                        t.savedOffline,
-                        style: const TextStyle(fontSize: 11, color: Palette.inkMuted),
+                      Flexible(
+                        child: Text(
+                          t.savedOffline,
+                          style: const TextStyle(fontSize: 11, color: Palette.inkMuted),
+                        ),
                       ),
                     ],
                   ),

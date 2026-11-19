@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/db/database.dart';
+import '../../../core/layout.dart';
 import '../../../core/theme.dart';
 import '../../../i18n/strings.g.dart';
 
@@ -60,7 +61,7 @@ class UserBubble extends StatelessWidget {
     return Align(
       alignment: AlignmentDirectional.centerEnd,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 320),
+        constraints: const BoxConstraints(maxWidth: 480),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
@@ -101,11 +102,13 @@ class UserBubble extends StatelessWidget {
                           color: failed ? Palette.urgent : Palette.inkMuted,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          label,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: failed ? Palette.urgent : Palette.inkMuted,
+                        Flexible(
+                          child: Text(
+                            label,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: failed ? Palette.urgent : Palette.inkMuted,
+                            ),
                           ),
                         ),
                       ],
@@ -121,21 +124,34 @@ class UserBubble extends StatelessWidget {
 }
 
 class SaathiBubble extends StatelessWidget {
-  const SaathiBubble({super.key, required this.child, this.showAvatar = true});
+  const SaathiBubble({
+    super.key,
+    required this.child,
+    this.showAvatar = true,
+    this.maxWidth = 560,
+    this.fullBleedOnCompact = false,
+  });
 
   final Widget child;
   final bool showAvatar;
+  final double maxWidth;
+  final bool fullBleedOnCompact;
 
   @override
   Widget build(BuildContext context) {
+    final constrained = ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: child,
+    );
+    if (fullBleedOnCompact && context.windowSize == WindowSize.compact) {
+      return Align(alignment: AlignmentDirectional.centerStart, child: constrained);
+    }
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(width: 32, child: showAvatar ? const SaathiAvatar() : null),
         const SizedBox(width: 8),
-        Flexible(
-          child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 360), child: child),
-        ),
+        Flexible(child: constrained),
       ],
     );
   }

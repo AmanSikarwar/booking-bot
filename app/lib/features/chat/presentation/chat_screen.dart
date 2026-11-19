@@ -8,9 +8,12 @@ import 'package:material_ui/material_ui.dart';
 import '../../../core/connectivity/connectivity_cubit.dart';
 import '../../../core/db/database.dart';
 import '../../../core/di.dart';
+import '../../../core/layout.dart';
 import '../../../core/router.dart';
 import '../../../core/theme.dart';
 import '../../../i18n/strings.g.dart';
+import '../../bookings/bookings_screen.dart';
+import '../../catalog/catalog_screen.dart';
 import '../../catalog/package.dart';
 import '../../settings/locale_cubit.dart';
 import '../domain/models.dart';
@@ -34,6 +37,14 @@ class _ChatScreenState extends State<ChatScreen> {
 
   String get _locale => context.read<LocaleCubit>().state.languageCode;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _sync();
+    });
+  }
+
   void _sync() => _controller.sync(
     toChatItems(
       context.read<ChatCubit>().state.messages,
@@ -50,11 +61,20 @@ class _ChatScreenState extends State<ChatScreen> {
   void _send(String text, {MessageKind kind = MessageKind.text}) =>
       unawaited(context.read<ChatCubit>().send(text, _locale, kind: kind));
 
+  void _newChat() => unawaited(context.read<ChatCubit>().newChat(_locale));
+
   @override
   Widget build(BuildContext context) {
-    final t = context.t;
-    final flagged = context.select((ChatCubit c) => c.state.flagged);
-    final online = context.watch<ConnectivityCubit>().state;
+    final size = context.windowSize;
+    final chat = _chat(context);
+    final column = size == WindowSize.compact
+        ? chat
+        : Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: chatColumnWidth),
+              child: chat,
+            ),
+          );
     return MultiBlocListener(
       listeners: [
         BlocListener<ChatCubit, ChatState>(
@@ -64,119 +84,69 @@ class _ChatScreenState extends State<ChatScreen> {
         BlocListener<ConnectivityCubit, bool>(listener: (_, _) => _sync()),
       ],
       child: Scaffold(
-        appBar: AppBar(
-          titleSpacing: 12,
-          title: Row(
-            children: [
-              const SaathiAvatar(size: 36),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      t.chat.name,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
-                    ),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            t.chat.subtitle,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12, color: Palette.inkMuted),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Palette.lavender),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            t.chat.aiBadge,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                              color: Palette.lavender,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => unawaited(context.read<LocaleCubit>().toggle()),
-              child: Text(t.settings.switchTo),
-            ),
-            IconButton(
-              tooltip: t.menu.bookings,
-              onPressed: () => const BookingsRoute().go(context),
-              icon: const Icon(Icons.event_note_outlined),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (v) => switch (v) {
-                'new' => unawaited(context.read<ChatCubit>().newChat(_locale)),
-                _ => const CatalogRoute().go(context),
-              },
-              itemBuilder: (_) => [
-                PopupMenuItem(value: 'new', child: Text(t.menu.newChat)),
-                PopupMenuItem(value: 'catalog', child: Text(t.menu.packages)),
-              ],
-            ),
-          ],
-        ),
-        body: Chat(
-          currentUserId: meId,
-          chatController: _controller,
+        appBar: _SaathiAppBar(size: size, onNewChat: _newChat),
+        body: size == WindowSize.expanded
+            ? Row(
+                children: [
+                  Expanded(child: column),
+                  const VerticalDivider(width: 1, color: Palette.line),
+                  SizedBox(width: sidePanelWidth, child: _SidePanel()),
+                ],
+              )
+            : column,
+      ),
+    );
+  }
+
+  Widget _chat(BuildContext context) {
+    final t = context.t;
+    final flagged = context.select((ChatCubit c) => c.state.flagged);
+    final online = context.watch<ConnectivityCubit>().state;
+    return Chat(
+      currentUserId: meId,
+      chatController: _controller,
+      backgroundColor: Palette.paper,
+      resolveUser: (id) async => fc.User(id: id, name: id == saathiId ? t.chat.name : null),
+      onMessageSend: _send,
+      builders: fc.Builders(
+        textMessageBuilder: (context, m, _, {required isSentByMe, groupStatus}) {
+          final status = MessageStatus.values.byName(m.metadata?['status'] as String? ?? 'sent');
+          if (isSentByMe) {
+            return UserBubble(
+              text: m.text,
+              status: status,
+              onRetry: () => unawaited(context.read<ChatCubit>().retry(m.id)),
+            );
+          }
+          return SaathiBubble(
+            child: SaathiText(text: m.text, interrupted: status == MessageStatus.incomplete),
+          );
+        },
+        customMessageBuilder: (context, m, _, {required isSentByMe, groupStatus}) =>
+            _custom(context, m, flagged: flagged),
+        emptyChatListBuilder: (context) => _Welcome(onPick: _send),
+        chatAnimatedListBuilder: (context, itemBuilder) =>
+            ChatAnimatedListReversed(itemBuilder: itemBuilder),
+        composerBuilder: (context) => Composer(
+          hintText: t.chat.inputHint,
+          sendButtonVisibilityMode: SendButtonVisibilityMode.disabled,
+          sendOnEnter: true,
+          maxLines: 5,
           backgroundColor: Palette.paper,
-          resolveUser: (id) async => fc.User(id: id, name: id == saathiId ? t.chat.name : null),
-          onMessageSend: _send,
-          builders: fc.Builders(
-            textMessageBuilder: (context, m, _, {required isSentByMe, groupStatus}) {
-              final status = MessageStatus.values.byName(
-                m.metadata?['status'] as String? ?? 'sent',
-              );
-              if (isSentByMe) {
-                return UserBubble(
-                  text: m.text,
-                  status: status,
-                  onRetry: () => unawaited(context.read<ChatCubit>().retry(m.id)),
-                );
-              }
-              return SaathiBubble(
-                child: SaathiText(text: m.text, interrupted: status == MessageStatus.incomplete),
-              );
-            },
-            customMessageBuilder: (context, m, _, {required isSentByMe, groupStatus}) =>
-                _custom(context, m, flagged: flagged),
-            emptyChatListBuilder: (context) => _Welcome(onPick: _send),
-            chatAnimatedListBuilder: (context, itemBuilder) =>
-                ChatAnimatedListReversed(itemBuilder: itemBuilder),
-            composerBuilder: (context) => Composer(
-              hintText: t.chat.inputHint,
-              sendButtonVisibilityMode: SendButtonVisibilityMode.disabled,
-              sendOnEnter: true,
-              topWidget: !online
-                  ? _Strip(icon: Icons.wifi_off, text: t.offline.banner)
-                  : flagged
-                  ? _Strip(
-                      icon: Icons.pause_circle_outline,
-                      text: t.chat.flaggedNote,
-                      action: (
-                        label: t.chat.newChat,
-                        onTap: () => unawaited(context.read<ChatCubit>().newChat(_locale)),
-                      ),
-                    )
-                  : null,
-            ),
-          ),
+          inputFillColor: Palette.surface,
+          sendIconColor: Palette.lavender,
+          emptyFieldSendIconColor: Palette.inkMuted,
+          hintColor: Palette.inkMuted,
+          textColor: Palette.ink,
+          topWidget: !online
+              ? _Strip(icon: Icons.wifi_off, text: t.offline.banner)
+              : flagged
+              ? _Strip(
+                  icon: Icons.pause_circle_outline,
+                  text: t.chat.flaggedNote,
+                  action: (label: t.chat.newChat, onTap: _newChat),
+                )
+              : null,
         ),
       ),
     );
@@ -219,34 +189,40 @@ class _ChatScreenState extends State<ChatScreen> {
     return switch (card) {
       PackagesCard(:final packages) => SaathiBubble(
         showAvatar: false,
-        child: Column(
+        maxWidth: 700,
+        fullBleedOnCompact: true,
+        child: ResponsiveWrap(
+          minItemWidth: 300,
+          maxColumns: 2,
           children: [
             for (final p in packages)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: PackageCardView(
-                  pkg: p,
-                  allTests: _testsById[p.id] ?? const [],
-                  onBook: flagged
-                      ? null
-                      : () => _send(
-                          t.actions.bookPackage(name: p.name.of(_locale)),
-                          kind: MessageKind.action,
-                        ),
-                ),
+              PackageCardView(
+                pkg: p,
+                allTests: _testsById[p.id] ?? const [],
+                onBook: flagged
+                    ? null
+                    : () => _send(
+                        t.actions.bookPackage(name: p.name.of(_locale)),
+                        kind: MessageKind.action,
+                      ),
               ),
           ],
         ),
       ),
       BookingCardData(:final booking) => SaathiBubble(
         showAvatar: false,
+        maxWidth: 420,
+        fullBleedOnCompact: true,
         child: BookingCardView(
           booking: booking,
-          onViewAll: () => const BookingsRoute().go(context),
+          onViewAll: context.windowSize == WindowSize.expanded
+              ? null
+              : () => const BookingsRoute().go(context),
         ),
       ),
       SlotsCard(:final offer) => SaathiBubble(
         showAvatar: false,
+        fullBleedOnCompact: true,
         child: SlotsCardView(
           offer: offer,
           onPick: flagged
@@ -264,9 +240,181 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
         ),
       ),
-      UrgentCard() => const UrgentCareCard(),
-      CrisisCard() => const CrisisSupportCard(),
+      UrgentCard() => const _SafetyWidth(child: UrgentCareCard()),
+      CrisisCard() => const _SafetyWidth(child: CrisisSupportCard()),
     };
+  }
+}
+
+class _SafetyWidth extends StatelessWidget {
+  const _SafetyWidth({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: AlignmentDirectional.centerStart,
+    child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 640), child: child),
+  );
+}
+
+class _SaathiAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _SaathiAppBar({required this.size, required this.onNewChat});
+
+  final WindowSize size;
+  final VoidCallback onNewChat;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    final compact = size == WindowSize.compact;
+    return AppBar(
+      titleSpacing: compact ? 12 : 20,
+      title: Row(
+        children: [
+          const SaathiAvatar(size: 36),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  t.chat.name,
+                  maxLines: 1,
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
+                ),
+                if (!context.largeText)
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          t.chat.subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12, color: Palette.inkMuted),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const _AiBadge(),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        _LanguageButton(showIcon: !compact),
+        if (size == WindowSize.medium) ...[
+          TextButton.icon(
+            onPressed: () => const BookingsRoute().go(context),
+            icon: const Icon(Icons.event_note_outlined),
+            label: Text(t.menu.bookings),
+          ),
+          TextButton.icon(
+            onPressed: () => const CatalogRoute().go(context),
+            icon: const Icon(Icons.science_outlined),
+            label: Text(t.menu.packages),
+          ),
+        ],
+        if (compact)
+          IconButton(
+            tooltip: t.menu.bookings,
+            onPressed: () => const BookingsRoute().go(context),
+            icon: const Icon(Icons.event_note_outlined),
+          ),
+        if (compact)
+          PopupMenuButton<String>(
+            onSelected: (v) => v == 'new' ? onNewChat() : const CatalogRoute().go(context),
+            itemBuilder: (_) => [
+              PopupMenuItem(value: 'new', child: Text(t.menu.newChat)),
+              PopupMenuItem(value: 'catalog', child: Text(t.menu.packages)),
+            ],
+          )
+        else
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 4, end: 12),
+            child: FilledButton.tonalIcon(
+              onPressed: onNewChat,
+              icon: const Icon(Icons.add_comment_outlined),
+              label: Text(t.menu.newChat),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _AiBadge extends StatelessWidget {
+  const _AiBadge();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+    decoration: BoxDecoration(
+      border: Border.all(color: Palette.lavender),
+      borderRadius: BorderRadius.circular(4),
+    ),
+    child: Text(
+      context.t.chat.aiBadge,
+      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Palette.lavender),
+    ),
+  );
+}
+
+class _LanguageButton extends StatelessWidget {
+  const _LanguageButton({required this.showIcon});
+
+  final bool showIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = Text(context.t.settings.switchTo);
+    void toggle() => unawaited(context.read<LocaleCubit>().toggle());
+    return Tooltip(
+      message: context.t.settings.language,
+      child: showIcon
+          ? TextButton.icon(onPressed: toggle, icon: const Icon(Icons.translate), label: label)
+          : TextButton(onPressed: toggle, child: label),
+    );
+  }
+}
+
+class _SidePanel extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    return ColoredBox(
+      color: Palette.surface,
+      child: DefaultTabController(
+        length: 2,
+        child: Column(
+          children: [
+            TabBar(
+              labelColor: Palette.lavender,
+              indicatorColor: Palette.lavender,
+              unselectedLabelColor: Palette.inkMuted,
+              tabs: [
+                Tab(text: t.menu.bookings),
+                Tab(text: t.menu.packages),
+              ],
+            ),
+            const Expanded(
+              child: TabBarView(
+                children: [
+                  BookingsList(padding: EdgeInsets.all(16)),
+                  CatalogList(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -277,11 +425,12 @@ class _Welcome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = context.t.chat;
+    final t = context.t;
+    final expanded = context.windowSize == WindowSize.expanded;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       children: [
-        SaathiBubble(child: SaathiText(text: t.greeting)),
+        SaathiBubble(child: SaathiText(text: t.chat.greeting)),
         const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsetsDirectional.only(start: 40),
@@ -289,10 +438,23 @@ class _Welcome extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final s in t.suggestions) ActionChip(label: Text(s), onPressed: () => onPick(s)),
+              for (final s in t.chat.suggestions)
+                ActionChip(label: Text(s), onPressed: () => onPick(s)),
             ],
           ),
         ),
+        if (!expanded)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 32, top: 12),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                onPressed: () => const CatalogRoute().go(context),
+                icon: const Icon(Icons.science_outlined, size: 18),
+                label: Text(t.catalog.browse),
+              ),
+            ),
+          ),
       ],
     );
   }

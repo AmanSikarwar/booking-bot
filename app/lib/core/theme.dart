@@ -91,11 +91,21 @@ ThemeData buildTheme() {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
+    inputDecorationTheme: InputDecorationTheme(
+      border: _pill(Palette.line),
+      enabledBorder: _pill(Palette.line),
+      focusedBorder: _pill(Palette.lavender, width: 1.5),
+    ),
     chipTheme: base.chipTheme.copyWith(
       side: const BorderSide(color: Palette.line),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
   );
 }
+
+OutlineInputBorder _pill(Color color, {double width = 1}) => OutlineInputBorder(
+  borderRadius: BorderRadius.circular(24),
+  borderSide: BorderSide(color: color, width: width),
+);
 
 const tabular = [FontFeature.tabularFigures()];

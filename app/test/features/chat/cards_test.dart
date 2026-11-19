@@ -64,7 +64,7 @@ void main() {
     expect(find.bySemanticsLabel('Sample tubes: lavender, grey, urine cup'), findsOneWidget);
     await tester.tap(find.text('Book home collection'));
     expect(booked, isTrue);
-    await tester.tap(find.text('View tests'));
+    await tester.tap(find.bySemanticsLabel(RegExp('^View tests')));
     await tester.pumpAndSettle();
     expect(find.text('Urine Microalbumin'), findsOneWidget);
     semantics.dispose();
