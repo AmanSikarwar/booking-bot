@@ -76,10 +76,6 @@ function weekday(iso: string): string {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" });
 }
 
-function dayMonth(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
-}
-
 function calendar(now: Date): string {
   return bookableDates(now).map((d) => {
     const day = new Date(`${d}T00:00:00Z`).toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" });

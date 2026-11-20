@@ -20,6 +20,11 @@ export interface HistoryTurn {
   text: string;
 }
 
+export interface BookingSafetyMessage {
+  text: string;
+  checks: { outcome: SafetyCheck["outcome"] }[];
+}
+
 export interface BookingRow {
   booking_ref: string;
   user_id: string;
@@ -80,6 +85,7 @@ export interface Store {
   replyEvents(userMessageId: string): Promise<StreamEvent[] | null>;
   history(conversationId: string, excludeId: string, turns: number): Promise<HistoryTurn[]>;
   recentUserTexts(conversationId: string, n: number): Promise<string[]>;
+  bookingSafetyMessages(conversationId: string, n: number): Promise<BookingSafetyMessage[]>;
   findBooking(idempotencyKey: string): Promise<BookingRow | null>;
   insertBooking(b: BookingRow): Promise<BookingRow>;
   logSafety(s: SafetyCheck): Promise<void>;
@@ -185,6 +191,15 @@ export class SupabaseStore implements Store {
         .eq("kind", "text").order("created_at", { ascending: false }).limit(n),
     ) as { content: { text: string } }[];
     return rows.reverse().map((r) => r.content.text);
+  }
+
+  async bookingSafetyMessages(conversationId: string, n: number) {
+    const rows = must(
+      await this.db.from("messages").select("content,safety_checks(outcome)")
+        .eq("conversation_id", conversationId).eq("role", "user").eq("kind", "text")
+        .order("created_at", { ascending: false }).limit(n),
+    ) as { content: { text: string }; safety_checks: BookingSafetyMessage["checks"] }[];
+    return rows.map((row) => ({ text: row.content.text, checks: row.safety_checks }));
   }
 
   async findBooking(idempotencyKey: string) {

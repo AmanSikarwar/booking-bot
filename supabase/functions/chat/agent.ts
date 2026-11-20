@@ -146,7 +146,12 @@ export async function runTurn(
 
   try {
     const hit = deps.detector.detect(input.text);
-    if (hit) {
+    const keywordFloor = async (decider: "decider_unavailable" | "skipped") => {
+      await store.logSafety({ message_id: messageId, keyword_match: hit!.matches, outcome: hit!.outcome });
+      console.warn(`soft keyword match escalated without decider (${decider})`);
+      return await escalate(hit!.outcome, hit!.categories[0]);
+    };
+    if (hit && !hit.soft) {
       await store.logSafety({ message_id: messageId, keyword_match: hit.matches, outcome: hit.outcome });
       return await escalate(hit.outcome, hit.categories[0]);
     }
@@ -155,9 +160,11 @@ export async function runTurn(
     const dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
     const untilReset = Math.ceil((Date.parse(dayStart) + 86_400_000 - now.getTime()) / 1000);
     if (await store.userTurnsSince(input.userId, dayStart) > deps.limits.userTurnsPerDay) {
+      if (hit) return await keywordFloor("decider_unavailable");
       return await fail("user_daily_limit", "daily message limit reached", true, untilReset);
     }
     if (await store.usageCountSince(dayStart) >= deps.limits.globalRequestsPerDay) {
+      if (hit) return await keywordFloor("decider_unavailable");
       return await fail("quota_exhausted", "daily model quota reached", true, untilReset);
     }
 
@@ -177,7 +184,7 @@ export async function runTurn(
         const outcome = escalation(t.probs);
         await store.logSafety({
           message_id: messageId,
-          keyword_match: [],
+          keyword_match: hit?.matches ?? [],
           decider_model: t.model,
           decider_probs: t.probs,
           outcome: outcome ?? "pass",
@@ -197,6 +204,7 @@ export async function runTurn(
           });
         }
         console.warn(`decider unavailable: ${t.reason}`);
+        if (hit) return await keywordFloor("decider_unavailable");
         await store.logSafety({
           message_id: messageId,
           keyword_match: [],
@@ -206,6 +214,7 @@ export async function runTurn(
         });
       }
     } else {
+      if (hit) return await keywordFloor("skipped");
       await store.logSafety({ message_id: messageId, keyword_match: [], outcome: "skipped" });
     }
 
@@ -345,8 +354,11 @@ export async function runTurn(
       record("tool_started", { tool: "book_slot" });
       const a = v.value;
       const fresh = await store.getConversation(conv.id);
-      const texts = await store.recentUserTexts(conv.id, 50);
-      if (fresh?.flagged || texts.some((t) => deps.detector.detect(t))) {
+      const messages = await store.bookingSafetyMessages(conv.id, 50);
+      if (fresh?.flagged || messages.some(({ text, checks }) => {
+        const hit = deps.detector.detect(text);
+        return hit && (!hit.soft || !checks.length || checks.some((check) => check.outcome !== "pass"));
+      })) {
         return { content: { error: "booking_blocked_for_safety", message: "Do not book. Advise urgent care." } };
       }
       const key = await idempotencyKey({

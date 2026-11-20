@@ -418,3 +418,64 @@ Deno.test("the turn sends profile context to the model", async () => {
   );
   assert((chat.requests[0].messages[0] as { content: string }).content.includes("Ramesh Sharma"));
 });
+
+const SOFT = "My father had a heart attack two years ago, which tests should he do yearly?";
+const triage = (emergency: number): Triage | { ok: false; reason: "timeout"; latencyMs: number } =>
+  emergency < 0 ? { ok: false, reason: "timeout", latencyMs: 1500 } : {
+    ok: true,
+    probs: { emergency, mental_health_crisis: 0.01, routine: 0.99 - emergency },
+    model: "mock/decider",
+    latencyMs: 0,
+    inputTokens: 0,
+    outputTokens: 0,
+    costUsd: 0,
+  };
+
+Deno.test("soft keyword match: the decider clears it and the chat continues", async () => {
+  const { deps, store } = setup({ chat: new ScriptedChat([[text("ok")]]), decider: () => triage(0.1) as Triage });
+  const { names } = await turn(deps, input(SOFT));
+  assert(!names.includes("urgent_care"));
+  assertEquals(store.safety.at(-1)!.keyword_match, ["heart attack"]);
+  assertEquals(store.safety.at(-1)!.outcome, "pass");
+  assert(!store.conversations.get("c1")!.flagged);
+});
+
+Deno.test("soft keyword match: the decider can still escalate", async () => {
+  const { deps } = setup({ decider: () => triage(0.7) as Triage });
+  assertEquals((await turn(deps, input(SOFT))).names, ["ack", "urgent_care", "done"]);
+});
+
+Deno.test("booking: a soft match must have a recorded safety pass", async () => {
+  const date = "2026-11-22";
+  const chat = new ScriptedChat([
+    [call("book_slot", bookArgs(date, free(date)))],
+    [text("Booking is paused.")],
+    [text("I can help with test packages.")],
+    [call("book_slot", bookArgs(date, free(date)))],
+    [text("Done.")],
+  ]);
+  const { deps, store } = setup({ chat, decider: () => triage(0.1) as Triage });
+  const soft = input(SOFT);
+  const pending = await beginTurn(deps, soft);
+  assert(pending.kind === "run");
+  assert(!(await turn(deps, input("book the test", { kind: "action" }))).names.includes("booking_confirmed"));
+  assertEquals(store.bookings.length, 0);
+  await runTurn(deps, soft, pending, () => {});
+  assert((await turn(deps, input("book the test", { kind: "action" }))).names.includes("booking_confirmed"));
+});
+
+Deno.test("soft keyword match: escalates when the decider is unavailable, skipped or over quota", async () => {
+  const down = setup({ decider: () => triage(-1) as Triage });
+  assertEquals((await turn(down.deps, input(SOFT))).names, ["ack", "urgent_care", "done"]);
+  const action = setup();
+  assertEquals((await turn(action.deps, input(SOFT, { kind: "action" }))).names, ["ack", "urgent_care", "done"]);
+  const quota = setup({ limits: { globalRequestsPerDay: 0 } });
+  assertEquals((await turn(quota.deps, input(SOFT))).names, ["ack", "urgent_care", "done"]);
+});
+
+Deno.test("hard keyword match never reaches the decider", async () => {
+  let called = false;
+  const { deps } = setup({ decider: () => (called = true, triage(0) as Triage) });
+  await turn(deps, input("I had a heart attack years ago and now I have chest pain again"));
+  assert(!called);
+});

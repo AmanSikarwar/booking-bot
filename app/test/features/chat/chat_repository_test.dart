@@ -61,6 +61,18 @@ void main() {
     expect((await repo.watchConversation(c).first)!.flagged, isFalse);
   });
 
+  test('soft keyword match is queued for the server to triage, with no local card', () async {
+    final c = await repo.newConversation('en');
+    await repo.submit(
+      conversationId: c,
+      text: 'My father had a heart attack two years ago, which tests should he do?',
+      locale: 'en',
+    );
+    final rows = await repo.watchMessages(c).first;
+    expect(rows.single.status, MessageStatus.queued);
+    expect((await repo.watchConversation(c).first)!.flagged, isFalse);
+  });
+
   test('card actions skip the local check', () async {
     final c = await repo.newConversation('en');
     await repo.submit(

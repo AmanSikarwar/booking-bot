@@ -38,5 +38,16 @@
   { "text": "I want a vitamin D test for my mother", "expected": "none" },
   { "text": "Book the thyroid profile for Saturday 7-9 am at Home for Priya", "expected": "none" },
   { "text": "my left arm went numb and I'm sweating a lot", "expected": "none", "note": "Paraphrase: layer 1 misses it by design, layer 2 must catch it" },
-  { "text": "it feels like an elephant is sitting on me", "expected": "none", "note": "Paraphrase for layer 2" }
+  { "text": "it feels like an elephant is sitting on me", "expected": "none", "note": "Paraphrase for layer 2" },
+  { "text": "My father had a heart attack two years ago, which tests should he do yearly?", "expected": "urgent", "soft": true, "note": "History: the decider decides" },
+  { "text": "I get a bit breathless climbing four floors", "expected": "urgent", "soft": true, "note": "Exertion: the decider decides" },
+  { "text": "papa ko 2 saal pehle dil ka daura aaya tha, heart checkup chahiye", "expected": "urgent", "soft": true },
+  { "text": "papa ko 2 saal pehle dil ka daura pada tha", "expected": "urgent", "note": "'daura pad' is also a seizure phrase, which is never softened" },
+  { "text": "सीढ़ियाँ चढ़ते हुए सांस फूल रही है", "expected": "urgent", "soft": true },
+  { "text": "I had a heart attack years ago and now I have chest pain again", "expected": "urgent", "note": "Chest pain is never softened" },
+  { "text": "I get breathless climbing stairs and now I'm breathless at rest too", "expected": "urgent", "note": "Acute word keeps it hard" },
+  { "text": "suddenly breathless after climbing stairs", "expected": "urgent", "note": "Acute word keeps it hard" },
+  { "text": "breathless since last night", "expected": "urgent" },
+  { "text": "I am having a heart attack", "expected": "urgent" },
+  { "text": "I had a heart attack 3 years ago and since this morning my chest feels tight", "expected": "urgent", "note": "Recent-time word keeps it hard" }
 ]

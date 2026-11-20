@@ -13,7 +13,9 @@ void main() {
 
   for (final c in cases) {
     test('red flag: ${c['text']}', () {
-      expect(detector.detect(c['text']! as String)?.outcome.name ?? 'none', c['expected']);
+      final hit = detector.detect(c['text']! as String);
+      expect(hit?.outcome.name ?? 'none', c['expected']);
+      expect(hit?.soft ?? false, c['soft'] ?? false);
     });
   }
 

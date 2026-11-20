@@ -6,7 +6,9 @@ const detector = new RedFlagDetector();
 
 for (const c of cases) {
   Deno.test(`red flag: ${c.text}`, () => {
-    assertEquals(detector.detect(c.text)?.outcome ?? "none", c.expected);
+    const hit = detector.detect(c.text);
+    assertEquals(hit?.outcome ?? "none", c.expected);
+    assertEquals(hit?.soft ?? false, (c as { soft?: boolean }).soft ?? false);
   });
 }
 

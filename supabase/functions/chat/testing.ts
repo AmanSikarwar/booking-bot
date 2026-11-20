@@ -108,6 +108,12 @@ export class MemoryStore implements Store {
         .slice(-n).map((m) => m.text),
     );
   }
+  bookingSafetyMessages(conversationId: string, n: number) {
+    return Promise.resolve(
+      this.messages.filter((m) => m.conversation_id === conversationId && m.role === "user" && m.kind === "text")
+        .slice(-n).map((m) => ({ text: m.text, checks: this.safety.filter((check) => check.message_id === m.id) })),
+    );
+  }
   findBooking(key: string) {
     return Promise.resolve(this.bookings.find((b) => b.idempotency_key === key) ?? null);
   }

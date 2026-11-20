@@ -67,7 +67,7 @@ class ChatRepository {
     );
     await _db.touchConversation(conversationId, display ?? text, now);
     final hit = kind == MessageKind.text ? _detector.detect(text) : null;
-    if (hit != null) {
+    if (hit != null && !hit.soft) {
       final category = hit.categories.first;
       await _db.upsertMessage(
         MessagesCompanion.insert(

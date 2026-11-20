@@ -121,5 +121,19 @@
       ],
       "combos": []
     }
-  ]
+  ],
+  "soften": {
+    "note": "A keyword match is soft (sent to the decider instead of escalating at once) only when every matched phrase is listed in a rule, that rule's context appears, and no acute word does. Crisis phrases and chest pain are never softened.",
+    "acute": ["now", "right now", "suddenly", "since morning", "this morning", "since last night", "last night", "tonight", "since yesterday", "today", "at rest", "abhi", "achanak", "aaj", "अभी", "अचानक", "आज", "severe", "very bad", "bahut tez"],
+    "rules": [
+      {
+        "phrases": ["heart attack", "दिल का दौरा", "dil ka daura"],
+        "context": ["years ago", "year ago", "yrs ago", "months ago", "month ago", "last year", "last month", "in the past", "history of", "died of", "saal pehle", "sal pehle", "mahine pehle", "pichle saal", "pehle hua tha", "साल पहले", "महीने पहले", "पिछले साल"]
+      },
+      {
+        "phrases": ["breathless", "breathlessness", "saans phool rahi", "सांस फूल रही"],
+        "context": ["climbing", "climb", "stairs", "staircase", "floors", "after running", "when running", "while running", "after exercise", "during exercise", "workout", "gym", "jogging", "seedhi", "seedhiyan", "सीढ़ी", "सीढ़ियां", "सीढ़ियाँ", "years ago", "year ago", "yrs ago", "months ago", "month ago", "last year", "last month", "in the past", "history of", "died of", "saal pehle", "sal pehle", "mahine pehle", "pichle saal", "pehle hua tha", "साल पहले", "महीने पहले", "पिछले साल"]
+      }
+    ]
+  }
 }
