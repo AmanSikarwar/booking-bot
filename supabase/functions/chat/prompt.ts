@@ -77,10 +77,8 @@ function weekday(iso: string): string {
 }
 
 function calendar(now: Date): string {
-  return bookableDates(now).map((d) => {
-    const day = new Date(`${d}T00:00:00Z`).toLocaleDateString("en-IN", { weekday: "long", timeZone: "UTC" });
-    return `${day} ${d}`;
-  }).join(", ");
+  return bookableDates(now).map((d, i) => `${["today ", "tomorrow ", ""][Math.min(i, 2)]}${weekday(d)} ${d}`)
+    .join(", ");
 }
 
 export interface AgentProfile {

@@ -568,3 +568,8 @@ Deno.test("text from separate model rounds is separated, not run together", asyn
   const reply = events.filter((e) => e.event === "text_delta").map((e) => e.data.text).join("");
   assertEquals(reply, "Let me check.\n\nHere are two options.");
 });
+
+Deno.test("calendar marks which bookable dates are today and tomorrow", () => {
+  const prompt = systemPrompt("en", NOW, false);
+  assert(prompt.includes("today Friday 2026-11-20, tomorrow Saturday 2026-11-21, Sunday 2026-11-22"));
+});
