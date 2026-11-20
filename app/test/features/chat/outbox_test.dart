@@ -179,6 +179,19 @@ void main() {
     expect([m.status, m.attempts], [MessageStatus.failed, 5]);
   });
 
+  test('HTTP 429 respects Retry-After without burning an attempt', () async {
+    await queue('m1', 'sugar');
+    reply(
+      const [],
+      error: const ChatApiException(429, 'rate_limited', retryable: true, retryAfter: 37),
+    );
+    await outbox.drainOnce();
+    final m = await msg('m1');
+    expect([m.status, m.attempts, m.error], [MessageStatus.queued, 0, 'rate_limited']);
+    expect(m.nextAttemptAt, clock.now().add(const Duration(seconds: 37)));
+    expect(await outbox.drainOnce(), isFalse);
+  });
+
   test('backoff caps at 60 seconds', () {
     expect(outbox.backoff(10).inSeconds, 60);
   });

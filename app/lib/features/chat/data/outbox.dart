@@ -179,6 +179,10 @@ class Outbox {
     if (e.status == 409) {
       return _waitWithoutAttempt(m, e.code, const Duration(seconds: 3));
     }
+    final retryAfter = e.retryAfter;
+    if (e.status == 429 && retryAfter != null) {
+      return _waitWithoutAttempt(m, e.code, Duration(seconds: retryAfter));
+    }
     return e.retryable ? _retryLater(m, e.code) : _fail(m, e.code);
   }
 

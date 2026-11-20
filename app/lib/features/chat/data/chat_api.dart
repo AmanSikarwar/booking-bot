@@ -40,11 +40,12 @@ class ChatRequest {
 }
 
 class ChatApiException implements Exception {
-  const ChatApiException(this.status, this.code, {this.retryable = false});
+  const ChatApiException(this.status, this.code, {this.retryable = false, this.retryAfter});
 
   final int status;
   final String code;
   final bool retryable;
+  final int? retryAfter;
 
   @override
   String toString() => 'ChatApiException($status, $code)';
@@ -77,7 +78,13 @@ class ChatApi {
       } on FormatException {
         // non-JSON error body from a proxy
       }
-      throw ChatApiException(res.statusCode, code, retryable: retryable);
+      final retryAfter = int.tryParse(res.headers['retry-after'] ?? '');
+      throw ChatApiException(
+        res.statusCode,
+        code,
+        retryable: retryable,
+        retryAfter: retryAfter != null && retryAfter > 0 ? retryAfter : null,
+      );
     }
     await for (final m in parseSse(res.stream.timeout(idleTimeout))) {
       yield ChatEvent.parse(m.event, m.data);
