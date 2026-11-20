@@ -9,6 +9,7 @@ import '../../../core/connectivity/connectivity_cubit.dart';
 import '../../../core/db/database.dart';
 import '../../../core/di.dart';
 import '../../../core/layout.dart';
+import '../../../core/motion.dart';
 import '../../../core/router.dart';
 import '../../../core/theme.dart';
 import '../../../i18n/strings.g.dart';
@@ -128,14 +129,16 @@ class _ChatScreenState extends State<ChatScreen> {
               status: status,
               isAction: m.metadata?['kind'] == 'action',
               onRetry: () => unawaited(context.read<ChatCubit>().retry(m.id)),
-            );
+            ).enterOnce(context, m.id);
           }
           return SaathiBubble(
             child: SaathiText(text: m.text, interrupted: status == MessageStatus.incomplete),
-          );
+          ).enterOnce(context, m.id);
         },
         customMessageBuilder: (context, m, _, {required isSentByMe, groupStatus}) =>
-            _custom(context, m, flagged: flagged),
+            (m.metadata?['card'] as Map<String, Object?>?)?['type'] == 'packages'
+            ? _custom(context, m, flagged: flagged)
+            : _custom(context, m, flagged: flagged).enterOnce(context, m.id),
         emptyChatListBuilder: (context) => const _Welcome(),
         chatAnimatedListBuilder: (context, itemBuilder) =>
             ChatAnimatedListReversed(itemBuilder: itemBuilder),
@@ -175,17 +178,26 @@ class _ChatScreenState extends State<ChatScreen> {
     required List<Suggestion> suggestions,
   }) {
     final strip = !online
-        ? _Strip(icon: Icons.wifi_off, text: t.offline.banner)
+        ? _Strip(
+            key: const ValueKey('offline'),
+            icon: Icons.wifi_off,
+            text: t.offline.banner,
+          ).enter(context, rise: 12)
         : flagged
         ? _Strip(
+            key: const ValueKey('flagged'),
             icon: Icons.pause_circle_outline,
             text: t.chat.flaggedNote,
             action: (label: t.chat.newChat, onTap: _newChat),
-          )
+          ).enter(context, rise: 12)
         : null;
     final bar = suggestions.isEmpty
         ? null
-        : SuggestionBar(items: suggestions, onTap: _onSuggestion);
+        : SuggestionBar(
+            key: ValueKey(suggestions.map((s) => s.label).join('|')),
+            items: suggestions,
+            onTap: _onSuggestion,
+          );
     if (strip == null) return bar;
     if (bar == null) return strip;
     return Column(mainAxisSize: MainAxisSize.min, children: [strip, bar]);
@@ -223,6 +235,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ChatCard.fromJson(meta['card'] as Map<String, Object?>),
         flagged,
         meta,
+        m.id,
       ),
       _ => const SizedBox.shrink(),
     };
@@ -242,7 +255,13 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _card(BuildContext context, ChatCard card, bool flagged, Map<String, Object?> meta) {
+  Widget _card(
+    BuildContext context,
+    ChatCard card,
+    bool flagged,
+    Map<String, Object?> meta,
+    String itemId,
+  ) {
     final t = context.t;
     return switch (card) {
       PackagesCard(:final packages) => SaathiBubble(
@@ -259,7 +278,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 details: _byId[p.id],
                 topMatch: i == 0 && packages.length > 1,
                 onBook: flagged ? null : () => _openForm(p.id, p.name),
-              ),
+              ).enterOnce(context, '$itemId/$i', delay: Motion.stagger * i),
           ],
         ),
       ),
@@ -516,7 +535,7 @@ class SuggestionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chips = [
+    final chips = staggered(context, [
       for (final s in items)
         ConstrainedBox(
           constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.8),
@@ -527,7 +546,7 @@ class SuggestionBar extends StatelessWidget {
             onPressed: () => onTap(s),
           ),
         ),
-    ];
+    ]);
     const padding = EdgeInsets.fromLTRB(16, 6, 16, 2);
     return Semantics(
       container: true,
@@ -564,7 +583,7 @@ class _Welcome extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       children: [
-        SaathiBubble(child: SaathiText(text: t.chat.greeting)),
+        SaathiBubble(child: SaathiText(text: t.chat.greeting)).enter(context),
         if (showBrowse)
           Padding(
             padding: const EdgeInsetsDirectional.only(start: 32, top: 12),
@@ -583,7 +602,7 @@ class _Welcome extends StatelessWidget {
 }
 
 class _Strip extends StatelessWidget {
-  const _Strip({required this.icon, required this.text, this.action});
+  const _Strip({super.key, required this.icon, required this.text, this.action});
 
   final IconData icon;
   final String text;

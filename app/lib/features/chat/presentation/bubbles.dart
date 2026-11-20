@@ -1,7 +1,9 @@
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/db/database.dart';
 import '../../../core/layout.dart';
+import '../../../core/motion.dart';
 import '../../../core/theme.dart';
 import '../../../i18n/strings.g.dart';
 
@@ -243,7 +245,12 @@ class ActivityChip extends StatelessWidget {
               child: CircularProgressIndicator(strokeWidth: 2, color: Palette.lavender),
             ),
             const SizedBox(width: 8),
-            Text(label, style: const TextStyle(fontSize: 13, color: Palette.lavender)),
+            Flexible(
+              child: _shimmer(
+                context,
+                Text(label, style: const TextStyle(fontSize: 13, color: Palette.lavender)),
+              ),
+            ),
           ],
         ),
       ),
@@ -282,3 +289,9 @@ class NoticeBubble extends StatelessWidget {
     );
   }
 }
+
+Widget _shimmer(BuildContext context, Widget child) => Motion.on(context)
+    ? child
+          .animate(onPlay: (c) => c.repeat())
+          .shimmer(duration: 1600.ms, color: Colors.white.withAlpha(200))
+    : child;

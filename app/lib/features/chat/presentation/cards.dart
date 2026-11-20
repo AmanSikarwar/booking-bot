@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/motion.dart';
 import '../../../core/theme.dart';
 import '../../../i18n/strings.g.dart';
 import '../domain/models.dart';
@@ -69,7 +70,11 @@ class BookingCardView extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.check_circle, color: Palette.success, size: 20),
+                        const Icon(
+                          Icons.check_circle,
+                          color: Palette.success,
+                          size: 20,
+                        ).pop(context),
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(

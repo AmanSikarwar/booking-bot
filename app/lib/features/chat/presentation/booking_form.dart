@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/motion.dart';
 import '../../../core/theme.dart';
 import '../../../i18n/strings.g.dart';
 import '../domain/models.dart';
@@ -124,7 +125,25 @@ class _BookingFormViewState extends State<BookingFormView> {
               ),
             ),
           const SizedBox(height: 12),
-          if (submitted != null) _Summary(request: submitted) else ..._fields(context),
+          AnimatedSwitcher(
+            duration: Motion.on(context) ? Motion.normal : Duration.zero,
+            switchInCurve: Motion.curve,
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: SizeTransition(
+                sizeFactor: animation,
+                alignment: AlignmentDirectional.topStart,
+                child: child,
+              ),
+            ),
+            child: submitted != null
+                ? _Summary(key: const ValueKey('summary'), request: submitted)
+                : Column(
+                    key: const ValueKey('fields'),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _fields(context),
+                  ),
+          ),
         ],
       ),
     );
@@ -283,7 +302,7 @@ class _Label extends StatelessWidget {
 }
 
 class _Summary extends StatelessWidget {
-  const _Summary({required this.request});
+  const _Summary({super.key, required this.request});
 
   final SlotRequest request;
 

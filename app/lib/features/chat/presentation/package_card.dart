@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../../core/layout.dart';
+import '../../../core/motion.dart';
 import '../../../core/theme.dart';
 import '../../../i18n/strings.g.dart';
 import '../../catalog/package.dart';
@@ -268,7 +269,7 @@ class PackageDetailsView extends StatelessWidget {
             controller: controller,
             shrinkWrap: true,
             padding: EdgeInsets.fromLTRB(20, showClose ? 20 : 0, 20, 20),
-            children: [
+            children: staggered(context, interval: const Duration(milliseconds: 25), [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -341,7 +342,7 @@ class PackageDetailsView extends StatelessWidget {
                   ],
                 ),
               ),
-            ],
+            ]),
           ),
         ),
         if (onBook != null)

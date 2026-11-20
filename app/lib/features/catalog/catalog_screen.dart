@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
@@ -7,6 +8,7 @@ import '../../core/app_shell.dart';
 
 import '../../core/di.dart';
 import '../../core/layout.dart';
+import '../../core/motion.dart';
 import '../../core/router.dart';
 import '../../i18n/strings.g.dart';
 import '../chat/domain/models.dart';
@@ -128,9 +130,10 @@ class _CatalogListState extends State<CatalogList> {
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: widget.maxWidth),
                   child: ResponsiveWrap(
+                    key: ValueKey('$_category|$_query'),
                     minItemWidth: 320,
                     children: [
-                      for (final p in shown)
+                      for (final (i, p) in shown.indexed)
                         PackageCardView(
                           details: p,
                           pkg: PackageSummary(
@@ -159,7 +162,7 @@ class _CatalogListState extends State<CatalogList> {
                                   );
                                   widget.onBooked?.call();
                                 },
-                        ),
+                        ).enter(context, delay: Motion.stagger * min(i, 8)),
                     ],
                   ),
                 ),

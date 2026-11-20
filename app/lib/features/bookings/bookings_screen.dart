@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -6,6 +8,7 @@ import '../../core/app_shell.dart';
 import '../../core/db/database.dart';
 import '../../core/di.dart';
 import '../../core/layout.dart';
+import '../../core/motion.dart';
 import '../../core/theme.dart';
 import '../../i18n/strings.g.dart';
 import '../catalog/package.dart';
@@ -70,7 +73,7 @@ class BookingsList extends StatelessWidget {
                 child: ResponsiveWrap(
                   minItemWidth: 320,
                   children: [
-                    for (final b in bookings)
+                    for (final (i, b) in bookings.indexed)
                       BookingCardView(
                         onViewAll: null,
                         booking: BookingInfo(
@@ -84,7 +87,7 @@ class BookingsList extends StatelessWidget {
                           status: b.status,
                           fastingHours: fasting[b.packageId] ?? 0,
                         ),
-                      ),
+                      ).enter(context, delay: Motion.stagger * min(i, 8)),
                   ],
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -9,6 +10,7 @@ import '../../core/app_shell.dart';
 
 import '../../core/db/database.dart';
 import '../../core/di.dart';
+import '../../core/motion.dart';
 import '../../core/router.dart';
 import '../../core/theme.dart';
 import '../../i18n/strings.g.dart';
@@ -93,7 +95,7 @@ class HistoryList extends StatelessWidget {
                     unawaited(context.read<ChatCubit>().openConversation(chats[i].id));
                     onOpened?.call();
                   },
-                ),
+                ).enterOnce(context, 'history/${chats[i].id}', delay: Motion.stagger * min(i, 8)),
               ),
             ),
           );

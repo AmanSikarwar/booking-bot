@@ -6,6 +6,7 @@ import '../features/catalog/catalog_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/history/history.dart';
 import 'app_shell.dart';
+import 'motion.dart';
 
 part 'router.g.dart';
 
@@ -30,7 +31,7 @@ class ChatRoute extends GoRouteData with $ChatRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      const NoTransitionPage(child: ChatScreen());
+      _fade(context, state, const ChatScreen());
 }
 
 class HistoryRoute extends GoRouteData with $HistoryRoute {
@@ -38,7 +39,7 @@ class HistoryRoute extends GoRouteData with $HistoryRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      const NoTransitionPage(child: HistoryScreen());
+      _fade(context, state, const HistoryScreen());
 }
 
 class BookingsRoute extends GoRouteData with $BookingsRoute {
@@ -46,7 +47,7 @@ class BookingsRoute extends GoRouteData with $BookingsRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      const NoTransitionPage(child: BookingsScreen());
+      _fade(context, state, const BookingsScreen());
 }
 
 class CatalogRoute extends GoRouteData with $CatalogRoute {
@@ -54,7 +55,20 @@ class CatalogRoute extends GoRouteData with $CatalogRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      const NoTransitionPage(child: CatalogScreen());
+      _fade(context, state, const CatalogScreen());
 }
+
+Page<void> _fade(BuildContext context, GoRouterState state, Widget child) => Motion.on(context)
+    ? CustomTransitionPage<void>(
+        key: state.pageKey,
+        child: child,
+        transitionDuration: Motion.fast,
+        reverseTransitionDuration: Motion.fast,
+        transitionsBuilder: (_, animation, _, child) => FadeTransition(
+          opacity: CurveTween(curve: Motion.curve).animate(animation),
+          child: child,
+        ),
+      )
+    : NoTransitionPage<void>(key: state.pageKey, child: child);
 
 final router = GoRouter(routes: $appRoutes);
