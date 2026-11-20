@@ -6,36 +6,58 @@ part of 'router.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [$chatRoute];
+List<RouteBase> get $appRoutes => [$appShellRoute];
 
-RouteBase get $chatRoute => GoRouteData.$route(
-  path: '/',
-  hasOverriddenOnExit: false,
-  factory: $ChatRoute._fromState,
+RouteBase get $appShellRoute => ShellRouteData.$route(
+  factory: $AppShellRouteExtension._fromState,
   routes: [
+    GoRouteData.$route(path: '/', hasOverriddenOnExit: false, factory: $ChatRoute._fromState),
     GoRouteData.$route(
-      path: 'bookings',
+      path: '/history',
+      hasOverriddenOnExit: false,
+      factory: $HistoryRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: '/bookings',
       hasOverriddenOnExit: false,
       factory: $BookingsRoute._fromState,
     ),
     GoRouteData.$route(
-      path: 'packages',
+      path: '/packages',
       hasOverriddenOnExit: false,
       factory: $CatalogRoute._fromState,
     ),
-    GoRouteData.$route(
-      path: 'chats',
-      hasOverriddenOnExit: false,
-      factory: $HistoryRoute._fromState,
-    ),
   ],
 );
+
+extension $AppShellRouteExtension on AppShellRoute {
+  static AppShellRoute _fromState(GoRouterState state) => const AppShellRoute();
+}
 
 mixin $ChatRoute on GoRouteData {
   static ChatRoute _fromState(GoRouterState state) => const ChatRoute();
 
   @override
   String get location => GoRouteData.$location('/');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) => context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $HistoryRoute on GoRouteData {
+  static HistoryRoute _fromState(GoRouterState state) => const HistoryRoute();
+
+  @override
+  String get location => GoRouteData.$location('/history');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -74,25 +96,6 @@ mixin $CatalogRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/packages');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) => context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $HistoryRoute on GoRouteData {
-  static HistoryRoute _fromState(GoRouterState state) => const HistoryRoute();
-
-  @override
-  String get location => GoRouteData.$location('/chats');
 
   @override
   void go(BuildContext context) => context.go(location);

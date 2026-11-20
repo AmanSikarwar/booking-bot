@@ -71,6 +71,7 @@ class TranslationsHi extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$form$hi form = _Translations$form$hi._(_root);
 	@override late final _Translations$followUps$hi followUps = _Translations$followUps$hi._(_root);
 	@override late final _Translations$history$hi history = _Translations$history$hi._(_root);
+	@override late final _Translations$nav$hi nav = _Translations$nav$hi._(_root);
 }
 
 // Path: chat
@@ -286,7 +287,7 @@ class _Translations$menu$hi extends Translations$menu$en {
 	@override String get newChat => 'नई चैट';
 	@override String get packages => 'सभी पैकेज';
 	@override String get bookings => 'मेरी बुकिंग';
-	@override String get history => 'चैट';
+	@override String get history => 'इतिहास';
 }
 
 // Path: form
@@ -348,12 +349,26 @@ class _Translations$history$hi extends Translations$history$en {
 	final TranslationsHi _root; // ignore: unused_field
 
 	// Translations
-	@override String get title => 'चैट';
+	@override String get title => 'इतिहास';
 	@override String get empty => 'साथी के साथ आपकी चैट यहाँ दिखेंगी।';
 	@override String get current => 'अभी की';
 	@override String get paused => 'बुकिंग रुकी है';
 	@override String today({required Object time}) => 'आज, ${time}';
 	@override String get yesterday => 'कल';
+}
+
+// Path: nav
+class _Translations$nav$hi extends Translations$nav$en {
+	_Translations$nav$hi._(TranslationsHi root) : this._root = root, super.internal(root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get chat => 'चैट';
+	@override String get history => 'इतिहास';
+	@override String get bookings => 'बुकिंग';
+	@override String get packages => 'पैकेज';
+	@override String get back => 'चैट पर वापस';
 }
 
 /// The flat map containing all translations for locale <hi>.
@@ -451,7 +466,7 @@ extension on TranslationsHi {
 			'menu.newChat' => 'नई चैट',
 			'menu.packages' => 'सभी पैकेज',
 			'menu.bookings' => 'मेरी बुकिंग',
-			'menu.history' => 'चैट',
+			'menu.history' => 'इतिहास',
 			'form.title' => 'घर से सैंपल बुक करें',
 			'form.date' => 'तारीख़',
 			'form.time' => 'समय',
@@ -486,12 +501,17 @@ extension on TranslationsHi {
 			'followUps.suggestText' => 'रूटीन चेकअप के लिए आप कौन से टेस्ट सुझाएँगे?',
 			'followUps.fullBody' => 'फुल बॉडी चेकअप',
 			'followUps.browse' => 'सभी पैकेज देखें',
-			'history.title' => 'चैट',
+			'history.title' => 'इतिहास',
 			'history.empty' => 'साथी के साथ आपकी चैट यहाँ दिखेंगी।',
 			'history.current' => 'अभी की',
 			'history.paused' => 'बुकिंग रुकी है',
 			'history.today' => ({required Object time}) => 'आज, ${time}',
 			'history.yesterday' => 'कल',
+			'nav.chat' => 'चैट',
+			'nav.history' => 'इतिहास',
+			'nav.bookings' => 'बुकिंग',
+			'nav.packages' => 'पैकेज',
+			'nav.back' => 'चैट पर वापस',
 			_ => null,
 		};
 	}

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../core/app_shell.dart';
+
 import '../../core/di.dart';
 import '../../core/layout.dart';
 import '../../core/router.dart';
@@ -19,7 +21,11 @@ class CatalogScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.t.catalog.title)),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: backToChat(context),
+        title: Text(context.t.catalog.title),
+      ),
       body: CatalogList(maxWidth: 1100, onBooked: () => const ChatRoute().go(context)),
     );
   }

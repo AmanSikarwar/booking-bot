@@ -414,22 +414,9 @@ class SaathiAppBar extends StatelessWidget implements PreferredSizeWidget {
                 : IconButton(tooltip: label, onPressed: go, icon: Icon(icon)),
         if (compact)
           IconButton(
-            tooltip: t.menu.bookings,
-            onPressed: () => const BookingsRoute().go(context),
-            icon: const Icon(Icons.event_note_outlined),
-          ),
-        if (compact)
-          PopupMenuButton<String>(
-            onSelected: (v) => switch (v) {
-              'new' => onNewChat(),
-              'history' => const HistoryRoute().go(context),
-              _ => const CatalogRoute().go(context),
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem(value: 'new', child: Text(t.menu.newChat)),
-              PopupMenuItem(value: 'history', child: Text(t.menu.history)),
-              PopupMenuItem(value: 'catalog', child: Text(t.menu.packages)),
-            ],
+            tooltip: t.menu.newChat,
+            onPressed: onNewChat,
+            icon: const Icon(Icons.add_comment_outlined),
           )
         else
           Padding(
@@ -574,12 +561,12 @@ class _Welcome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.t;
-    final expanded = context.windowSize == WindowSize.expanded;
+    final showBrowse = context.windowSize == WindowSize.medium;
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       children: [
         SaathiBubble(child: SaathiText(text: t.chat.greeting)),
-        if (!expanded)
+        if (showBrowse)
           Padding(
             padding: const EdgeInsetsDirectional.only(start: 32, top: 12),
             child: Align(

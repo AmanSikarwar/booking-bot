@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../core/app_shell.dart';
+
 import '../../core/db/database.dart';
 import '../../core/di.dart';
 import '../../core/layout.dart';
@@ -17,7 +19,11 @@ class BookingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.t.bookings.title)),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: backToChat(context),
+        title: Text(context.t.bookings.title),
+      ),
       body: const BookingsList(padding: EdgeInsets.all(16), maxWidth: 1100),
     );
   }

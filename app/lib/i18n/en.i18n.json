@@ -122,7 +122,7 @@
     "newChat": "New chat",
     "packages": "All packages",
     "bookings": "My bookings",
-    "history": "Chats"
+    "history": "History"
   },
   "form": {
     "title": "Book home collection",
@@ -163,11 +163,18 @@
     "browse": "Browse all packages"
   },
   "history": {
-    "title": "Chats",
+    "title": "History",
     "empty": "Your chats with Saathi will appear here.",
     "current": "Current",
     "paused": "Booking paused",
     "today": "Today, {time}",
     "yesterday": "Yesterday"
+  },
+  "nav": {
+    "chat": "Chat",
+    "history": "History",
+    "bookings": "Bookings",
+    "packages": "Packages",
+    "back": "Back to chat"
   }
 }

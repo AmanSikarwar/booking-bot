@@ -76,6 +76,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$form$en form = Translations$form$en.internal(_root);
 	late final Translations$followUps$en followUps = Translations$followUps$en.internal(_root);
 	late final Translations$history$en history = Translations$history$en.internal(_root);
+	late final Translations$nav$en nav = Translations$nav$en.internal(_root);
 }
 
 // Path: chat
@@ -435,8 +436,8 @@ class Translations$menu$en {
 	/// en: 'My bookings'
 	String get bookings => 'My bookings';
 
-	/// en: 'Chats'
-	String get history => 'Chats';
+	/// en: 'History'
+	String get history => 'History';
 }
 
 // Path: form
@@ -567,8 +568,8 @@ class Translations$history$en {
 
 	// Translations
 
-	/// en: 'Chats'
-	String get title => 'Chats';
+	/// en: 'History'
+	String get title => 'History';
 
 	/// en: 'Your chats with Saathi will appear here.'
 	String get empty => 'Your chats with Saathi will appear here.';
@@ -584,6 +585,30 @@ class Translations$history$en {
 
 	/// en: 'Yesterday'
 	String get yesterday => 'Yesterday';
+}
+
+// Path: nav
+class Translations$nav$en {
+	Translations$nav$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Chat'
+	String get chat => 'Chat';
+
+	/// en: 'History'
+	String get history => 'History';
+
+	/// en: 'Bookings'
+	String get bookings => 'Bookings';
+
+	/// en: 'Packages'
+	String get packages => 'Packages';
+
+	/// en: 'Back to chat'
+	String get back => 'Back to chat';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -681,7 +706,7 @@ extension on Translations {
 			'menu.newChat' => 'New chat',
 			'menu.packages' => 'All packages',
 			'menu.bookings' => 'My bookings',
-			'menu.history' => 'Chats',
+			'menu.history' => 'History',
 			'form.title' => 'Book home collection',
 			'form.date' => 'Date',
 			'form.time' => 'Time window',
@@ -716,12 +741,17 @@ extension on Translations {
 			'followUps.suggestText' => 'Which tests would you suggest for a routine checkup?',
 			'followUps.fullBody' => 'Full body checkup',
 			'followUps.browse' => 'Browse all packages',
-			'history.title' => 'Chats',
+			'history.title' => 'History',
 			'history.empty' => 'Your chats with Saathi will appear here.',
 			'history.current' => 'Current',
 			'history.paused' => 'Booking paused',
 			'history.today' => ({required Object time}) => 'Today, ${time}',
 			'history.yesterday' => 'Yesterday',
+			'nav.chat' => 'Chat',
+			'nav.history' => 'History',
+			'nav.bookings' => 'Bookings',
+			'nav.packages' => 'Packages',
+			'nav.back' => 'Back to chat',
 			_ => null,
 		};
 	}

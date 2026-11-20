@@ -5,6 +5,8 @@ import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../core/app_shell.dart';
+
 import '../../core/db/database.dart';
 import '../../core/di.dart';
 import '../../core/router.dart';
@@ -34,7 +36,11 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.t.history.title)),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: backToChat(context),
+        title: Text(context.t.history.title),
+      ),
       body: HistoryList(onOpened: () => const ChatRoute().go(context)),
     );
   }
