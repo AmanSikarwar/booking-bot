@@ -355,7 +355,10 @@ Deno.test("show_booking_form emits a pre-filled form with only open slots", asyn
   ]);
   const { deps } = setup({ chat });
   const { events } = await turn(deps, input("book the thyroid test for Priya on Sunday morning"));
-  const form = events.find((e) => e.event === "booking_form")!;
+  const formIndex = events.findIndex((e) => e.event === "booking_form");
+  assert(formIndex > 0);
+  assertEquals(events[formIndex - 1], { event: "tool_started", data: { tool: "show_booking_form" } });
+  const form = events[formIndex];
   const prefill = form.data.prefill as Record<string, unknown>;
   assertEquals([prefill.patient_name, prefill.date, prefill.time_window], ["Priya", "2026-11-22", "07-09"]);
   const availability = form.data.availability as Record<string, string[]>;

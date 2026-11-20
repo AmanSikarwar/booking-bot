@@ -330,6 +330,7 @@ export async function runTurn(
           },
         };
       }
+      record("tool_started", { tool: "show_booking_form" });
       const f = v.value;
       const pkg = catalog.byId(f.package_id)!;
       const now = deps.now();
