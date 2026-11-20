@@ -226,6 +226,23 @@ void main() {
     expect([m.status, m.attempts], [MessageStatus.failed, 5]);
   });
 
+  test('a rate limit inside the stream waits retry_after without burning an attempt', () async {
+    await queue('m1', 'sugar');
+    reply([
+      const ChatEvent.ack(replay: false),
+      const ChatEvent.error(code: 'rate_limited', retryable: true, retryAfter: 20),
+      const ChatEvent.done(),
+    ]);
+    for (var i = 0; i < 6; i++) {
+      final before = await msg('m1');
+      if (before.nextAttemptAt != null) clock.current = before.nextAttemptAt!;
+      await outbox.drainOnce();
+    }
+    final m = await msg('m1');
+    expect([m.status, m.attempts, m.error], [MessageStatus.queued, 0, 'rate_limited']);
+    expect(m.nextAttemptAt!.difference(clock.now()), const Duration(seconds: 20));
+  });
+
   test('HTTP 429 respects Retry-After without burning an attempt', () async {
     await queue('m1', 'sugar');
     reply(

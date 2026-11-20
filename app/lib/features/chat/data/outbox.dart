@@ -163,6 +163,10 @@ class Outbox {
       if (_quotaCodes.contains(error.code)) {
         return _waitWithoutAttempt(m, error.code, Duration(seconds: error.retryAfter ?? 3600));
       }
+      final retryAfter = error.retryAfter;
+      if (error.retryable && retryAfter != null && retryAfter > 0) {
+        return _waitWithoutAttempt(m, error.code, Duration(seconds: retryAfter));
+      }
       return error.retryable ? _retryLater(m, error.code) : _fail(m, error.code);
     }
     if (!done) {
