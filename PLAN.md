@@ -39,7 +39,8 @@ Today, users have to browse long test lists they don't understand, or call the l
 2. **Symptom to package (no diagnosis):** "I feel tired and my hair is falling" → Saathi says these tests are *commonly ordered* in such cases, shows cards, and suggests consulting a doctor to interpret results.
 3. **Red flag:** "I have chest pain and can't breathe properly", or a paraphrase such as "my left arm went numb and I'm sweating a lot" → **urgent-care card** (call 112 / 108), with no packages and no booking.
 4. **Offline:** the user opens the app on a train with no signal → sees past chats and bookings → types a message → it is marked *Queued* → it sends automatically when the network returns, and the reply streams in.
-5. **Language switch:** the user toggles to Hindi → UI strings, package names and Saathi's replies all switch to Hindi.
+5. **Back to an earlier chat:** the user opens *Chats* (side panel on desktop, header on tablets, menu on phones) → past conversations, newest first, titled by their first message, with paused chats marked → tap one to continue it, offline too.
+6. **Language switch:** the user toggles to Hindi → UI strings, package names and Saathi's replies all switch to Hindi.
 
 ---
 
@@ -239,7 +240,19 @@ These messages are written once, reviewed, and shown exactly as written: in Saat
 | Quota exhausted | I'm taking a short break and will be back at 5:30 am. You can still browse all packages meanwhile. | मैं थोड़ी देर के लिए रुका हूँ, सुबह 5:30 बजे वापस आऊँगा। तब तक आप सभी पैकेज देख सकते हैं। |
 | Error, retrying | That didn't go through. Trying again… | यह नहीं पहुँचा। फिर से कोशिश कर रहा हूँ… |
 
-#### Responsive layout
+#### Suggestions
+
+Suggestion chips sit just above the message box (a scrolling row on phones, wrapped on wider screens). They are chosen on the device from what Saathi just showed, so they cost nothing, work offline and never come from model text:
+
+| Saathi's last reply | Suggestions |
+|---|---|
+| Empty chat | Four starters ("Check my thyroid", "Sugar test for Papa", …) |
+| Package cards | *Book {top package}* (opens the booking form), *Something cheaper*, *No fasting needed* |
+| Booking confirmed | *Book another test*, *My bookings*, *How do I prepare?* |
+| Full slot | *Try another day* |
+| Plain text | *Suggest tests for me*, *Full body checkup*, *Browse all packages* |
+| Open booking form, safety card, flagged chat, or a reply still pending | none |
+
 
 | Window | Layout |
 |---|---|
@@ -528,7 +541,7 @@ The catalogue also carries a version number, so the app knows when its bundled c
 
 | Table | Key columns |
 |---|---|
-| conversations | id, title, locale, flagged, created_at, updated_at |
+| conversations | id, title (first user message, back-filled by the v3 migration), locale, flagged, created_at, updated_at (bumped on every message; orders the history) |
 | messages | id (same as client_message_id for user messages), conversation_id, role, kind (text or action), text, card type (packages, booking, slot alternatives, urgent, crisis, or none), card payload (JSON), status (queued, sending, streaming, sent, failed, incomplete), attempts, next attempt time, error, created_at |
 | bookings | id, booking_ref, conversation_id, package_id, English and Hindi package names, slot_date, time_window, address_label, patient_name, status, created_at |
 | app_meta | Key/value settings: locale, catalogue version |
