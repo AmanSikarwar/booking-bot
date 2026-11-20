@@ -101,7 +101,7 @@ class PackageCardView extends StatelessWidget {
       color: Palette.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: topMatch ? Palette.lavender.withAlpha(110) : Palette.line),
+        side: BorderSide(color: topMatch ? Palette.teal.withAlpha(110) : Palette.line),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -149,10 +149,10 @@ class PackageCardView extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Palette.lavender,
+                        color: Palette.teal,
                       ),
                     ),
-                    const Icon(Icons.chevron_right, size: 18, color: Palette.lavender),
+                    const Icon(Icons.chevron_right, size: 18, color: Palette.teal),
                   ],
                 ),
                 if (onBook != null) ...[
@@ -393,12 +393,8 @@ class _Title extends StatelessWidget {
           child: Container(
             width: large ? 48 : 40,
             height: large ? 48 : 40,
-            decoration: const BoxDecoration(color: Palette.lavenderSoft, shape: BoxShape.circle),
-            child: Icon(
-              categoryIcon(category ?? ''),
-              color: Palette.lavender,
-              size: large ? 26 : 22,
-            ),
+            decoration: const BoxDecoration(color: Palette.tealSoft, shape: BoxShape.circle),
+            child: Icon(categoryIcon(category ?? ''), color: Palette.teal, size: large ? 26 : 22),
           ),
         ),
         const SizedBox(width: 12),
@@ -562,7 +558,7 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-    decoration: BoxDecoration(color: Palette.lavender, borderRadius: BorderRadius.circular(20)),
+    decoration: BoxDecoration(color: Palette.teal, borderRadius: BorderRadius.circular(20)),
     child: Text(
       label,
       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
@@ -580,15 +576,15 @@ class _TestTag extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     decoration: BoxDecoration(
-      color: accent ? Palette.lavenderSoft : Palette.paper,
+      color: accent ? Palette.tealSoft : Palette.paper,
       borderRadius: BorderRadius.circular(8),
-      border: Border.all(color: accent ? Palette.lavenderSoft : Palette.line),
+      border: Border.all(color: accent ? Palette.tealSoft : Palette.line),
     ),
     child: Text(
       name,
       style: TextStyle(
         fontSize: 12,
-        color: accent ? Palette.lavender : Palette.ink,
+        color: accent ? Palette.teal : Palette.ink,
         fontWeight: accent ? FontWeight.w600 : FontWeight.w400,
       ),
     ),

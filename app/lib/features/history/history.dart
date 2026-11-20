@@ -47,7 +47,7 @@ class HistoryScreen extends StatelessWidget {
       body: HistoryList(onOpened: () => const ChatRoute().go(context)),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'new-chat',
-        backgroundColor: Palette.lavender,
+        backgroundColor: Palette.teal,
         foregroundColor: Colors.white,
         onPressed: () {
           unawaited(
@@ -142,7 +142,7 @@ class _HistoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.t.history;
     return Material(
-      color: selected ? Palette.lavenderSoft : Colors.transparent,
+      color: selected ? Palette.tealSoft : Colors.transparent,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -156,13 +156,13 @@ class _HistoryTile extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: chat.flagged
                       ? Palette.urgent.withAlpha(20)
-                      : (selected ? Palette.surface : Palette.lavenderSoft),
+                      : (selected ? Palette.surface : Palette.tealSoft),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   chat.flagged ? Icons.pause_circle_outline : Icons.chat_bubble_outline,
                   size: 20,
-                  color: chat.flagged ? Palette.urgent : Palette.lavender,
+                  color: chat.flagged ? Palette.urgent : Palette.teal,
                 ),
               ),
               const SizedBox(width: 16),
@@ -194,7 +194,7 @@ class _HistoryTile extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: Palette.lavender,
+                              color: Palette.teal,
                             ),
                           ),
                         if (chat.flagged)

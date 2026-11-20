@@ -151,7 +151,7 @@ class _ChatScreenState extends State<ChatScreen> {
           maxLines: 5,
           backgroundColor: Palette.paper,
           inputFillColor: Palette.surface,
-          sendIconColor: Palette.lavender,
+          sendIconColor: Palette.teal,
           emptyFieldSendIconColor: Palette.inkMuted,
           hintColor: Palette.inkMuted,
           textColor: Palette.ink,
@@ -476,12 +476,12 @@ class _AiBadge extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
     decoration: BoxDecoration(
-      border: Border.all(color: Palette.lavender),
+      border: Border.all(color: Palette.teal),
       borderRadius: BorderRadius.circular(4),
     ),
     child: Text(
       context.t.chat.aiBadge,
-      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Palette.lavender),
+      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Palette.teal),
     ),
   );
 }
@@ -515,8 +515,8 @@ class _SidePanel extends StatelessWidget {
         child: Column(
           children: [
             TabBar(
-              labelColor: Palette.lavender,
-              indicatorColor: Palette.lavender,
+              labelColor: Palette.teal,
+              indicatorColor: Palette.teal,
               unselectedLabelColor: Palette.inkMuted,
               tabs: [
                 Tab(text: t.menu.history),
@@ -553,7 +553,7 @@ class SuggestionBar extends StatelessWidget {
         ConstrainedBox(
           constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.8),
           child: ActionChip(
-            avatar: Icon(s.icon, size: 16, color: Palette.lavender),
+            avatar: Icon(s.icon, size: 16, color: Palette.teal),
             label: Text(s.label),
             backgroundColor: Palette.surface,
             onPressed: () => onTap(s),
@@ -686,7 +686,7 @@ class _TypingDotsState extends State<_TypingDots> with SingleTickerProviderState
                 padding: const EdgeInsets.symmetric(horizontal: 2),
                 child: Opacity(
                   opacity: reduce ? 0.6 : 0.3 + 0.7 * ((_anim.value * 3 - i) % 3 < 1 ? 1 : 0),
-                  child: const CircleAvatar(radius: 3.5, backgroundColor: Palette.lavender),
+                  child: const CircleAvatar(radius: 3.5, backgroundColor: Palette.teal),
                 ),
               ),
           ],

@@ -309,7 +309,7 @@ class SlotsCardView extends StatelessWidget {
             children: [
               for (final s in offer.alternatives)
                 ActionChip(
-                  avatar: const Icon(Icons.schedule, size: 16, color: Palette.lavender),
+                  avatar: const Icon(Icons.schedule, size: 16, color: Palette.teal),
                   label: Text(
                     '${dateLabel(context, s.date)} · ${windowLabel(context, s.timeWindow)}',
                   ),

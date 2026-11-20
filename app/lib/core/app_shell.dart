@@ -26,7 +26,7 @@ class AppShell extends StatelessWidget {
           ? NavigationBar(
               selectedIndex: index,
               backgroundColor: Palette.surface,
-              indicatorColor: Palette.lavenderSoft,
+              indicatorColor: Palette.tealSoft,
               height: 64,
               onDestinationSelected: (i) => switch (i) {
                 0 => const ChatRoute().go(context),
@@ -38,27 +38,27 @@ class AppShell extends StatelessWidget {
               destinations: [
                 NavigationDestination(
                   icon: const Icon(Icons.chat_bubble_outline),
-                  selectedIcon: const Icon(Icons.chat_bubble, color: Palette.lavender),
+                  selectedIcon: const Icon(Icons.chat_bubble, color: Palette.teal),
                   label: t.chat,
                 ),
                 NavigationDestination(
                   icon: const Icon(Icons.history),
-                  selectedIcon: const Icon(Icons.history, color: Palette.lavender),
+                  selectedIcon: const Icon(Icons.history, color: Palette.teal),
                   label: t.history,
                 ),
                 NavigationDestination(
                   icon: const Icon(Icons.event_note_outlined),
-                  selectedIcon: const Icon(Icons.event_note, color: Palette.lavender),
+                  selectedIcon: const Icon(Icons.event_note, color: Palette.teal),
                   label: t.bookings,
                 ),
                 NavigationDestination(
                   icon: const Icon(Icons.science_outlined),
-                  selectedIcon: const Icon(Icons.science, color: Palette.lavender),
+                  selectedIcon: const Icon(Icons.science, color: Palette.teal),
                   label: t.packages,
                 ),
                 NavigationDestination(
                   icon: const Icon(Icons.person_outline),
-                  selectedIcon: const Icon(Icons.person, color: Palette.lavender),
+                  selectedIcon: const Icon(Icons.person, color: Palette.teal),
                   label: t.profile,
                 ),
               ],

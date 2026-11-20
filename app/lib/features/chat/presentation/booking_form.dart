@@ -125,12 +125,12 @@ class _BookingFormViewState extends State<BookingFormView> {
         children: [
           Row(
             children: [
-              const Icon(Icons.home_outlined, color: Palette.lavender, size: 20),
+              const Icon(Icons.home_outlined, color: Palette.teal, size: 20),
               const SizedBox(width: 8),
               Flexible(
                 child: Text(
                   t.title,
-                  style: const TextStyle(fontWeight: FontWeight.w600, color: Palette.lavender),
+                  style: const TextStyle(fontWeight: FontWeight.w600, color: Palette.teal),
                 ),
               ),
             ],
@@ -338,7 +338,7 @@ class _BookingFormViewState extends State<BookingFormView> {
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Palette.lavender, width: 1.5),
+      borderSide: const BorderSide(color: Palette.teal, width: 1.5),
     ),
   );
 }

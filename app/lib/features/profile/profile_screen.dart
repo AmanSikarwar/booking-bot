@@ -34,14 +34,10 @@ class ProfileAvatar extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: const BoxDecoration(color: Palette.lavenderSoft, shape: BoxShape.circle),
+      decoration: const BoxDecoration(color: Palette.tealSoft, shape: BoxShape.circle),
       child: Text(
         initials(name),
-        style: TextStyle(
-          color: Palette.lavender,
-          fontWeight: FontWeight.w700,
-          fontSize: size * 0.38,
-        ),
+        style: TextStyle(color: Palette.teal, fontWeight: FontWeight.w700, fontSize: size * 0.38),
       ),
     ),
   );
@@ -152,7 +148,7 @@ class ProfileScreen extends StatelessWidget {
                               width: 40,
                               height: 40,
                               decoration: const BoxDecoration(
-                                color: Palette.lavenderSoft,
+                                color: Palette.tealSoft,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -161,7 +157,7 @@ class ProfileScreen extends StatelessWidget {
                                   'office' || 'work' || 'ऑफ़िस' => Icons.work_outline,
                                   _ => Icons.place_outlined,
                                 },
-                                color: Palette.lavender,
+                                color: Palette.teal,
                                 size: 20,
                               ),
                             ),
@@ -205,13 +201,13 @@ class ProfileScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Palette.lavenderSoft,
+                      color: Palette.tealSoft,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.shield_outlined, size: 18, color: Palette.lavender),
+                        const Icon(Icons.shield_outlined, size: 18, color: Palette.teal),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -504,7 +500,7 @@ InputDecoration _decoration(String label, String? error) => InputDecoration(
   ),
   focusedBorder: OutlineInputBorder(
     borderRadius: BorderRadius.circular(12),
-    borderSide: const BorderSide(color: Palette.lavender, width: 1.5),
+    borderSide: const BorderSide(color: Palette.teal, width: 1.5),
   ),
 );
 
@@ -696,12 +692,12 @@ class _AddTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
-          const Icon(Icons.add_circle_outline, color: Palette.lavender),
+          const Icon(Icons.add_circle_outline, color: Palette.teal),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontWeight: FontWeight.w600, color: Palette.lavender),
+              style: const TextStyle(fontWeight: FontWeight.w600, color: Palette.teal),
             ),
           ),
         ],

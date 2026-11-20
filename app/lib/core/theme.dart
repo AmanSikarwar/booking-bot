@@ -3,13 +3,13 @@ import 'package:material_ui/material_ui.dart';
 import '../gen/fonts.gen.dart';
 
 abstract final class Palette {
-  static const ink = Color(0xFF1E2532);
-  static const inkMuted = Color(0xFF5B6472);
-  static const paper = Color(0xFFF3F5F7);
+  static const ink = Color(0xFF15282A);
+  static const inkMuted = Color(0xFF52666A);
+  static const paper = Color(0xFFF2F6F6);
   static const surface = Color(0xFFFFFFFF);
-  static const line = Color(0xFFDDE2E8);
-  static const lavender = Color(0xFF6B55A3);
-  static const lavenderSoft = Color(0xFFECE8F6);
+  static const line = Color(0xFFD5E3E1);
+  static const teal = Color(0xFF0F766E);
+  static const tealSoft = Color(0xFFDDF1EE);
   static const urgent = Color(0xFFB42318);
   static const crisis = Color(0xFF2F5DA8);
   static const success = Color(0xFF1F7A4D);
@@ -48,8 +48,8 @@ List<Tube> tubesFor(List<String> tests) {
 
 ThemeData buildTheme() {
   final scheme = ColorScheme.fromSeed(
-    seedColor: Palette.lavender,
-    primary: Palette.lavender,
+    seedColor: Palette.teal,
+    primary: Palette.teal,
     surface: Palette.surface,
     onSurface: Palette.ink,
     error: Palette.urgent,
@@ -94,7 +94,7 @@ ThemeData buildTheme() {
     inputDecorationTheme: InputDecorationTheme(
       border: _pill(Palette.line),
       enabledBorder: _pill(Palette.line),
-      focusedBorder: _pill(Palette.lavender, width: 1.5),
+      focusedBorder: _pill(Palette.teal, width: 1.5),
     ),
     chipTheme: base.chipTheme.copyWith(
       side: const BorderSide(color: Palette.line),

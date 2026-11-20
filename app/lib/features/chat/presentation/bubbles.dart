@@ -18,7 +18,7 @@ class SaathiAvatar extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        decoration: const BoxDecoration(color: Palette.lavenderSoft, shape: BoxShape.circle),
+        decoration: const BoxDecoration(color: Palette.tealSoft, shape: BoxShape.circle),
         child: CustomPaint(painter: _DropletPainter()),
       ),
     );
@@ -36,7 +36,7 @@ class _DropletPainter extends CustomPainter {
       ..arcToPoint(Offset(w * .74, h * .62), radius: Radius.circular(w * .24), clockwise: false)
       ..cubicTo(w * .74, h * .5, w * .5, h * .2, w * .5, h * .2)
       ..close();
-    canvas.drawPath(path, Paint()..color = Palette.lavender);
+    canvas.drawPath(path, Paint()..color = Palette.teal);
   }
 
   @override
@@ -77,8 +77,8 @@ class UserBubble extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isAction ? Palette.lavenderSoft : Palette.lavender,
-                border: isAction ? Border.all(color: Palette.lavender.withAlpha(60)) : null,
+                color: isAction ? Palette.tealSoft : Palette.teal,
+                border: isAction ? Border.all(color: Palette.teal.withAlpha(60)) : null,
                 borderRadius: const BorderRadiusDirectional.only(
                   topStart: Radius.circular(18),
                   topEnd: Radius.circular(18),
@@ -93,13 +93,13 @@ class UserBubble extends StatelessWidget {
                   if (isAction)
                     const Padding(
                       padding: EdgeInsetsDirectional.only(end: 6, top: 2),
-                      child: Icon(Icons.touch_app_outlined, size: 16, color: Palette.lavender),
+                      child: Icon(Icons.touch_app_outlined, size: 16, color: Palette.teal),
                     ),
                   Flexible(
                     child: Text(
                       text,
                       style: TextStyle(
-                        color: isAction ? Palette.lavender : Colors.white,
+                        color: isAction ? Palette.teal : Colors.white,
                         fontSize: isAction ? 14 : 15,
                         height: 1.35,
                       ),
@@ -233,22 +233,19 @@ class ActivityChip extends StatelessWidget {
       liveRegion: true,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: Palette.lavenderSoft,
-          borderRadius: BorderRadius.circular(20),
-        ),
+        decoration: BoxDecoration(color: Palette.tealSoft, borderRadius: BorderRadius.circular(20)),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox.square(
               dimension: 14,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Palette.lavender),
+              child: CircularProgressIndicator(strokeWidth: 2, color: Palette.teal),
             ),
             const SizedBox(width: 8),
             Flexible(
               child: _shimmer(
                 context,
-                Text(label, style: const TextStyle(fontSize: 13, color: Palette.lavender)),
+                Text(label, style: const TextStyle(fontSize: 13, color: Palette.teal)),
               ),
             ),
           ],
