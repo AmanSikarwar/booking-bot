@@ -89,7 +89,7 @@ flowchart LR
 
 ### How a booking works
 
-The chat agent has three tools. `search_packages` returns ranked catalogue matches. `show_booking_form` provides a native form and available windows when the user asks to book. `book_slot` validates the selection, applies the safety gate, and either saves a mock booking or returns alternatives. Package cards can also open the form directly on the device.
+The chat agent has three tools. `search_packages` returns ranked catalogue matches. `show_booking_form` provides a native form and available windows when the user asks to book. `book_slot` validates the selection and applies the safety gate before looking up or creating a mock booking. Package cards can also open the form directly on the device. This example follows a valid submission through `book_slot`.
 
 ```mermaid
 sequenceDiagram
@@ -103,15 +103,21 @@ sequenceDiagram
     API-->>App: Stream reply and package cards
     User->>App: Open a booking form and select a slot
     App->>API: Submit the booking as an action turn
-    API->>API: Validate the slot and check safety history
-    alt Slot available and booking allowed
-        API->>Store: Save or reuse the mock booking
-        API-->>App: Stream booking_confirmed
-        App->>App: Save the ticket in Drift
-    else Slot full
-        API-->>App: Stream slot_unavailable with alternatives
-    else Safety gate blocks the booking
-        API-->>App: Send the assistant reply without confirmation
+    API->>API: Run book_slot and validate the selection
+    API->>Store: Read conversation flag and recent safety history
+    alt Safety gate blocks booking
+        API->>API: Return booking_blocked_for_safety to the chat model
+    else Safety gate allows booking
+        API->>Store: Look up an existing booking
+        alt No existing booking and slot is full
+            API-->>App: Stream slot_unavailable with alternatives
+        else Existing booking or slot available
+            opt New booking
+                API->>Store: Save the mock booking
+            end
+            API-->>App: Stream booking_confirmed
+            App->>App: Save the ticket in Drift
+        end
     end
 ```
 
@@ -139,17 +145,21 @@ See the [API contract](PLAN.md#10-api-contract) for payloads and HTTP status cod
 
 ### Safety checks
 
-The app uses shared keyword rules to show an immediate urgent-care or crisis card for hard matches, including offline. The server repeats the check. For eligible text turns, the decision model examines up to three recent user messages. Selected context-dependent keyword matches go through this model so that a mention of past medical history can be treated differently from a current emergency. If triage is unavailable, the server still escalates a context-dependent keyword match.
+The app uses shared keyword rules to show an immediate urgent-care or crisis card for hard matches, including offline. The server repeats the check when it processes a turn, after API admission and replay checks. For text turns without a hard match, the Decision API examines up to three recent user messages. If triage is unavailable, the server still escalates a context-dependent keyword match.
 
 ```mermaid
 flowchart TD
-    Input["Server receives an authenticated turn"] --> Hard{"Hard keyword match?"}
-    Hard -->|Yes| Escalate["Show fixed safety card and flag conversation"]
-    Hard -->|No| Triage["Triage eligible text turns"]
+    Input["Turn enters processing"] --> Hard{"Hard keyword match?"}
+    Hard -->|Yes| Escalate["Flag conversation and stream safety card"]
+    Hard -->|No| Kind{"Turn type?"}
+    Kind -->|Text| Triage["Run Decision API triage"]
+    Kind -->|Action| Soft{"Contextual keyword match?"}
     Triage -->|"Urgent or crisis"| Escalate
-    Triage -->|"Contextual match and triage unavailable or skipped"| Escalate
-    Triage -->|"No escalation"| Chat["Continue to package and booking tools"]
-    Chat --> Gate["Booking gate checks conversation flag and recent messages"]
+    Triage -->|Unavailable| Soft
+    Triage -->|Pass| Chat["Continue to chat model"]
+    Soft -->|Yes| Escalate
+    Soft -->|No| Chat
+    Chat -->|"If book_slot runs"| Gate["Check conversation flag and recent safety history"]
 ```
 
 Structured booking actions skip model triage. The server still checks keyword matches and booking history. The safety gate blocks flagged conversations, hard matches, and contextual matches without a recorded pass. A separate output check detects diagnosis-like language. Cards use fixed translations, and the assistant's scope covers lab tests, preparation, and bookings. The [safety design](PLAN.md#6-safety-design) records thresholds and fallback behavior.
