@@ -297,8 +297,22 @@ void main() {
   test('messages stuck in flight after a restart are requeued', () async {
     await queue('m1', 'x');
     await db.patchMessage('m1', const MessagesCompanion(status: Value(MessageStatus.streaming)));
+    await db.upsertMessage(
+      MessagesCompanion.insert(
+        id: replyIdFor('m1'),
+        conversationId: 'c1',
+        role: MessageRole.assistant,
+        replyTo: const Value('m1'),
+        body: const Value('These are'),
+        status: MessageStatus.streaming,
+        activeTool: const Value('search_packages'),
+        createdAt: clock.now(),
+      ),
+    );
     await db.resetInFlight();
     expect((await msg('m1')).status, MessageStatus.queued);
+    final reply = await msg(replyIdFor('m1'));
+    expect([reply.status, reply.activeTool], [MessageStatus.incomplete, null]);
   });
 
   test('requests carry only names, relations and address labels from the profile', () async {

@@ -210,13 +210,22 @@ class AppDatabase extends _$AppDatabase {
     return row?.nextAttemptAt;
   }
 
-  Future<void> resetInFlight() =>
-      (update(messages)..where(
-            (m) =>
-                m.role.equalsValue(MessageRole.user) &
-                m.status.isInValues([MessageStatus.sending, MessageStatus.streaming]),
-          ))
-          .write(const MessagesCompanion(status: Value(MessageStatus.queued)));
+  Future<void> resetInFlight() => transaction(() async {
+    await (update(messages)..where(
+          (m) =>
+              m.role.equalsValue(MessageRole.user) &
+              m.status.isInValues([MessageStatus.sending, MessageStatus.streaming]),
+        ))
+        .write(const MessagesCompanion(status: Value(MessageStatus.queued)));
+    await (update(messages)..where(
+          (m) =>
+              m.role.equalsValue(MessageRole.assistant) &
+              m.status.equalsValue(MessageStatus.streaming),
+        ))
+        .write(
+          const MessagesCompanion(status: Value(MessageStatus.incomplete), activeTool: Value(null)),
+        );
+  });
 
   Future<void> saveBooking(String conversationId, BookingInfo b, DateTime now) =>
       into(bookings).insertOnConflictUpdate(
