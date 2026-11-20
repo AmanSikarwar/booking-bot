@@ -17,6 +17,7 @@ class ChatRequest {
     required this.locale,
     required this.text,
     required this.createdAt,
+    this.profile,
   });
 
   final String conversationId;
@@ -25,6 +26,7 @@ class ChatRequest {
   final String locale;
   final String text;
   final DateTime createdAt;
+  final Map<String, Object?>? profile;
 
   Map<String, Object?> toJson() => {
     'conversation_id': conversationId,
@@ -33,6 +35,7 @@ class ChatRequest {
     'locale': locale,
     'text': text,
     'client_created_at': createdAt.toUtc().toIso8601String(),
+    if (profile != null) 'profile': profile,
   };
 }
 

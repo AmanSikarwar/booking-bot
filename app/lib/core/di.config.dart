@@ -26,6 +26,8 @@ import 'package:saathi/features/chat/data/outbox.dart' as _i415;
 import 'package:saathi/features/chat/data/session.dart' as _i468;
 import 'package:saathi/features/chat/presentation/chat_cubit.dart' as _i863;
 import 'package:saathi/features/history/history.dart' as _i215;
+import 'package:saathi/features/profile/profile_cubit.dart' as _i844;
+import 'package:saathi/features/profile/profile_repository.dart' as _i340;
 import 'package:saathi/features/safety/red_flag_detector.dart' as _i891;
 import 'package:saathi/features/settings/locale_cubit.dart' as _i567;
 import 'package:supabase_flutter/supabase_flutter.dart' as _i454;
@@ -53,8 +55,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i519.Client>(() => appModule.httpClient);
     gh.lazySingleton<_i454.SupabaseClient>(() => appModule.supabase);
     gh.lazySingleton<_i706.Uuid>(() => appModule.uuid);
+    gh.lazySingleton<_i340.ProfileRepository>(
+      () => _i340.ProfileRepository(gh<_i537.AppDatabase>(), gh<_i706.Uuid>()),
+    );
     gh.lazySingleton<_i468.SessionTokens>(
       () => _i468.SupabaseSessionTokens(gh<_i454.SupabaseClient>()),
+    );
+    gh.factory<_i844.ProfileCubit>(
+      () => _i844.ProfileCubit(gh<_i340.ProfileRepository>()),
     );
     gh.factory<_i87.BookingsCubit>(
       () => _i87.BookingsCubit(gh<_i537.AppDatabase>()),
@@ -73,17 +81,18 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i370.ConnectivityService(gh<_i960.ChatApi>()),
       dispose: (i) => i.dispose(),
     );
+    gh.factory<_i111.ConnectivityCubit>(
+      () => _i111.ConnectivityCubit(gh<_i370.ConnectivityService>()),
+    );
     gh.lazySingleton<_i415.Outbox>(
       () => _i415.Outbox(
         gh<_i537.AppDatabase>(),
         gh<_i960.ChatApi>(),
         gh<_i370.ConnectivityService>(),
         gh<_i961.Clock>(),
+        gh<_i340.ProfileRepository>(),
       ),
       dispose: (i) => i.dispose(),
-    );
-    gh.factory<_i111.ConnectivityCubit>(
-      () => _i111.ConnectivityCubit(gh<_i370.ConnectivityService>()),
     );
     gh.lazySingleton<_i971.ChatRepository>(
       () => _i971.ChatRepository(

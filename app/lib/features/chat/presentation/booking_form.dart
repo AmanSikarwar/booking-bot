@@ -3,14 +3,23 @@ import 'package:material_ui/material_ui.dart';
 import '../../../core/motion.dart';
 import '../../../core/theme.dart';
 import '../../../i18n/strings.g.dart';
+import '../../profile/profile.dart';
+import '../../profile/profile_labels.dart';
 import '../domain/models.dart';
 import '../domain/slots.dart';
 import 'cards.dart';
 
 class BookingFormView extends StatefulWidget {
-  const BookingFormView({super.key, required this.form, required this.onSubmit, this.now});
+  const BookingFormView({
+    super.key,
+    required this.form,
+    required this.profile,
+    required this.onSubmit,
+    this.now,
+  });
 
   final BookingFormData form;
+  final Profile profile;
   final void Function(SlotRequest request)? onSubmit;
   final DateTime? now;
 
@@ -18,25 +27,44 @@ class BookingFormView extends StatefulWidget {
   State<BookingFormView> createState() => _BookingFormViewState();
 }
 
-enum _Address { home, office, other }
+const _other = 'other';
 
 class _BookingFormViewState extends State<BookingFormView> {
   late final DateTime _now = widget.now ?? DateTime.now();
   late final List<String> _dates = bookableDates(_now);
   late String? _date = _validDate(widget.form.prefill.date);
   late String? _window = _validWindow(_date, widget.form.prefill.timeWindow);
-  late _Address _address = _addressFrom(widget.form.prefill.addressLabel);
+  late String _addressId = _initialAddress();
+  late String _personId = _initialPerson();
   late final _otherAddress = TextEditingController(
-    text: _address == _Address.other ? widget.form.prefill.addressLabel : null,
+    text: _addressId == _other ? widget.form.prefill.addressLabel : null,
   );
-  late final _patient = TextEditingController(text: widget.form.prefill.patientName);
+  late final _otherPatient = TextEditingController(
+    text: _personId == _other ? widget.form.prefill.patientName : null,
+  );
   bool _showErrors = false;
 
   @override
   void dispose() {
     _otherAddress.dispose();
-    _patient.dispose();
+    _otherPatient.dispose();
     super.dispose();
+  }
+
+  String _initialAddress() {
+    final label = widget.form.prefill.addressLabel?.trim() ?? '';
+    final saved = widget.profile.addressLabelled(label);
+    if (saved != null) return saved.id;
+    if (label.isNotEmpty) return _other;
+    return widget.profile.addresses.firstOrNull?.id ?? _other;
+  }
+
+  String _initialPerson() {
+    final name = widget.form.prefill.patientName?.trim() ?? '';
+    final saved = widget.profile.personNamed(name);
+    if (saved != null) return saved.id;
+    if (name.isNotEmpty) return _other;
+    return widget.profile.self.id;
   }
 
   List<String> _open(String date) => [
@@ -53,17 +81,13 @@ class _BookingFormViewState extends State<BookingFormView> {
   String? _validWindow(String? d, String? w) =>
       d != null && w != null && _open(d).contains(w) ? w : null;
 
-  _Address _addressFrom(String? label) => switch (label?.trim().toLowerCase()) {
-    null || '' || 'home' || 'घर' => _Address.home,
-    'office' || 'ऑफ़िस' || 'ऑफिस' => _Address.office,
-    _ => _Address.other,
-  };
+  String get _addressLabel => _addressId == _other
+      ? _otherAddress.text.trim()
+      : widget.profile.addresses.firstWhere((a) => a.id == _addressId).label;
 
-  String _addressLabel(BuildContext context) => switch (_address) {
-    _Address.home => context.t.form.home,
-    _Address.office => context.t.form.office,
-    _Address.other => _otherAddress.text.trim(),
-  };
+  String get _patientName => _personId == _other
+      ? _otherPatient.text.trim()
+      : widget.profile.people.firstWhere((p) => p.id == _personId).name;
 
   String _dayLabel(BuildContext context, String date) {
     final i = _dates.indexOf(date);
@@ -73,8 +97,8 @@ class _BookingFormViewState extends State<BookingFormView> {
   }
 
   void _submit() {
-    final address = _addressLabel(context);
-    final patient = _patient.text.trim();
+    final address = _addressLabel;
+    final patient = _patientName;
     if (_date == null || _window == null || address.isEmpty || patient.isEmpty) {
       setState(() => _showErrors = true);
       return;
@@ -137,7 +161,11 @@ class _BookingFormViewState extends State<BookingFormView> {
               ),
             ),
             child: submitted != null
-                ? _Summary(key: const ValueKey('summary'), request: submitted)
+                ? _Summary(
+                    key: const ValueKey('summary'),
+                    request: submitted,
+                    profile: widget.profile,
+                  )
                 : Column(
                     key: const ValueKey('fields'),
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,9 +182,10 @@ class _BookingFormViewState extends State<BookingFormView> {
     final enabled = widget.onSubmit != null;
     final dateError = _showErrors && _date == null;
     final timeError = _showErrors && _date != null && _window == null;
-    final addressError =
-        _showErrors && _address == _Address.other && _otherAddress.text.trim().isEmpty;
-    final patientError = _showErrors && _patient.text.trim().isEmpty;
+    final addressError = _showErrors && _addressId == _other && _otherAddress.text.trim().isEmpty;
+    final patientError = _showErrors && _personId == _other && _otherPatient.text.trim().isEmpty;
+    final tp = context.t.profile;
+    final selectedAddress = widget.profile.addresses.where((a) => a.id == _addressId).firstOrNull;
     return [
       _Label(t.date, error: dateError ? t.pickDate : null),
       SizedBox(
@@ -192,24 +221,75 @@ class _BookingFormViewState extends State<BookingFormView> {
         ],
       ),
       const SizedBox(height: 12),
+      _Label(t.patient),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          for (final p in widget.profile.people)
+            ChoiceChip(
+              label: Text(personChip(context.t, p)),
+              selected: _personId == p.id,
+              onSelected: enabled ? (_) => setState(() => _personId = p.id) : null,
+            ),
+          ChoiceChip(
+            label: Text(tp.someoneElse),
+            selected: _personId == _other,
+            onSelected: enabled ? (_) => setState(() => _personId = _other) : null,
+          ),
+        ],
+      ),
+      if (_personId == _other)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: TextField(
+            controller: _otherPatient,
+            enabled: enabled,
+            maxLength: 80,
+            textCapitalization: TextCapitalization.words,
+            autofillHints: const [AutofillHints.name],
+            textInputAction: TextInputAction.done,
+            onChanged: (_) => setState(() {}),
+            decoration: _input(t.patientHint, error: patientError ? t.required : null),
+          ),
+        ),
+      const SizedBox(height: 12),
       _Label(t.address),
       Wrap(
         spacing: 8,
         runSpacing: 8,
         children: [
-          for (final a in _Address.values)
+          for (final a in widget.profile.addresses)
             ChoiceChip(
-              label: Text(switch (a) {
-                _Address.home => t.home,
-                _Address.office => t.office,
-                _Address.other => t.other,
-              }),
-              selected: _address == a,
-              onSelected: enabled ? (_) => setState(() => _address = a) : null,
+              label: Text(a.label),
+              selected: _addressId == a.id,
+              onSelected: enabled ? (_) => setState(() => _addressId = a.id) : null,
             ),
+          ChoiceChip(
+            label: Text(t.other),
+            selected: _addressId == _other,
+            onSelected: enabled ? (_) => setState(() => _addressId = _other) : null,
+          ),
         ],
       ),
-      if (_address == _Address.other)
+      if (selectedAddress != null)
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.place_outlined, size: 16, color: Palette.inkMuted),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  fullAddress(selectedAddress),
+                  style: const TextStyle(fontSize: 13, color: Palette.inkMuted, height: 1.35),
+                ),
+              ),
+            ],
+          ),
+        ),
+      if (_addressId == _other)
         Padding(
           padding: const EdgeInsets.only(top: 8),
           child: TextField(
@@ -221,19 +301,6 @@ class _BookingFormViewState extends State<BookingFormView> {
             decoration: _input(t.otherHint, error: addressError ? t.required : null),
           ),
         ),
-      const SizedBox(height: 12),
-      _Label(t.patient),
-      TextField(
-        controller: _patient,
-        enabled: enabled,
-        maxLength: 80,
-        textCapitalization: TextCapitalization.words,
-        autofillHints: const [AutofillHints.name],
-        textInputAction: TextInputAction.done,
-        onChanged: (_) => setState(() {}),
-        onSubmitted: enabled ? (_) => _submit() : null,
-        decoration: _input(t.patientHint, error: patientError ? t.required : null),
-      ),
       const SizedBox(height: 14),
       SizedBox(
         width: double.infinity,
@@ -302,9 +369,10 @@ class _Label extends StatelessWidget {
 }
 
 class _Summary extends StatelessWidget {
-  const _Summary({super.key, required this.request});
+  const _Summary({super.key, required this.request, required this.profile});
 
   final SlotRequest request;
+  final Profile profile;
 
   @override
   Widget build(BuildContext context) {
@@ -320,6 +388,8 @@ class _Summary extends StatelessWidget {
           '${request.addressLabel} · ${t.booking.forPatient(name: request.patientName)}',
           style: const TextStyle(color: Palette.inkMuted),
         ),
+        if (profile.addressLabelled(request.addressLabel) case final a?)
+          Text(fullAddress(a), style: const TextStyle(fontSize: 12, color: Palette.inkMuted)),
         const SizedBox(height: 8),
         Row(
           children: [

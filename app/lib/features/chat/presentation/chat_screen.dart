@@ -17,6 +17,8 @@ import '../../bookings/bookings_screen.dart';
 import '../../catalog/catalog_screen.dart';
 import '../../catalog/package.dart';
 import '../../history/history.dart';
+import '../../profile/profile_cubit.dart';
+import '../../profile/profile_screen.dart';
 import '../../settings/locale_cubit.dart';
 import '../domain/models.dart';
 import 'booking_form.dart';
@@ -288,6 +290,7 @@ class _ChatScreenState extends State<ChatScreen> {
         fullBleedOnCompact: true,
         child: BookingCardView(
           booking: booking,
+          profile: context.watch<ProfileCubit>().state,
           onViewAll: context.windowSize == WindowSize.expanded
               ? null
               : () => const BookingsRoute().go(context),
@@ -325,6 +328,7 @@ class _ChatScreenState extends State<ChatScreen> {
         fullBleedOnCompact: true,
         child: BookingFormView(
           form: form,
+          profile: context.watch<ProfileCubit>().state,
           onSubmit: flagged
               ? null
               : (r) => unawaited(
@@ -382,7 +386,7 @@ class SaathiAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final t = context.t;
     final compact = size == WindowSize.compact;
-    final roomy = MediaQuery.sizeOf(context).width >= 1080 && !context.largeText;
+    final roomy = MediaQuery.sizeOf(context).width >= 1120 && !context.largeText;
     return AppBar(
       titleSpacing: compact ? 12 : 20,
       title: Row(
@@ -430,6 +434,15 @@ class SaathiAppBar extends StatelessWidget implements PreferredSizeWidget {
             roomy
                 ? TextButton.icon(onPressed: go, icon: Icon(icon), label: Text(label))
                 : IconButton(tooltip: label, onPressed: go, icon: Icon(icon)),
+        if (!compact)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 4),
+            child: IconButton(
+              tooltip: t.profile.title,
+              onPressed: () => const ProfileRoute().go(context),
+              icon: ProfileAvatar(name: context.watch<ProfileCubit>().state.self.name, size: 32),
+            ),
+          ),
         if (compact)
           IconButton(
             tooltip: t.menu.newChat,

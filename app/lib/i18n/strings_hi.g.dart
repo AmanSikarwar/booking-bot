@@ -73,6 +73,7 @@ class TranslationsHi extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$history$hi history = _Translations$history$hi._(_root);
 	@override late final _Translations$nav$hi nav = _Translations$nav$hi._(_root);
 	@override late final _Translations$details$hi details = _Translations$details$hi._(_root);
+	@override late final _Translations$profile$hi profile = _Translations$profile$hi._(_root);
 }
 
 // Path: chat
@@ -300,8 +301,6 @@ class _Translations$form$hi extends Translations$form$en {
 	@override String get date => 'तारीख़';
 	@override String get time => 'समय';
 	@override String get address => 'सैंपल का पता';
-	@override String get home => 'घर';
-	@override String get office => 'ऑफ़िस';
 	@override String get other => 'दूसरा';
 	@override String get otherHint => 'जैसे पापा का घर';
 	@override String get patient => 'मरीज़ का नाम';
@@ -368,6 +367,7 @@ class _Translations$nav$hi extends Translations$nav$en {
 	@override String get bookings => 'बुकिंग';
 	@override String get packages => 'पैकेज';
 	@override String get back => 'चैट पर वापस';
+	@override String get profile => 'प्रोफ़ाइल';
 }
 
 // Path: details
@@ -390,6 +390,77 @@ class _Translations$details$hi extends Translations$details$en {
 	@override String get doctorNote => 'इन टेस्ट से निदान नहीं होता। रिपोर्ट का मतलब डॉक्टर बता सकते हैं।';
 	@override String get close => 'बंद करें';
 	@override String more({required Object n}) => '+${n} और';
+}
+
+// Path: profile
+class _Translations$profile$hi extends Translations$profile$en {
+	_Translations$profile$hi._(TranslationsHi root) : this._root = root, super.internal(root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'प्रोफ़ाइल';
+	@override String get you => 'आप';
+	@override String get family => 'परिवार के सदस्य';
+	@override String get addresses => 'सेव किए पते';
+	@override String get contact => 'संपर्क';
+	@override String get phone => 'फ़ोन';
+	@override String get email => 'ईमेल';
+	@override String get addPerson => 'परिवार का सदस्य जोड़ें';
+	@override String get addAddress => 'पता जोड़ें';
+	@override String get editPerson => 'सदस्य बदलें';
+	@override String get editAddress => 'पता बदलें';
+	@override String get remove => 'हटाएँ';
+	@override String get save => 'सेव करें';
+	@override String get cancel => 'रद्द करें';
+	@override String get name => 'पूरा नाम';
+	@override String get age => 'उम्र';
+	@override String get relation => 'रिश्ता';
+	@override String get gender => 'लिंग';
+	@override String get label => 'नाम, जैसे घर';
+	@override String get line1 => 'मकान या फ़्लैट, बिल्डिंग';
+	@override String get line2 => 'इलाका या सेक्टर (वैकल्पिक)';
+	@override String get city => 'शहर';
+	@override String get pincode => 'पिनकोड';
+	@override String years({required Object n}) => '${n} साल';
+	@override String get sample => 'ये इस डेमो की सैंपल जानकारी है। बुकिंग करते समय साथी को सिर्फ़ नाम और पते का नाम भेजा जाता है।';
+	@override String get reset => 'सैंपल जानकारी रीसेट करें';
+	@override String get someoneElse => 'कोई और';
+	@override String get invalidAge => '0 से 120 के बीच उम्र लिखें';
+	@override String get invalidPin => '6 अंकों का पिनकोड लिखें';
+	@override String bookingsFor({required Object n}) => '${n} बुकिंग';
+	@override late final _Translations$profile$relations$hi relations = _Translations$profile$relations$hi._(_root);
+	@override late final _Translations$profile$genders$hi genders = _Translations$profile$genders$hi._(_root);
+}
+
+// Path: profile.relations
+class _Translations$profile$relations$hi extends Translations$profile$relations$en {
+	_Translations$profile$relations$hi._(TranslationsHi root) : this._root = root, super.internal(root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get self => 'आप';
+	@override String get father => 'पिता';
+	@override String get mother => 'माँ';
+	@override String get spouse => 'जीवनसाथी';
+	@override String get son => 'बेटा';
+	@override String get daughter => 'बेटी';
+	@override String get brother => 'भाई';
+	@override String get sister => 'बहन';
+	@override String get other => 'अन्य';
+}
+
+// Path: profile.genders
+class _Translations$profile$genders$hi extends Translations$profile$genders$en {
+	_Translations$profile$genders$hi._(TranslationsHi root) : this._root = root, super.internal(root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get female => 'महिला';
+	@override String get male => 'पुरुष';
+	@override String get other => 'अन्य';
 }
 
 /// The flat map containing all translations for locale <hi>.
@@ -490,8 +561,6 @@ extension on TranslationsHi {
 			'form.date' => 'तारीख़',
 			'form.time' => 'समय',
 			'form.address' => 'सैंपल का पता',
-			'form.home' => 'घर',
-			'form.office' => 'ऑफ़िस',
 			'form.other' => 'दूसरा',
 			'form.otherHint' => 'जैसे पापा का घर',
 			'form.patient' => 'मरीज़ का नाम',
@@ -531,6 +600,7 @@ extension on TranslationsHi {
 			'nav.bookings' => 'बुकिंग',
 			'nav.packages' => 'पैकेज',
 			'nav.back' => 'चैट पर वापस',
+			'nav.profile' => 'प्रोफ़ाइल',
 			'details.view' => 'जानकारी',
 			'details.about' => 'पैकेज के बारे में',
 			'details.facts' => 'एक नज़र में',
@@ -544,6 +614,48 @@ extension on TranslationsHi {
 			'details.doctorNote' => 'इन टेस्ट से निदान नहीं होता। रिपोर्ट का मतलब डॉक्टर बता सकते हैं।',
 			'details.close' => 'बंद करें',
 			'details.more' => ({required Object n}) => '+${n} और',
+			'profile.title' => 'प्रोफ़ाइल',
+			'profile.you' => 'आप',
+			'profile.family' => 'परिवार के सदस्य',
+			'profile.addresses' => 'सेव किए पते',
+			'profile.contact' => 'संपर्क',
+			'profile.phone' => 'फ़ोन',
+			'profile.email' => 'ईमेल',
+			'profile.addPerson' => 'परिवार का सदस्य जोड़ें',
+			'profile.addAddress' => 'पता जोड़ें',
+			'profile.editPerson' => 'सदस्य बदलें',
+			'profile.editAddress' => 'पता बदलें',
+			'profile.remove' => 'हटाएँ',
+			'profile.save' => 'सेव करें',
+			'profile.cancel' => 'रद्द करें',
+			'profile.name' => 'पूरा नाम',
+			'profile.age' => 'उम्र',
+			'profile.relation' => 'रिश्ता',
+			'profile.gender' => 'लिंग',
+			'profile.label' => 'नाम, जैसे घर',
+			'profile.line1' => 'मकान या फ़्लैट, बिल्डिंग',
+			'profile.line2' => 'इलाका या सेक्टर (वैकल्पिक)',
+			'profile.city' => 'शहर',
+			'profile.pincode' => 'पिनकोड',
+			'profile.years' => ({required Object n}) => '${n} साल',
+			'profile.sample' => 'ये इस डेमो की सैंपल जानकारी है। बुकिंग करते समय साथी को सिर्फ़ नाम और पते का नाम भेजा जाता है।',
+			'profile.reset' => 'सैंपल जानकारी रीसेट करें',
+			'profile.someoneElse' => 'कोई और',
+			'profile.invalidAge' => '0 से 120 के बीच उम्र लिखें',
+			'profile.invalidPin' => '6 अंकों का पिनकोड लिखें',
+			'profile.bookingsFor' => ({required Object n}) => '${n} बुकिंग',
+			'profile.relations.self' => 'आप',
+			'profile.relations.father' => 'पिता',
+			'profile.relations.mother' => 'माँ',
+			'profile.relations.spouse' => 'जीवनसाथी',
+			'profile.relations.son' => 'बेटा',
+			'profile.relations.daughter' => 'बेटी',
+			'profile.relations.brother' => 'भाई',
+			'profile.relations.sister' => 'बहन',
+			'profile.relations.other' => 'अन्य',
+			'profile.genders.female' => 'महिला',
+			'profile.genders.male' => 'पुरुष',
+			'profile.genders.other' => 'अन्य',
 			_ => null,
 		};
 	}

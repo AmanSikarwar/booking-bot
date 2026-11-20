@@ -544,9 +544,19 @@ The catalogue also carries a version number, so the app knows when its bundled c
 | conversations | id, title (first user message, back-filled by the v3 migration), locale, flagged, created_at, updated_at (bumped on every message; orders the history) |
 | messages | id (same as client_message_id for user messages), conversation_id, role, kind (text or action), text, card type (packages, booking, slot alternatives, urgent, crisis, or none), card payload (JSON), status (queued, sending, streaming, sent, failed, incomplete), attempts, next attempt time, error, created_at |
 | bookings | id, booking_ref, conversation_id, package_id, English and Hindi package names, slot_date, time_window, address_label, patient_name, status, created_at |
-| app_meta | Key/value settings: locale, catalogue version |
+| app_meta | Key/value settings: locale, catalogue version, and `profile` (JSON, see 9.4) |
 
 The anonymous session itself is persisted by `supabase_flutter`.
+
+### 9.4 Profile (device only, synthetic)
+
+A Profile tab (5th phone tab; header avatar on tablet and desktop) holds the user's personal details: name, age, gender, phone, email, family members (relation, age, gender) and saved addresses (label, two lines, city, 6-digit pincode). On first launch it is seeded with an obviously synthetic family (Priya Sharma, +91 90000 00001, priya.sharma@example.com, Gurugram addresses). Everything is editable, and a reset button restores the sample. It is stored as one JSON value in `app_meta`, so no schema migration is needed.
+
+How it reaches bookings:
+- The booking form's patient field is a chip per profile person plus "Someone else"; the address field is a chip per saved address plus "Other", with the full address shown under the selected chip. Defaults: the user, at the first saved address.
+- A model-filled patient name or address label pre-selects the matching chip (case-insensitive; first name is enough). An unknown name falls back to "Someone else" with the name typed in.
+- Booking tickets (chat and My bookings) add the relation and age under the patient, and the full address under its label, when they match the profile.
+- Each chat request carries `profile`: only names, relations and address labels. Phone, email, ages and full addresses never leave the device. The server validates the payload (at most 8 people and 6 labels, known relations, length caps, newlines stripped) and adds one prompt rule so "book it for Papa" pre-fills the father's saved name.
 
 ---
 
@@ -566,6 +576,7 @@ The anonymous session itself is persisted by `supabase_flutter`.
 | locale | en or hi | Reply language |
 | text | text | The user's message |
 | client_created_at | timestamp with offset | When the message was typed, which may be while offline |
+| profile | object, optional | `{patients: [{name, relation}], addresses: [label]}` from the device profile (9.4); invalid entries are dropped |
 
 The server loads history itself, using the last 10 turns. The client never sends history, which keeps payloads small on weak networks and stops clients injecting fake assistant turns.
 

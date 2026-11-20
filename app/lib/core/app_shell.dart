@@ -11,7 +11,7 @@ class AppShell extends StatelessWidget {
   final String location;
   final Widget child;
 
-  static const _paths = ['/', '/history', '/bookings', '/packages'];
+  static const _paths = ['/', '/history', '/bookings', '/packages', '/profile'];
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,8 @@ class AppShell extends StatelessWidget {
                 0 => const ChatRoute().go(context),
                 1 => const HistoryRoute().go(context),
                 2 => const BookingsRoute().go(context),
-                _ => const CatalogRoute().go(context),
+                3 => const CatalogRoute().go(context),
+                _ => const ProfileRoute().go(context),
               },
               destinations: [
                 NavigationDestination(
@@ -54,6 +55,11 @@ class AppShell extends StatelessWidget {
                   icon: const Icon(Icons.science_outlined),
                   selectedIcon: const Icon(Icons.science, color: Palette.lavender),
                   label: t.packages,
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.person_outline),
+                  selectedIcon: const Icon(Icons.person, color: Palette.lavender),
+                  label: t.profile,
                 ),
               ],
             )

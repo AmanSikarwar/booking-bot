@@ -7,6 +7,7 @@ import 'package:saathi/features/chat/domain/models.dart';
 import 'package:flutter/services.dart';
 import 'package:saathi/features/chat/presentation/cards.dart';
 import 'package:saathi/features/chat/presentation/package_card.dart';
+import 'package:saathi/features/profile/profile.dart';
 import 'package:saathi/i18n/strings.g.dart';
 
 const diabetes = PackageSummary(
@@ -233,5 +234,21 @@ void main() {
     await pump(tester, const CrisisSupportCard());
     expect(find.textContaining('14416'), findsWidgets);
     expect(find.text('Call 14416'), findsOneWidget);
+  });
+
+  testWidgets('booking card describes family patients and saved addresses from the profile', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      BookingCardView(
+        booking: booking.copyWith(patientName: 'Ramesh Sharma', addressLabel: "Papa's house"),
+        onViewAll: null,
+        profile: sampleProfile,
+      ),
+    );
+    expect(find.text('Ramesh Sharma'), findsOneWidget);
+    expect(find.text('Father, 64 yrs'), findsOneWidget);
+    expect(find.text('House 21, Block C, Sector 9, Gurugram 122001'), findsOneWidget);
   });
 }

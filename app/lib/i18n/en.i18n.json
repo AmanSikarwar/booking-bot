@@ -127,8 +127,6 @@
     "date": "Date",
     "time": "Time window",
     "address": "Collection address",
-    "home": "Home",
-    "office": "Office",
     "other": "Other",
     "otherHint": "e.g. Papa's house",
     "patient": "Patient name",
@@ -173,7 +171,8 @@
     "history": "History",
     "bookings": "Bookings",
     "packages": "Packages",
-    "back": "Back to chat"
+    "back": "Back to chat",
+    "profile": "Profile"
   },
   "details": {
     "view": "Details",
@@ -189,5 +188,53 @@
     "doctorNote": "These tests don't give a diagnosis. A doctor can help interpret your results.",
     "close": "Close",
     "more": "+{n} more"
+  },
+  "profile": {
+    "title": "Profile",
+    "you": "You",
+    "family": "Family members",
+    "addresses": "Saved addresses",
+    "contact": "Contact",
+    "phone": "Phone",
+    "email": "Email",
+    "addPerson": "Add family member",
+    "addAddress": "Add address",
+    "editPerson": "Edit family member",
+    "editAddress": "Edit address",
+    "remove": "Remove",
+    "save": "Save",
+    "cancel": "Cancel",
+    "name": "Full name",
+    "age": "Age",
+    "relation": "Relation",
+    "gender": "Gender",
+    "label": "Label, e.g. Home",
+    "line1": "House or flat, building",
+    "line2": "Area or sector (optional)",
+    "city": "City",
+    "pincode": "Pincode",
+    "years": "{n} yrs",
+    "sample": "These are sample details for this demo. When you book, only names and address labels are shared with Saathi.",
+    "reset": "Reset sample data",
+    "someoneElse": "Someone else",
+    "invalidAge": "Enter an age from 0 to 120",
+    "invalidPin": "Enter a 6-digit pincode",
+    "bookingsFor": "{n} bookings",
+    "relations": {
+      "self": "You",
+      "father": "Father",
+      "mother": "Mother",
+      "spouse": "Spouse",
+      "son": "Son",
+      "daughter": "Daughter",
+      "brother": "Brother",
+      "sister": "Sister",
+      "other": "Other"
+    },
+    "genders": {
+      "female": "Female",
+      "male": "Male",
+      "other": "Other"
+    }
   }
 }

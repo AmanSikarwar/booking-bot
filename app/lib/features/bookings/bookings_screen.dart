@@ -14,6 +14,7 @@ import '../../i18n/strings.g.dart';
 import '../catalog/package.dart';
 import '../chat/domain/models.dart';
 import '../chat/presentation/cards.dart';
+import '../profile/profile_cubit.dart';
 import 'bookings_cubit.dart';
 
 class BookingsScreen extends StatelessWidget {
@@ -76,6 +77,7 @@ class BookingsList extends StatelessWidget {
                     for (final (i, b) in bookings.indexed)
                       BookingCardView(
                         onViewAll: null,
+                        profile: context.watch<ProfileCubit>().state,
                         booking: BookingInfo(
                           bookingRef: b.bookingRef,
                           packageId: b.packageId,

@@ -122,6 +122,9 @@ class AppDatabase extends _$AppDatabase {
   Future<String?> meta(String key) async =>
       (await (select(appMeta)..where((m) => m.key.equals(key))).getSingleOrNull())?.value;
 
+  Stream<String?> watchMeta(String key) =>
+      (select(appMeta)..where((m) => m.key.equals(key))).watchSingleOrNull().map((m) => m?.value);
+
   Future<void> setMeta(String key, String value) =>
       into(appMeta).insertOnConflictUpdate(AppMetaCompanion.insert(key: key, value: value));
 

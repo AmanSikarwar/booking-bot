@@ -9,11 +9,12 @@ import '../../../core/connectivity/connectivity_service.dart';
 import '../../../core/db/database.dart';
 import '../domain/chat_event.dart';
 import '../domain/models.dart';
+import '../../profile/profile_repository.dart';
 import 'chat_api.dart';
 
 @lazySingleton
 class Outbox {
-  Outbox(this._db, this._api, this._connectivity, this._clock);
+  Outbox(this._db, this._api, this._connectivity, this._clock, this._profile);
 
   static const maxAttempts = 5;
   static const _quotaCodes = {'quota_exhausted', 'user_daily_limit'};
@@ -22,6 +23,7 @@ class Outbox {
   final ChatApi _api;
   final ConnectivityService _connectivity;
   final Clock _clock;
+  final ProfileRepository _profile;
   StreamSubscription<bool>? _sub;
   Timer? _timer;
   bool _running = false;
@@ -84,8 +86,10 @@ class Outbox {
     var done = false;
     ErrorEvent? error;
     try {
+      final profile = (await _profile.current()).forAgent();
       final events = _api.send(
         ChatRequest(
+          profile: profile,
           conversationId: m.conversationId,
           clientMessageId: m.id,
           kind: m.kind.name,

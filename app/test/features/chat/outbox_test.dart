@@ -10,6 +10,8 @@ import 'package:saathi/features/chat/data/chat_api.dart';
 import 'package:saathi/features/chat/data/outbox.dart';
 import 'package:saathi/features/chat/domain/chat_event.dart';
 import 'package:saathi/features/chat/domain/models.dart';
+import 'package:saathi/features/profile/profile_repository.dart';
+import 'package:uuid/uuid.dart';
 
 class MockApi extends Mock implements ChatApi {}
 
@@ -65,7 +67,7 @@ void main() {
     when(() => connectivity.isOnline).thenReturn(true);
     when(() => connectivity.changes).thenAnswer((_) => const Stream.empty());
     when(() => connectivity.recheck()).thenAnswer((_) async {});
-    outbox = Outbox(db, api, connectivity, clock);
+    outbox = Outbox(db, api, connectivity, clock, ProfileRepository(db, const Uuid()));
     requests.clear();
     await db.ensureConversation('c1', 'en', clock.now());
   });
@@ -220,5 +222,20 @@ void main() {
     await db.patchMessage('m1', const MessagesCompanion(status: Value(MessageStatus.streaming)));
     await db.resetInFlight();
     expect((await msg('m1')).status, MessageStatus.queued);
+  });
+
+  test('requests carry only names, relations and address labels from the profile', () async {
+    await queue('m1', 'sugar test for papa');
+    reply([const ChatEvent.ack(replay: false), const ChatEvent.done()]);
+    await outbox.drainOnce();
+    final profile = requests.single.toJson()['profile']! as Map<String, Object?>;
+    expect(profile.keys, ['patients', 'addresses']);
+    expect((profile['patients']! as List).first, {'name': 'Priya Sharma', 'relation': 'self'});
+    expect(profile['addresses'], ['Home', 'Office', "Papa's house"]);
+    expect(
+      requests.single.toJson().toString(),
+      isNot(contains('90000')),
+      reason: 'no phone number',
+    );
   });
 }

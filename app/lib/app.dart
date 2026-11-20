@@ -9,6 +9,7 @@ import 'core/router.dart';
 import 'core/theme.dart';
 import 'features/chat/data/outbox.dart';
 import 'features/chat/presentation/chat_cubit.dart';
+import 'features/profile/profile_cubit.dart';
 import 'features/settings/locale_cubit.dart';
 import 'i18n/strings.g.dart';
 
@@ -33,6 +34,7 @@ class _SaathiAppState extends State<SaathiApp> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<LocaleCubit>()),
+        BlocProvider(create: (_) => getIt<ProfileCubit>()),
         BlocProvider(create: (_) => getIt<ConnectivityCubit>()),
         BlocProvider(
           create: (_) {

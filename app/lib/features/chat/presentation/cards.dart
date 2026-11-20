@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/motion.dart';
 import '../../../core/theme.dart';
 import '../../../i18n/strings.g.dart';
+import '../../profile/profile.dart';
+import '../../profile/profile_labels.dart';
 import '../domain/models.dart';
 
 final _rupees = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0);
@@ -28,7 +30,9 @@ String dateLabel(BuildContext context, String isoDate) {
 String _lang(BuildContext context) => TranslationProvider.of(context).flutterLocale.languageCode;
 
 class BookingCardView extends StatelessWidget {
-  const BookingCardView({super.key, required this.booking, required this.onViewAll});
+  const BookingCardView({super.key, required this.booking, required this.onViewAll, this.profile});
+
+  final Profile? profile;
 
   final BookingInfo booking;
   final VoidCallback? onViewAll;
@@ -149,8 +153,22 @@ class BookingCardView extends StatelessWidget {
                   '${dateLabel(context, b.date)} · ${windowLabel(context, b.timeWindow)}',
                   caption: t.booking.collector,
                 ),
-                _InfoRow(Icons.place_outlined, b.addressLabel),
-                _InfoRow(Icons.person_outline, b.patientName),
+                _InfoRow(
+                  Icons.place_outlined,
+                  b.addressLabel,
+                  detail: switch (profile?.addressLabelled(b.addressLabel)) {
+                    final a? => fullAddress(a),
+                    null => null,
+                  },
+                ),
+                _InfoRow(
+                  Icons.person_outline,
+                  b.patientName,
+                  detail: switch (profile?.personNamed(b.patientName)) {
+                    final p? => personLine(t, p),
+                    null => null,
+                  },
+                ),
                 if (b.fastingHours > 0)
                   _InfoRow(
                     Icons.no_food_outlined,
@@ -171,11 +189,12 @@ class BookingCardView extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow(this.icon, this.text, {this.caption, this.emphasis = false});
+  const _InfoRow(this.icon, this.text, {this.caption, this.detail, this.emphasis = false});
 
   final IconData icon;
   final String text;
   final String? caption;
+  final String? detail;
   final bool emphasis;
 
   @override
@@ -201,6 +220,11 @@ class _InfoRow extends StatelessWidget {
                     fontWeight: emphasis ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
+                if (detail != null)
+                  Text(
+                    detail!,
+                    style: const TextStyle(fontSize: 12, color: Palette.inkMuted, height: 1.35),
+                  ),
               ],
             ),
           ),

@@ -78,6 +78,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$history$en history = Translations$history$en.internal(_root);
 	late final Translations$nav$en nav = Translations$nav$en.internal(_root);
 	late final Translations$details$en details = Translations$details$en.internal(_root);
+	late final Translations$profile$en profile = Translations$profile$en.internal(_root);
 }
 
 // Path: chat
@@ -455,12 +456,6 @@ class Translations$form$en {
 	/// en: 'Collection address'
 	String get address => 'Collection address';
 
-	/// en: 'Home'
-	String get home => 'Home';
-
-	/// en: 'Office'
-	String get office => 'Office';
-
 	/// en: 'Other'
 	String get other => 'Other';
 
@@ -604,6 +599,9 @@ class Translations$nav$en {
 
 	/// en: 'Back to chat'
 	String get back => 'Back to chat';
+
+	/// en: 'Profile'
+	String get profile => 'Profile';
 }
 
 // Path: details
@@ -652,6 +650,162 @@ class Translations$details$en {
 
 	/// en: '+{n} more'
 	String more({required Object n}) => '+${n} more';
+}
+
+// Path: profile
+class Translations$profile$en {
+	Translations$profile$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Profile'
+	String get title => 'Profile';
+
+	/// en: 'You'
+	String get you => 'You';
+
+	/// en: 'Family members'
+	String get family => 'Family members';
+
+	/// en: 'Saved addresses'
+	String get addresses => 'Saved addresses';
+
+	/// en: 'Contact'
+	String get contact => 'Contact';
+
+	/// en: 'Phone'
+	String get phone => 'Phone';
+
+	/// en: 'Email'
+	String get email => 'Email';
+
+	/// en: 'Add family member'
+	String get addPerson => 'Add family member';
+
+	/// en: 'Add address'
+	String get addAddress => 'Add address';
+
+	/// en: 'Edit family member'
+	String get editPerson => 'Edit family member';
+
+	/// en: 'Edit address'
+	String get editAddress => 'Edit address';
+
+	/// en: 'Remove'
+	String get remove => 'Remove';
+
+	/// en: 'Save'
+	String get save => 'Save';
+
+	/// en: 'Cancel'
+	String get cancel => 'Cancel';
+
+	/// en: 'Full name'
+	String get name => 'Full name';
+
+	/// en: 'Age'
+	String get age => 'Age';
+
+	/// en: 'Relation'
+	String get relation => 'Relation';
+
+	/// en: 'Gender'
+	String get gender => 'Gender';
+
+	/// en: 'Label, e.g. Home'
+	String get label => 'Label, e.g. Home';
+
+	/// en: 'House or flat, building'
+	String get line1 => 'House or flat, building';
+
+	/// en: 'Area or sector (optional)'
+	String get line2 => 'Area or sector (optional)';
+
+	/// en: 'City'
+	String get city => 'City';
+
+	/// en: 'Pincode'
+	String get pincode => 'Pincode';
+
+	/// en: '{n} yrs'
+	String years({required Object n}) => '${n} yrs';
+
+	/// en: 'These are sample details for this demo. When you book, only names and address labels are shared with Saathi.'
+	String get sample => 'These are sample details for this demo. When you book, only names and address labels are shared with Saathi.';
+
+	/// en: 'Reset sample data'
+	String get reset => 'Reset sample data';
+
+	/// en: 'Someone else'
+	String get someoneElse => 'Someone else';
+
+	/// en: 'Enter an age from 0 to 120'
+	String get invalidAge => 'Enter an age from 0 to 120';
+
+	/// en: 'Enter a 6-digit pincode'
+	String get invalidPin => 'Enter a 6-digit pincode';
+
+	/// en: '{n} bookings'
+	String bookingsFor({required Object n}) => '${n} bookings';
+
+	late final Translations$profile$relations$en relations = Translations$profile$relations$en.internal(_root);
+	late final Translations$profile$genders$en genders = Translations$profile$genders$en.internal(_root);
+}
+
+// Path: profile.relations
+class Translations$profile$relations$en {
+	Translations$profile$relations$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'You'
+	String get self => 'You';
+
+	/// en: 'Father'
+	String get father => 'Father';
+
+	/// en: 'Mother'
+	String get mother => 'Mother';
+
+	/// en: 'Spouse'
+	String get spouse => 'Spouse';
+
+	/// en: 'Son'
+	String get son => 'Son';
+
+	/// en: 'Daughter'
+	String get daughter => 'Daughter';
+
+	/// en: 'Brother'
+	String get brother => 'Brother';
+
+	/// en: 'Sister'
+	String get sister => 'Sister';
+
+	/// en: 'Other'
+	String get other => 'Other';
+}
+
+// Path: profile.genders
+class Translations$profile$genders$en {
+	Translations$profile$genders$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Female'
+	String get female => 'Female';
+
+	/// en: 'Male'
+	String get male => 'Male';
+
+	/// en: 'Other'
+	String get other => 'Other';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -752,8 +906,6 @@ extension on Translations {
 			'form.date' => 'Date',
 			'form.time' => 'Time window',
 			'form.address' => 'Collection address',
-			'form.home' => 'Home',
-			'form.office' => 'Office',
 			'form.other' => 'Other',
 			'form.otherHint' => 'e.g. Papa\'s house',
 			'form.patient' => 'Patient name',
@@ -793,6 +945,7 @@ extension on Translations {
 			'nav.bookings' => 'Bookings',
 			'nav.packages' => 'Packages',
 			'nav.back' => 'Back to chat',
+			'nav.profile' => 'Profile',
 			'details.view' => 'Details',
 			'details.about' => 'About this package',
 			'details.facts' => 'At a glance',
@@ -806,6 +959,48 @@ extension on Translations {
 			'details.doctorNote' => 'These tests don\'t give a diagnosis. A doctor can help interpret your results.',
 			'details.close' => 'Close',
 			'details.more' => ({required Object n}) => '+${n} more',
+			'profile.title' => 'Profile',
+			'profile.you' => 'You',
+			'profile.family' => 'Family members',
+			'profile.addresses' => 'Saved addresses',
+			'profile.contact' => 'Contact',
+			'profile.phone' => 'Phone',
+			'profile.email' => 'Email',
+			'profile.addPerson' => 'Add family member',
+			'profile.addAddress' => 'Add address',
+			'profile.editPerson' => 'Edit family member',
+			'profile.editAddress' => 'Edit address',
+			'profile.remove' => 'Remove',
+			'profile.save' => 'Save',
+			'profile.cancel' => 'Cancel',
+			'profile.name' => 'Full name',
+			'profile.age' => 'Age',
+			'profile.relation' => 'Relation',
+			'profile.gender' => 'Gender',
+			'profile.label' => 'Label, e.g. Home',
+			'profile.line1' => 'House or flat, building',
+			'profile.line2' => 'Area or sector (optional)',
+			'profile.city' => 'City',
+			'profile.pincode' => 'Pincode',
+			'profile.years' => ({required Object n}) => '${n} yrs',
+			'profile.sample' => 'These are sample details for this demo. When you book, only names and address labels are shared with Saathi.',
+			'profile.reset' => 'Reset sample data',
+			'profile.someoneElse' => 'Someone else',
+			'profile.invalidAge' => 'Enter an age from 0 to 120',
+			'profile.invalidPin' => 'Enter a 6-digit pincode',
+			'profile.bookingsFor' => ({required Object n}) => '${n} bookings',
+			'profile.relations.self' => 'You',
+			'profile.relations.father' => 'Father',
+			'profile.relations.mother' => 'Mother',
+			'profile.relations.spouse' => 'Spouse',
+			'profile.relations.son' => 'Son',
+			'profile.relations.daughter' => 'Daughter',
+			'profile.relations.brother' => 'Brother',
+			'profile.relations.sister' => 'Sister',
+			'profile.relations.other' => 'Other',
+			'profile.genders.female' => 'Female',
+			'profile.genders.male' => 'Male',
+			'profile.genders.other' => 'Other',
 			_ => null,
 		};
 	}

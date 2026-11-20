@@ -5,6 +5,7 @@ import 'package:saathi/core/theme.dart';
 import 'package:saathi/features/catalog/package.dart';
 import 'package:saathi/features/chat/domain/models.dart';
 import 'package:saathi/features/chat/presentation/booking_form.dart';
+import 'package:saathi/features/profile/profile.dart';
 import 'package:saathi/i18n/strings.g.dart';
 
 final now = DateTime.utc(2026, 11, 20, 4, 30);
@@ -26,7 +27,12 @@ Future<void> pump(
         theme: buildTheme(),
         home: Scaffold(
           body: SingleChildScrollView(
-            child: BookingFormView(form: form, onSubmit: onSubmit, now: now),
+            child: BookingFormView(
+              form: form,
+              profile: sampleProfile,
+              onSubmit: onSubmit,
+              now: now,
+            ),
           ),
         ),
       ),
@@ -66,7 +72,7 @@ void main() {
         date: '2026-11-22',
         timeWindow: '07-09',
         addressLabel: 'Home',
-        patientName: 'Priya',
+        patientName: 'Priya Sharma',
       ),
     );
   });
@@ -108,33 +114,97 @@ void main() {
     await tester.pump();
     expect(calls, 0);
     expect(find.text('Pick a date'), findsOneWidget);
-    expect(find.text('Required'), findsOneWidget);
     await tester.tap(find.text('Tomorrow'));
     await tester.pump();
     expect(find.text('Pick a time window'), findsOneWidget);
   });
 
-  testWidgets('other address uses the typed label; Hindi chips send Hindi labels', (tester) async {
+  testWidgets('patient and address come from the profile; family names pre-select', (tester) async {
     SlotRequest? sent;
     await pump(
       tester,
       const BookingFormData(
         packageId: 'pkg_thyroid_profile',
         packageName: thyroid,
-        fastingHours: 10,
-        prefill: FormPrefill(date: '2026-11-21', timeWindow: '09-11', patientName: 'रमेश'),
+        prefill: FormPrefill(
+          date: '2026-11-21',
+          timeWindow: '09-11',
+          patientName: 'Ramesh Sharma',
+          addressLabel: "papa's house",
+        ),
       ),
       onSubmit: (r) => sent = r,
-      locale: AppLocale.hi,
     );
-    expect(find.text('सैंपल से पहले 10 घंटे खाली पेट रहें'), findsOneWidget);
-    await tester.tap(find.text('बुकिंग पक्की करें'));
-    expect(sent?.addressLabel, 'घर');
-    await tester.tap(find.text('दूसरा'));
-    await tester.pump();
-    await tester.enterText(find.byType(TextField).first, 'पापा का घर');
-    await tester.tap(find.text('बुकिंग पक्की करें'));
-    expect(sent?.addressLabel, 'पापा का घर');
+    expect(chip(tester, 'Ramesh · Father').selected, isTrue);
+    expect(chip(tester, "Papa's house").selected, isTrue);
+    expect(find.text('House 21, Block C, Sector 9, Gurugram 122001'), findsOneWidget);
+    for (final label in [
+      'Priya · You',
+      'Sunita · Mother',
+      'Arjun · Spouse',
+      'Someone else',
+      'Home',
+      'Office',
+      'Other',
+    ]) {
+      expect(find.widgetWithText(ChoiceChip, label), findsOneWidget, reason: label);
+    }
+    await tester.tap(find.text('Confirm booking'));
+    expect(
+      sent,
+      const SlotRequest(
+        date: '2026-11-21',
+        timeWindow: '09-11',
+        addressLabel: "Papa's house",
+        patientName: 'Ramesh Sharma',
+      ),
+    );
+  });
+
+  testWidgets(
+    'defaults to you at the first saved address; someone else and other take typed values',
+    (tester) async {
+      SlotRequest? sent;
+      await pump(
+        tester,
+        const BookingFormData(
+          packageId: 'pkg_thyroid_profile',
+          packageName: thyroid,
+          prefill: FormPrefill(date: '2026-11-21', timeWindow: '09-11'),
+        ),
+        onSubmit: (r) => sent = r,
+        locale: AppLocale.hi,
+      );
+      expect(chip(tester, 'Priya · आप').selected, isTrue);
+      expect(chip(tester, 'Home').selected, isTrue);
+      await tester.tap(find.text('बुकिंग पक्की करें'));
+      expect([sent?.patientName, sent?.addressLabel], ['Priya Sharma', 'Home']);
+      await tester.tap(find.text('कोई और'));
+      await tester.pump();
+      await tester.tap(find.text('बुकिंग पक्की करें'));
+      await tester.pump();
+      expect(find.text('ज़रूरी है'), findsOneWidget);
+      await tester.enterText(find.byType(TextField).first, 'कमला देवी');
+      await tester.tap(find.text('दूसरा'));
+      await tester.pump();
+      await tester.enterText(find.byType(TextField).last, 'मौसी का घर');
+      await tester.tap(find.text('बुकिंग पक्की करें'));
+      expect([sent?.patientName, sent?.addressLabel], ['कमला देवी', 'मौसी का घर']);
+    },
+  );
+
+  testWidgets('a name not in the profile pre-fills someone else', (tester) async {
+    await pump(
+      tester,
+      const BookingFormData(
+        packageId: 'pkg_thyroid_profile',
+        packageName: thyroid,
+        prefill: FormPrefill(patientName: 'Kamla Devi'),
+      ),
+      onSubmit: (_) {},
+    );
+    expect(chip(tester, 'Someone else').selected, isTrue);
+    expect(find.text('Kamla Devi'), findsOneWidget);
   });
 
   testWidgets('submitted form shows a read-only summary', (tester) async {

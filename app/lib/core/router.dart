@@ -5,6 +5,7 @@ import '../features/bookings/bookings_screen.dart';
 import '../features/catalog/catalog_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/history/history.dart';
+import '../features/profile/profile_screen.dart';
 import 'app_shell.dart';
 import 'motion.dart';
 
@@ -16,6 +17,7 @@ part 'router.g.dart';
     TypedGoRoute<HistoryRoute>(path: '/history'),
     TypedGoRoute<BookingsRoute>(path: '/bookings'),
     TypedGoRoute<CatalogRoute>(path: '/packages'),
+    TypedGoRoute<ProfileRoute>(path: '/profile'),
   ],
 )
 class AppShellRoute extends ShellRouteData {
@@ -56,6 +58,14 @@ class CatalogRoute extends GoRouteData with $CatalogRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
       _fade(context, state, const CatalogScreen());
+}
+
+class ProfileRoute extends GoRouteData with $ProfileRoute {
+  const ProfileRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _fade(context, state, const ProfileScreen());
 }
 
 Page<void> _fade(BuildContext context, GoRouterState state, Widget child) => Motion.on(context)

@@ -9,6 +9,7 @@ import 'package:saathi/features/chat/domain/models.dart';
 import 'package:saathi/features/chat/presentation/bubbles.dart';
 import 'package:saathi/features/chat/presentation/cards.dart';
 import 'package:saathi/features/chat/presentation/package_card.dart';
+import 'package:saathi/features/profile/profile.dart';
 import 'package:saathi/i18n/strings.g.dart';
 
 const name = Localized(
@@ -134,7 +135,14 @@ void main() {
                             height: 900,
                             child: PackageDetailsView(pkg: pkg, details: details, onBook: () {}),
                           ),
-                          BookingCardView(booking: booking, onViewAll: () {}),
+                          BookingCardView(
+                            booking: booking.copyWith(
+                              patientName: 'Ramesh Sharma',
+                              addressLabel: "Papa's house",
+                            ),
+                            onViewAll: () {},
+                            profile: sampleProfile,
+                          ),
                           SlotsCardView(offer: offer, onPick: (_) {}),
                           const UrgentCareCard(),
                           const CrisisSupportCard(),

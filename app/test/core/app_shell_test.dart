@@ -10,7 +10,7 @@ GoRouter testRouter() => GoRouter(
     ShellRoute(
       builder: (context, state, child) => AppShell(location: state.uri.path, child: child),
       routes: [
-        for (final p in ['/', '/history', '/bookings', '/packages'])
+        for (final p in ['/', '/history', '/bookings', '/packages', '/profile'])
           GoRoute(
             path: p,
             builder: (_, _) => Scaffold(body: Text('page $p')),
@@ -37,7 +37,7 @@ Future<void> pump(WidgetTester tester, {double width = 390, double keyboard = 0}
 void main() {
   testWidgets('phones get a bottom bar with all four destinations', (tester) async {
     await pump(tester);
-    for (final label in ['Chat', 'History', 'Bookings', 'Packages']) {
+    for (final label in ['Chat', 'History', 'Bookings', 'Packages', 'Profile']) {
       expect(find.text(label), findsOneWidget);
     }
     await tester.tap(find.text('History'));
@@ -47,6 +47,9 @@ void main() {
     await tester.tap(find.text('Packages'));
     await tester.pumpAndSettle();
     expect(find.text('page /packages'), findsOneWidget);
+    await tester.tap(find.text('Profile'));
+    await tester.pumpAndSettle();
+    expect(find.text('page /profile'), findsOneWidget);
   });
 
   testWidgets('bottom bar hides while the keyboard is open', (tester) async {
