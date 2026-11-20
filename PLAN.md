@@ -39,7 +39,7 @@ Today, users have to browse long test lists they don't understand, or call the l
 2. **Symptom to package (no diagnosis):** "I feel tired and my hair is falling" → Saathi says these tests are *commonly ordered* in such cases, shows cards, and suggests consulting a doctor to interpret results.
 3. **Red flag:** "I have chest pain and can't breathe properly", or a paraphrase such as "my left arm went numb and I'm sweating a lot" → **urgent-care card** (call 112 / 108), with no packages and no booking.
 4. **Offline:** the user opens the app on a train with no signal → sees past chats and bookings → types a message → it is marked *Queued* → it sends automatically when the network returns, and the reply streams in.
-5. **Back to an earlier chat:** the user opens *Chats* (side panel on desktop, header on tablets, menu on phones) → past conversations, newest first, titled by their first message, with paused chats marked → tap one to continue it, offline too.
+5. **Back to an earlier chat:** the user opens *History* (bottom bar on phones, header on tablets, side panel on desktop) → past conversations, newest first, titled by their first message, with paused chats marked → tap one to continue it, offline too.
 6. **Language switch:** the user toggles to Hindi → UI strings, package names and Saathi's replies all switch to Hindi.
 
 ---
@@ -256,7 +256,7 @@ Suggestion chips sit just above the message box (a scrolling row on phones, wrap
 
 | Window | Layout |
 |---|---|
-| Compact (< 600 px) | Single column; cards use the full width; header shows icons and a menu; subtitle hides at large text sizes |
+| Compact (< 600 px) | Single column; cards use the full width; header has the language toggle and *New chat*; a bottom navigation bar (Chat · History · Bookings · Packages) that hides while the keyboard is open; subtitle hides at large text sizes |
 | Medium (600–1199 px) | Conversation centred in a 760 px column with the composer aligned to it; package cards two per row; labelled header actions |
 | Expanded (≥ 1200 px) | Two panes: chat, plus a side panel with **My bookings** and **All packages** tabs, so booking and browsing never leave the chat |
 
