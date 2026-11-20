@@ -420,6 +420,8 @@ export async function runTurn(
           if (row !== "ref_taken") booking = row;
         }
         if (!booking) throw new Error("no free booking reference");
+      } else if (booking.address_label !== a.address_label) {
+        booking = await store.updateBookingAddress(booking.booking_ref, a.address_label);
       }
       record("booking_confirmed", {
         booking_ref: booking.booking_ref,

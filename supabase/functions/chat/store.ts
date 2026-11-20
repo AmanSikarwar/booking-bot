@@ -89,6 +89,7 @@ export interface Store {
   bookingSafetyMessages(conversationId: string, n: number): Promise<BookingSafetyMessage[]>;
   findBooking(idempotencyKey: string): Promise<BookingRow | null>;
   insertBooking(b: BookingRow): Promise<BookingRow | "ref_taken">;
+  updateBookingAddress(bookingRef: string, addressLabel: string): Promise<BookingRow>;
   logSafety(s: SafetyCheck): Promise<void>;
   logUsage(u: UsageRow): Promise<void>;
 }
@@ -210,6 +211,13 @@ export class SupabaseStore implements Store {
     if (error?.code === "23505") return (await this.findBooking(b.idempotency_key)) ?? "ref_taken";
     if (error) throw new Error(error.message);
     return data;
+  }
+
+  async updateBookingAddress(bookingRef: string, addressLabel: string) {
+    return must(
+      await this.db.from("bookings").update({ address_label: addressLabel }).eq("booking_ref", bookingRef)
+        .select("*").single(),
+    );
   }
 
   async logSafety(s: SafetyCheck) {

@@ -539,3 +539,21 @@ Deno.test("booking: a reference already taken by another booking falls through t
   assert(names.includes("booking_confirmed"));
   assertEquals(events.find((e) => e.event === "booking_confirmed")!.data.booking_ref, bookingRef(key, 1));
 });
+
+Deno.test("booking: the same slot booked again with a new address moves the booking, not duplicates it", async () => {
+  const date = "2026-11-22";
+  const w = free(date);
+  const { deps, store } = setup({
+    chat: new ScriptedChat([[call("book_slot", bookArgs(date, w))], [text("Done.")]]),
+  });
+  const first = await turn(deps, input("book it"));
+  const ref = first.events.find((e) => e.event === "booking_confirmed")!.data.booking_ref;
+  deps.chat = new ScriptedChat([[call("book_slot", { ...bookArgs(date, w), address_label: "Office" })], [
+    text("Moved."),
+  ]]);
+  const moved = await turn(deps, input("make it Office instead"));
+  const confirmed = moved.events.find((e) => e.event === "booking_confirmed")!.data;
+  assertEquals([confirmed.booking_ref, confirmed.address_label], [ref, "Office"]);
+  assertEquals(store.bookings.length, 1);
+  assertEquals(store.bookings[0].address_label, "Office");
+});

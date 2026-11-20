@@ -124,6 +124,11 @@ export class MemoryStore implements Store {
     this.bookings.push(b);
     return Promise.resolve(b);
   }
+  updateBookingAddress(bookingRef: string, addressLabel: string) {
+    const b = this.bookings.find((x) => x.booking_ref === bookingRef)!;
+    b.address_label = addressLabel;
+    return Promise.resolve(b);
+  }
   logSafety(s: SafetyCheck) {
     this.safety.push(s);
     return Promise.resolve();
