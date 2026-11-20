@@ -1,3 +1,4 @@
+import { ModelQuotaExceeded } from "./quota.ts";
 import { parseSse } from "./sse.ts";
 
 export interface ToolCall {
@@ -119,6 +120,7 @@ export class OpenRouterChat implements ChatModel {
           body,
         });
       } catch (e) {
+        if (e instanceof ModelQuotaExceeded) throw e;
         if (attempt === 0) continue;
         throw new LlmError("upstream_error", String(e), undefined, Date.now() - started);
       }

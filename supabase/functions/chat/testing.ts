@@ -131,12 +131,4 @@ export class MemoryStore implements Store {
     this.usage.push({ ...u, created_at: this.#ts() });
     return Promise.resolve();
   }
-  usageCountSince(since: string) {
-    return Promise.resolve(this.usage.filter((u) => u.created_at >= since).length);
-  }
-  userTurnsSince(userId: string, since: string) {
-    return Promise.resolve(
-      this.messages.filter((m) => m.user_id === userId && m.role === "user" && m.created_at >= since).length,
-    );
-  }
 }

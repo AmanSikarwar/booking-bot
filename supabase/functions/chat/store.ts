@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Locale } from "./catalog.ts";
+import type { QuotaDenial } from "./quota.ts";
 import type { StreamEvent } from "./sse.ts";
 
 export interface Conversation {
@@ -90,8 +91,6 @@ export interface Store {
   insertBooking(b: BookingRow): Promise<BookingRow>;
   logSafety(s: SafetyCheck): Promise<void>;
   logUsage(u: UsageRow): Promise<void>;
-  usageCountSince(since: string): Promise<number>;
-  userTurnsSince(userId: string, since: string): Promise<number>;
 }
 
 function must<T>(r: { data: T; error: { message: string } | null }): T {
@@ -221,18 +220,8 @@ export class SupabaseStore implements Store {
     must(await this.db.from("llm_usage").insert({ ...u, provider: "openrouter" }));
   }
 
-  async usageCountSince(since: string) {
-    const { count, error } = await this.db.from("llm_usage").select("id", { count: "exact", head: true })
-      .gte("created_at", since);
-    if (error) throw new Error(error.message);
-    return count ?? 0;
-  }
-
-  async userTurnsSince(userId: string, since: string) {
-    const { count, error } = await this.db.from("messages").select("id", { count: "exact", head: true })
-      .eq("user_id", userId).eq("role", "user").gte("created_at", since);
-    if (error) throw new Error(error.message);
-    return count ?? 0;
+  async reserveQuota(scope: "chat" | "openrouter") {
+    return must(await this.db.rpc("reserve_chat_quota", { p_scope: scope })) as QuotaDenial | null;
   }
 }
 

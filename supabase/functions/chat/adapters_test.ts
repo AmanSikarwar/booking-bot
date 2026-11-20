@@ -1,6 +1,7 @@
 import { assert, assertEquals, assertRejects } from "@std/assert";
 import { type ChatChunk, LlmError, OpenRouterChat } from "./llm.ts";
 import { escalation, OpenRouterDecider } from "./decider.ts";
+import { ModelQuotaExceeded, withModelBudget } from "./quota.ts";
 
 function sseResponse(lines: string[], split = 7): Response {
   const raw = lines.map((l) => `data: ${l}\n\n`).join("");
@@ -69,6 +70,25 @@ Deno.test("chat adapter: 5xx retried once then fails", async () => {
   });
   const err = await assertRejects(() => collect(model.stream({ messages: [] })), LlmError);
   assertEquals([err.code, calls], ["upstream_error", 2]);
+});
+
+Deno.test("model budget blocks upstream retries and is shared with triage", async () => {
+  let reservations = 0;
+  let requests = 0;
+  const budgetedFetch = withModelBudget(
+    () => Promise.resolve(++reservations === 1 ? null : { code: "quota_exhausted", retry_after: 120 }),
+    () => {
+      requests++;
+      return Promise.resolve(new Response("upstream failure", { status: 502 }));
+    },
+  );
+  const chat = new OpenRouterChat("k", "m", budgetedFetch);
+  const err = await assertRejects(() => collect(chat.stream({ messages: [] })), ModelQuotaExceeded);
+  assertEquals([err.retryAfter, requests, reservations], [120, 1, 2]);
+
+  const triage = await new OpenRouterDecider("k", "m", budgetedFetch).triage([], "en");
+  assert(!triage.ok && triage.reason === "quota_exhausted");
+  assertEquals([triage.retryAfter, requests, reservations], [120, 1, 3]);
 });
 
 Deno.test("chat adapter: mid-stream error chunk throws", async () => {

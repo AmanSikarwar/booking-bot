@@ -10,6 +10,7 @@ import {
   systemPrompt,
   TOOLS,
 } from "./prompt.ts";
+import { ModelQuotaExceeded } from "./quota.ts";
 import type { RedFlagDetector } from "./redflag.ts";
 import { alternatives, bookableDates, bookingRef, idempotencyKey, isBookable, isFull, TIME_WINDOWS } from "./slots.ts";
 import type { StreamEvent } from "./sse.ts";
@@ -24,7 +25,6 @@ export interface Deps {
   catalog: Catalog;
   now: () => Date;
   newId: () => string;
-  limits: { userTurnsPerDay: number; globalRequestsPerDay: number; staleMs: number };
 }
 
 export interface TurnInput {
@@ -43,6 +43,7 @@ export type Begin =
   | { kind: "run"; userMessageId: string; conversation: Conversation };
 
 const MAX_TOOL_ROUNDS = 3;
+const STALE_TURN_MS = 90_000;
 const BOOKING_INTENT = /\b(book|booking|schedule|appointment|slot|reserve|collection)|बुक|स्लॉट|कलेक्शन|अपॉइंटमेंट/i;
 const HISTORY_TURNS = 10;
 const HELPLINES = { urgent: ["112", "108"], crisis: ["14416"] };
@@ -83,7 +84,7 @@ export async function beginTurn(deps: Deps, input: TurnInput): Promise<Begin> {
     const events = await store.replyEvents(existing.id);
     if (events) return { kind: "replay", events };
   }
-  const staleBefore = new Date(deps.now().getTime() - deps.limits.staleMs).toISOString();
+  const staleBefore = new Date(deps.now().getTime() - STALE_TURN_MS).toISOString();
   if (existing.status === "completed" || await store.claimStale(existing.id, staleBefore)) {
     return { kind: "run", userMessageId: existing.id, conversation: conv };
   }
@@ -141,6 +142,7 @@ export async function runTurn(
     else record("crisis_support", { category, helplines: HELPLINES.crisis });
     await finish("");
   };
+  const quotaExhausted = (retryAfter: number) => fail("quota_exhausted", "daily model quota reached", true, retryAfter);
 
   emit({ event: "ack", data: { client_message_id: input.clientMessageId, replay: false } });
 
@@ -157,20 +159,13 @@ export async function runTurn(
     }
 
     const now = deps.now();
-    const dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString();
-    const untilReset = Math.ceil((Date.parse(dayStart) + 86_400_000 - now.getTime()) / 1000);
-    if (await store.userTurnsSince(input.userId, dayStart) > deps.limits.userTurnsPerDay) {
-      if (hit) return await keywordFloor("decider_unavailable");
-      return await fail("user_daily_limit", "daily message limit reached", true, untilReset);
-    }
-    if (await store.usageCountSince(dayStart) >= deps.limits.globalRequestsPerDay) {
-      if (hit) return await keywordFloor("decider_unavailable");
-      return await fail("quota_exhausted", "daily model quota reached", true, untilReset);
-    }
-
     if (input.kind === "text") {
       const recent = await store.recentUserTexts(conv.id, 3);
       const t = await deps.decider.triage(recent.length ? recent : [input.text], locale);
+      if (!t.ok && t.reason === "quota_exhausted") {
+        if (hit) return await keywordFloor("decider_unavailable");
+        return await quotaExhausted(t.retryAfter);
+      }
       if (t.ok) {
         await log({
           kind: "decision",
@@ -226,6 +221,7 @@ export async function runTurn(
     ];
     let text = "";
     let invalid = 0;
+    let quotaAfterCard = false;
 
     for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
       let roundText = "";
@@ -250,6 +246,15 @@ export async function runTurn(
           }
         }
       } catch (e) {
+        if (
+          e instanceof ModelQuotaExceeded &&
+          events.some((event) =>
+            ["package_cards", "booking_form", "booking_confirmed", "slot_unavailable"].includes(event.event)
+          )
+        ) {
+          quotaAfterCard = true;
+          break;
+        }
         if (e instanceof LlmError) {
           await log({
             kind: "chat",
@@ -285,7 +290,7 @@ export async function runTurn(
       }
     }
 
-    if (!text.trim()) {
+    if (!text.trim() && !quotaAfterCard) {
       const shown = events.some((e) =>
         e.event === "package_cards" || e.event === "booking_confirmed" || e.event === "slot_unavailable"
       );
@@ -299,10 +304,12 @@ export async function runTurn(
     }
     await finish(text);
   } catch (e) {
-    console.error(e);
-    if (e instanceof LlmError && e.code === "rate_limited") {
+    if (e instanceof ModelQuotaExceeded) {
+      await quotaExhausted(e.retryAfter);
+    } else if (e instanceof LlmError && e.code === "rate_limited") {
       await fail("rate_limited", "the model is busy", true, e.retryAfter);
     } else {
+      console.error(e);
       await fail("llm_unavailable", "the assistant is unavailable", true);
     }
   }
@@ -355,10 +362,12 @@ export async function runTurn(
       const a = v.value;
       const fresh = await store.getConversation(conv.id);
       const messages = await store.bookingSafetyMessages(conv.id, 50);
-      if (fresh?.flagged || messages.some(({ text, checks }) => {
-        const hit = deps.detector.detect(text);
-        return hit && (!hit.soft || !checks.length || checks.some((check) => check.outcome !== "pass"));
-      })) {
+      if (
+        fresh?.flagged || messages.some(({ text, checks }) => {
+          const hit = deps.detector.detect(text);
+          return hit && (!hit.soft || !checks.length || checks.some((check) => check.outcome !== "pass"));
+        })
+      ) {
         return { content: { error: "booking_blocked_for_safety", message: "Do not book. Advise urgent care." } };
       }
       const key = await idempotencyKey({

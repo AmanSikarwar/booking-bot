@@ -7,6 +7,7 @@ import { MockChat, MockDecider } from "./mocks.ts";
 import { RedFlagDetector } from "./redflag.ts";
 import { encodeEvent, type StreamEvent } from "./sse.ts";
 import { parseProfile } from "./prompt.ts";
+import { withModelBudget } from "./quota.ts";
 import { SupabaseStore } from "./store.ts";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
@@ -17,13 +18,15 @@ const secretKey = env("SUPABASE_SECRET_KEYS")
   : env("SUPABASE_SERVICE_ROLE_KEY");
 const admin = createClient(env("SUPABASE_URL"), secretKey, { auth: { persistSession: false } });
 const mock = env("LLM_MODE") === "mock";
+const store = new SupabaseStore(admin);
+const modelFetch = withModelBudget(() => store.reserveQuota("openrouter"));
 
 const deps: Deps = {
-  store: new SupabaseStore(admin),
+  store,
   chat: mock ? new MockChat() : new OpenRouterChat(
     env("OPENROUTER_API_KEY"),
     env("LLM_MODEL") || "deepseek/deepseek-v4.1-flash-1017",
-    fetch,
+    modelFetch,
     (env("LLM_FALLBACK_MODELS") ||
       "google/gemma-4-26b-a4b-it:free,nvidia/nemotron-3.5-super-vl:free")
       .split(",").map((m) => m.trim()).filter(Boolean),
@@ -31,22 +34,19 @@ const deps: Deps = {
   decider: mock ? new MockDecider() : new OpenRouterDecider(
     env("OPENROUTER_API_KEY"),
     env("DECIDER_MODEL") || "perplexity/pplx-decider-flash-v1.3:free",
+    modelFetch,
   ),
   detector: new RedFlagDetector(),
   catalog: new Catalog(),
   now: () => new Date(),
   newId: () => crypto.randomUUID(),
-  limits: {
-    userTurnsPerDay: Number(env("USER_TURNS_PER_DAY")) || 25,
-    globalRequestsPerDay: Number(env("GLOBAL_REQUESTS_PER_DAY")) || 900,
-    staleMs: 90_000,
-  },
 };
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, HEAD, OPTIONS",
+  "Access-Control-Expose-Headers": "Retry-After",
 };
 const SSE_HEADERS = {
   ...CORS,
@@ -57,8 +57,10 @@ const SSE_HEADERS = {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function error(status: number, code: string, message: string, retryable = false) {
-  return Response.json({ code, message, retryable }, { status, headers: CORS });
+function error(status: number, code: string, message: string, retryable = false, retryAfter?: number) {
+  const headers = new Headers(CORS);
+  if (retryAfter !== undefined) headers.set("Retry-After", String(retryAfter));
+  return Response.json({ code, message, retryable, retry_after: retryAfter }, { status, headers });
 }
 
 function parseBody(b: unknown, userId: string): TurnInput | null {
@@ -103,15 +105,13 @@ Deno.serve(async (req) => {
     return error(401, "unauthorized", "a valid session token is required", true);
   }
 
-  let input: TurnInput | null;
   try {
-    input = parseBody(await req.json(), userId);
-  } catch {
-    input = null;
-  }
-  if (!input) return error(400, "invalid_request", "invalid request body");
+    const denial = await store.reserveQuota("chat");
+    if (denial) return error(429, denial.code, "chat request limit reached", true, denial.retry_after);
 
-  try {
+    const input = parseBody(await req.json().catch(() => null), userId);
+    if (!input) return error(400, "invalid_request", "invalid request body");
+
     const begin = await beginTurn(deps, input);
     if (begin.kind === "error") return error(begin.status, begin.code, begin.message, begin.status === 409);
     if (begin.kind === "replay") {

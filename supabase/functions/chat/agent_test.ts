@@ -5,6 +5,7 @@ import type { Triage } from "./decider.ts";
 import type { ChatChunk, ChatModel, ChatRequest } from "./llm.ts";
 import { MockChat, MockDecider } from "./mocks.ts";
 import { parseProfile, systemPrompt } from "./prompt.ts";
+import { ModelQuotaExceeded } from "./quota.ts";
 import { RedFlagDetector } from "./redflag.ts";
 import { isFull, TIME_WINDOWS } from "./slots.ts";
 import type { StreamEvent } from "./sse.ts";
@@ -35,7 +36,7 @@ const call = (name: string, args: unknown, id = name): ChatChunk => ({
   }],
 });
 
-function setup(opts: { chat?: ChatModel; decider?: (m: string[]) => Triage; limits?: Partial<Deps["limits"]> } = {}) {
+function setup(opts: { chat?: ChatModel; decider?: (m: string[]) => Triage } = {}) {
   const store = new MemoryStore(() => NOW);
   let n = 0;
   const deps: Deps = {
@@ -46,7 +47,6 @@ function setup(opts: { chat?: ChatModel; decider?: (m: string[]) => Triage; limi
     catalog: new Catalog(),
     now: () => NOW,
     newId: () => `id-${++n}`,
-    limits: { userTurnsPerDay: 25, globalRequestsPerDay: 900, staleMs: 90_000, ...opts.limits },
   };
   return { store, deps };
 }
@@ -260,25 +260,39 @@ Deno.test("max 3 tool rounds, then tools disabled", async () => {
   assertEquals(chat.requests[3].tools, undefined);
 });
 
-Deno.test("quota: global budget exhausted keeps message retryable", async () => {
-  const { deps, store } = setup({ limits: { globalRequestsPerDay: 0 } });
+const quotaExhausted = (): Triage => ({ ok: false, reason: "quota_exhausted", retryAfter: 90, latencyMs: 5 });
+
+Deno.test("quota: model budget exhaustion keeps message retryable", async () => {
+  const { deps, store } = setup({ decider: quotaExhausted });
   const { events } = await turn(deps, input("sugar"));
   const err = events.find((e) => e.event === "error")!;
-  assertEquals([err.data.code, err.data.retryable], ["quota_exhausted", true]);
+  assertEquals([err.data.code, err.data.retryable, err.data.retry_after], ["quota_exhausted", true, 90]);
   assertEquals(store.messages[0].status, "failed");
   assertEquals(store.usage.length, 0);
 });
 
 Deno.test("quota: red flags still work when quota is exhausted", async () => {
-  const { deps } = setup({ limits: { globalRequestsPerDay: 0 } });
+  const { deps, store } = setup({ decider: quotaExhausted });
   assertEquals((await turn(deps, input("can't breathe"))).names, ["ack", "urgent_care", "done"]);
+  assertEquals(store.usage.length, 0);
 });
 
-Deno.test("quota: per-user daily cap", async () => {
-  const { deps } = setup({ limits: { userTurnsPerDay: 1 } });
-  await turn(deps, input("sugar"));
-  const { events } = await turn(deps, input("thyroid"));
-  assertEquals(events.find((e) => e.event === "error")!.data.code, "user_daily_limit");
+Deno.test("quota: a booking remains completed when its follow-up model call is blocked", async () => {
+  const date = "2026-11-22";
+  const first = new ScriptedChat([[call("book_slot", bookArgs(date, free(date)))]]);
+  const { deps, store } = setup({
+    chat: {
+      model: first.model,
+      async *stream(req) {
+        if (first.requests.length) throw new ModelQuotaExceeded(90);
+        yield* first.stream(req);
+      },
+    },
+  });
+  const { names } = await turn(deps, input("book the test", { kind: "action" }));
+  assertEquals(names, ["ack", "tool_started", "booking_confirmed", "done"]);
+  assertEquals(store.messages[0].status, "completed");
+  assertEquals(store.bookings.length, 1);
 });
 
 Deno.test("output check appends disclaimer to diagnosis-like text", async () => {
@@ -469,7 +483,7 @@ Deno.test("soft keyword match: escalates when the decider is unavailable, skippe
   assertEquals((await turn(down.deps, input(SOFT))).names, ["ack", "urgent_care", "done"]);
   const action = setup();
   assertEquals((await turn(action.deps, input(SOFT, { kind: "action" }))).names, ["ack", "urgent_care", "done"]);
-  const quota = setup({ limits: { globalRequestsPerDay: 0 } });
+  const quota = setup({ decider: quotaExhausted });
   assertEquals((await turn(quota.deps, input(SOFT))).names, ["ack", "urgent_care", "done"]);
 });
 
