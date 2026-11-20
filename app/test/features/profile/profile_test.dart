@@ -69,7 +69,26 @@ void main() {
 
   test('profile lookups match names and labels loosely, and share only names and labels', () {
     expect(sampleProfile.personNamed('ramesh')?.relation, Relation.father);
-    expect(sampleProfile.personNamed('Ramesh Kumar')?.relation, Relation.father);
+    expect(sampleProfile.personNamed('  RAMESH   sharma ')?.relation, Relation.father);
+    expect(
+      sampleProfile.personNamed('Ramesh Kumar'),
+      isNull,
+      reason: 'a different surname is someone else',
+    );
+    expect(sampleProfile.personNamed('Priya Verma'), isNull);
+    final twins = sampleProfile.copyWith(
+      people: [
+        ...sampleProfile.people,
+        const Person(
+          id: 'x',
+          name: 'Ramesh Gupta',
+          relation: Relation.other,
+          age: 50,
+          gender: Gender.male,
+        ),
+      ],
+    );
+    expect(twins.personNamed('Ramesh'), isNull, reason: 'an ambiguous first name matches no one');
     expect(sampleProfile.personNamed('Kamla'), isNull);
     expect(sampleProfile.addressLabelled("PAPA'S HOUSE")?.id, 'a-parents');
     final agent = sampleProfile.forAgent().toString();

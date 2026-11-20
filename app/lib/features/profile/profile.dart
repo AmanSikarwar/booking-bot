@@ -50,12 +50,12 @@ abstract class Profile with _$Profile {
   Person get self => people.firstWhere((p) => p.relation == Relation.self);
 
   Person? personNamed(String name) {
-    final n = name.trim().toLowerCase();
+    final n = name.trim().toLowerCase().split(RegExp(r'\s+')).join(' ');
     if (n.isEmpty) return null;
-    return people.where((p) => p.name.toLowerCase() == n).firstOrNull ??
-        people
-            .where((p) => p.name.toLowerCase().split(' ').first == n.split(' ').first)
-            .firstOrNull;
+    final exact = people.where((p) => p.name.toLowerCase() == n).firstOrNull;
+    if (exact != null || n.contains(' ')) return exact;
+    final byFirst = people.where((p) => p.name.toLowerCase().split(' ').first == n).toList();
+    return byFirst.length == 1 ? byFirst.single : null;
   }
 
   Address? addressLabelled(String label) {

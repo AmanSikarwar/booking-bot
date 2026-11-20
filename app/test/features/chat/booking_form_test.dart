@@ -209,6 +209,25 @@ void main() {
     },
   );
 
+  testWidgets('a same first name with a different surname is someone else, not you', (
+    tester,
+  ) async {
+    SlotRequest? sent;
+    await pump(
+      tester,
+      const BookingFormData(
+        packageId: 'pkg_thyroid_profile',
+        packageName: thyroid,
+        prefill: FormPrefill(date: '2026-11-21', timeWindow: '09-11', patientName: 'Priya Verma'),
+      ),
+      onSubmit: (r) => sent = r,
+    );
+    expect(chip(tester, 'Someone else').selected, isTrue);
+    expect(chip(tester, 'Priya · You').selected, isFalse);
+    await tester.tap(find.text('Confirm booking'));
+    expect(sent?.patientName, 'Priya Verma');
+  });
+
   testWidgets('a name not in the profile pre-fills someone else', (tester) async {
     await pump(
       tester,
