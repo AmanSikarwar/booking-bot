@@ -220,8 +220,10 @@ export class SupabaseStore implements Store {
     must(await this.db.from("llm_usage").insert({ ...u, provider: "openrouter" }));
   }
 
-  async reserveQuota(scope: "chat" | "openrouter") {
-    return must(await this.db.rpc("reserve_chat_quota", { p_scope: scope })) as QuotaDenial | null;
+  async reserveQuota(scope: "chat" | "openrouter", userId?: string) {
+    return must(
+      await this.db.rpc("reserve_chat_quota", { p_scope: scope, ...(userId ? { p_user: userId } : {}) }),
+    ) as QuotaDenial | null;
   }
 }
 

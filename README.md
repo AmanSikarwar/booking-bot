@@ -137,7 +137,7 @@ See the [API contract](PLAN.md#10-api-contract) for payloads and HTTP status cod
 
 ### Rate limits
 
-- **Chat API:** The demo admits up to 10 authenticated POST requests in any rolling 60 seconds and 200 per UTC day, shared across sessions. Replays, retries, and malformed authenticated requests count toward the API limits. Over-limit requests return HTTP `429` with `Retry-After` in seconds.
+- **Chat API:** The demo admits up to 10 authenticated POST requests in any rolling 60 seconds and 200 per UTC day across all users. Each user (anonymous session) gets at most 4 per minute and 40 per day of that, so one client cannot lock everyone else out. Replays, retries, and malformed authenticated requests count toward the API limits. Over-limit requests return HTTP `429` with `Retry-After` in seconds.
 - **OpenRouter Chat Completions:** The app reserves a separate daily allowance of 200 outbound attempts before sending them, including tool follow-ups and retries. Free Decision API triage uses its own upstream quota and can still run for admitted requests when the chat completion budget is exhausted. When the chat budget runs out during a stream, the app queues the turn unless a tool has already produced a usable card.
 - Both daily limits reset at **00:00 UTC (05:30 IST)**. The request cap controls volume. Actual spend also depends on the model and token usage.
 

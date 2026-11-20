@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const denial = await store.reserveQuota("chat");
+    const denial = await store.reserveQuota("chat", userId);
     if (denial) return error(429, denial.code, "chat request limit reached", true, denial.retry_after);
 
     const input = parseBody(await req.json().catch(() => null), userId);

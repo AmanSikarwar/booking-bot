@@ -1,5 +1,5 @@
 export interface QuotaDenial {
-  code: "rate_limited" | "quota_exhausted";
+  code: "rate_limited" | "quota_exhausted" | "user_daily_limit";
   retry_after: number;
 }
 

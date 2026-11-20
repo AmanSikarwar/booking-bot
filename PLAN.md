@@ -700,7 +700,7 @@ Measured on live turns: a search turn is 2 chat requests, ~2.9K input and ~140 o
 
 ### Guards
 
-- **API limits** apply globally across all sessions. Postgres admits up to 10 authenticated POST requests in a rolling minute and 200 per UTC day. Over-limit requests return HTTP `429` with a retry time.
+- **API limits** apply globally and per session. Postgres admits up to 10 authenticated POST requests in a rolling minute and 200 per UTC day across all sessions, and at most 4 per minute and 40 per day for each session, so one client cannot exhaust the shared allowance. Over-limit requests return HTTP `429` with a retry time.
 - **Chat completion budget** permits 200 outbound OpenRouter Chat Completions attempts per UTC day, including tool follow-ups and retries. The database reserves capacity before each attempt. Free Decision API calls use their own upstream quota.
 - **Quota savers** include the keyword check, skipping the decider on card actions, and replay. These paths still use the API allowance.
 - **Provider spend** depends on tokens and model prices. The daily attempt quota bounds volume, and `llm_usage.cost_usd` tracks reported spend.

@@ -42,7 +42,7 @@ At the reference price, one call with the observed median token counts costs **$
 
 ## Daily limits and spend scenarios
 
-- **Public Chat API:** 10 authenticated POST requests per rolling minute and 200 per UTC day, shared across sessions. Retries, completed-turn replays, and malformed authenticated POSTs can consume this allowance.
+- **Public Chat API:** 10 authenticated POST requests per rolling minute and 200 per UTC day across all sessions, with at most 4 per minute and 40 per day for any one session. Retries, completed-turn replays, and malformed authenticated POSTs can consume this allowance.
 - **Chat completions:** A separate pool allows 200 outbound attempts per UTC day. Tool follow-ups and adapter retries reserve from it, as do requests ultimately served by a free chat fallback. At two attempts per turn, the cap supports up to **100 tool-assisted turns per day** under that mix. Additional attempts reduce completed throughput.
 - **Decision API:** Its calls sit outside the chat completion pool. The incoming authenticated POST still counts against the public Chat API allowance. OpenRouter publishes separate limits for free model usage, typically 20 requests per minute and 50 daily, rising to 1,000 daily with qualifying credit purchases. The account's allowance and upstream capacity can affect free-model availability.
 
