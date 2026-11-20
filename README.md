@@ -2,7 +2,7 @@
 
 **Saathi (साथी) is an English and Hindi lab-booking companion.** Find a test package in conversation or in the catalogue, choose a patient and an address, and book a simulated home sample collection.
 
-[Open the web demo](https://amansikarwar.dev/booking-bot/) · [Download the Android demo APK](https://github.com/AmanSikarwar/booking-bot/releases/tag/v0.1.0) · [View CI runs](https://github.com/AmanSikarwar/booking-bot/actions/workflows/ci.yml)
+[Open the web demo](https://amansikarwar.dev/booking-bot/) · [Download the Android demo APK](https://github.com/AmanSikarwar/booking-bot/releases/tag/v0.1.1) · [View CI runs](https://github.com/AmanSikarwar/booking-bot/actions/workflows/ci.yml)
 
 The demo uses a synthetic catalogue, sample profiles and addresses, and simulated appointment availability. Use sample information when trying it. A confirmation creates a demo booking record.
 
@@ -258,7 +258,7 @@ Pass `safety`, `reco`, or `persona` to run a single suite. A focused run writes 
 
 ### Android
 
-The [v0.1.0 demo prerelease](https://github.com/AmanSikarwar/booking-bot/releases/tag/v0.1.0) contains a debug-signed APK and SHA-256 checksum. The current build configuration uses a local release keystore for new release builds. Android requires the same signing identity to install an update over an existing app with the same application ID.
+The [v0.1.1 demo prerelease](https://github.com/AmanSikarwar/booking-bot/releases/tag/v0.1.1) contains a release-signed APK and SHA-256 checksum. If you installed the debug-signed v0.1.0 APK, uninstall it before installing v0.1.1. Uninstalling removes the chats and bookings stored on the device.
 
 1. Put the release keystore in `app/android/app/`.
 2. Create `app/android/key.properties` with these properties. For a keystore in the app module, set `storeFile` to its filename. Both files are ignored by Git.
