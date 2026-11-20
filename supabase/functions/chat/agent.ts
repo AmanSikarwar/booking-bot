@@ -20,6 +20,7 @@ import {
   isBookable,
   isFull,
   REF_VARIANTS,
+  spokenDate,
   TIME_WINDOWS,
 } from "./slots.ts";
 import type { StreamEvent } from "./sse.ts";
@@ -362,7 +363,7 @@ export async function runTurn(
         package_name: pkg.name,
         fasting_hours: pkg.fasting_hours,
         prefill: {
-          date: f.date ?? null,
+          date: (input.kind === "text" ? spokenDate(input.text, now) : undefined) ?? f.date ?? null,
           time_window: f.time_window ?? null,
           address_label: f.address_label ?? null,
           patient_name: f.patient_name ?? null,

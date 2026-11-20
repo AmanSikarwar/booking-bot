@@ -573,3 +573,18 @@ Deno.test("calendar marks which bookable dates are today and tomorrow", () => {
   const prompt = systemPrompt("en", NOW, false);
   assert(prompt.includes("today Friday 2026-11-20, tomorrow Saturday 2026-11-21, Sunday 2026-11-22"));
 });
+
+Deno.test("show_booking_form prefills the day the user said, not the model's guess", async () => {
+  const chat = new ScriptedChat([
+    [call("show_booking_form", {
+      package_id: "pkg_thyroid_profile",
+      patient_name: "Ramesh Sharma",
+      date: "2026-11-20",
+    })],
+    [text("Filled in for tomorrow.")],
+  ]);
+  const { deps } = setup({ chat });
+  const { events } = await turn(deps, input("book thyroid one for papa for tommorow"));
+  const prefill = events.find((e) => e.event === "booking_form")!.data.prefill as Record<string, unknown>;
+  assertEquals(prefill.date, "2026-11-21");
+});

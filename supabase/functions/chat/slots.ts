@@ -11,6 +11,17 @@ function istHour(now: Date): number {
   return new Date(now.getTime() + IST_OFFSET_MS).getUTCHours();
 }
 
+const SPOKEN_DAYS: [RegExp, number][] = [
+  [/\b(day after tomorrow|parso|parson)\b|परसों/i, 2],
+  [/\b(tomorrow|tmrw?|tom+or+ow|kal)\b|कल/i, 1],
+  [/\b(today|aaj)\b|आज/i, 0],
+];
+
+export function spokenDate(text: string, now: Date): string | undefined {
+  const hit = SPOKEN_DAYS.find(([re]) => re.test(text));
+  return hit && istDate(now, hit[1]);
+}
+
 export function bookableDates(now: Date): string[] {
   return Array.from({ length: 8 }, (_, i) => istDate(now, i));
 }

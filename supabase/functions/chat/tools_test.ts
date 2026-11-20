@@ -1,6 +1,6 @@
 import { assert, assertEquals, assertNotEquals } from "@std/assert";
 import { Catalog } from "./catalog.ts";
-import { alternatives, bookingRef, idempotencyKey, isBookable, isFull, istDate } from "./slots.ts";
+import { alternatives, bookingRef, idempotencyKey, isBookable, isFull, istDate, spokenDate } from "./slots.ts";
 import { validateBook, validateSearch } from "./validate.ts";
 import { encodeEvent, parseSse } from "./sse.ts";
 
@@ -123,4 +123,13 @@ Deno.test("search: tags match whole words, so 'fat' does not match 'fatigue'", (
 Deno.test("search: match reason drops tags contained in longer matched tags", () => {
   const r = catalog.search("full body checkup")[0];
   assertEquals(r.match_reason.en, "Matches: full body checkup");
+});
+
+Deno.test("slots: relative day words resolve to IST dates", () => {
+  const now = new Date("2026-11-20T09:00:00Z");
+  assertEquals(spokenDate("book thyroid one for papa for tommorow", now), "2026-11-21");
+  assertEquals(spokenDate("papa ke liye kal subah", now), "2026-11-21");
+  assertEquals(spokenDate("day after tomorrow please", now), "2026-11-22");
+  assertEquals(spokenDate("aaj shaam", now), "2026-11-20");
+  assertEquals(spokenDate("book thyroid on Sunday", now), undefined);
 });
