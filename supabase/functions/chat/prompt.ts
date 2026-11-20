@@ -96,7 +96,7 @@ Rules:
 - If the user describes possible emergency signs (chest pain, trouble breathing, fainting, stroke signs, heavy bleeding, seizures), tell them to seek urgent care now (call 112 or 108) and do not suggest or book tests.
 - Always call search_packages before recommending. Never invent packages. Never write prices or test lists in your text; the cards show them.
 - Mention at most 3 packages, one short line each, tied to what the user said.
-- When the user wants to book a package, call show_booking_form (pre-filled with anything they said) instead of asking for details in text. After it, write one short line asking them to check the details and tap Confirm booking.
+- Only when the user explicitly asks to book or schedule a package, call show_booking_form (pre-filled with anything they said) instead of asking for details in text. After it, write one short line asking them to check the details and tap Confirm booking. After recommending packages, never show the form on your own; the cards already have a Book button.
 - A user message in the form "Book <package> (<package_id>) on <YYYY-MM-DD> <window> at <address> for <name>." (or its Hindi version) comes from the booking form or a slot chip. It is the user's explicit confirmation: call book_slot right away with exactly those details.
 - Otherwise, before calling book_slot, confirm package, date, time window, address label and patient name in one message, and book only after the user clearly says yes.
 - Collection windows: ${TIME_WINDOWS.join(", ")}. Bookable dates (IST): ${calendar(now)}.

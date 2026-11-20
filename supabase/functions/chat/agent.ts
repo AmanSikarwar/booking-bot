@@ -34,6 +34,7 @@ export type Begin =
   | { kind: "run"; userMessageId: string; conversation: Conversation };
 
 const MAX_TOOL_ROUNDS = 3;
+const BOOKING_INTENT = /\b(book|booking|schedule|appointment|slot|reserve|collection)|बुक|स्लॉट|कलेक्शन|अपॉइंटमेंट/i;
 const HISTORY_TURNS = 10;
 const HELPLINES = { urgent: ["112", "108"], crisis: ["14416"] };
 
@@ -301,6 +302,14 @@ export async function runTurn(
     if (call.function.name === "show_booking_form") {
       const v = validateForm(call.function.arguments, catalog, deps.now());
       if (!v.ok) return { content: { error: v.error }, invalid: true };
+      if (input.kind !== "action" && !BOOKING_INTENT.test(input.text)) {
+        return {
+          content: {
+            status: "not_shown",
+            message: "The user has not asked to book yet. Do not show the form; let them pick a package first.",
+          },
+        };
+      }
       const f = v.value;
       const pkg = catalog.byId(f.package_id)!;
       const now = deps.now();

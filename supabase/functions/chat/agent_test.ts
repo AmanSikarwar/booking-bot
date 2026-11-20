@@ -365,3 +365,24 @@ Deno.test("show_booking_form with an unknown package is an invalid call", async 
   assert(!names.includes("booking_form"));
   assert(JSON.stringify(chat.requests[1].messages.at(-1)).includes("package_id must be"));
 });
+
+Deno.test("show_booking_form is refused when the user only asked about tests", async () => {
+  const chat = new ScriptedChat([
+    [call("search_packages", { query: "full body" })],
+    [call("show_booking_form", { package_id: "pkg_full_body" })],
+    [text("Here are two options.")],
+  ]);
+  const { deps } = setup({ chat });
+  const { names } = await turn(deps, input("Full body checkup"));
+  assert(!names.includes("booking_form"));
+  assertEquals(JSON.parse((chat.requests[2].messages.at(-1) as { content: string }).content).status, "not_shown");
+});
+
+Deno.test("show_booking_form is allowed for Hindi booking requests and card actions", async () => {
+  for (const [text_, kind] of [["पापा के लिए शुगर टेस्ट बुक करना है", "text"], ["any", "action"]] as const) {
+    const chat = new ScriptedChat([[call("show_booking_form", { package_id: "pkg_diabetes_care" })], [text("ok")]]);
+    const { deps } = setup({ chat });
+    const { names } = await turn(deps, input(text_, { kind }));
+    assert(names.includes("booking_form"), text_);
+  }
+});
