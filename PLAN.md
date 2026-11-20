@@ -313,8 +313,8 @@ The chat model doesn't enforce JSON schemas, so every tool call is checked on th
 
 | Card | Shows | Actions |
 |---|---|---|
-| PackageCard | Name, sample-tube caps, match reason, test count / fasting / report time (tap to expand the full test list), price and MRP | **Book home collection** (sends a structured "I want to book {package}" message with `kind: action`) |
-| BookingCard | Booking reference, package, date and window, address label, patient name, status, "Saved offline" badge | **View all bookings** |
+| PackageCard | Category icon, name and category, *Top match* badge on the first of several results, match reason (chat) or description (catalogue), first 3 tests as tags with *View all N tests*, icon facts (tests, report time, fasting), sample-tube caps with a plain summary ("2 tubes + urine cup"), price, MRP and discount badge | **Book home collection** (opens the booking-details card) |
+| BookingCard | Ticket layout: copyable booking reference, package, perforated divider, then when ("Collector arrives"), where and who with icons, fasting reminder when needed, "Saved offline" badge | **Copy reference**, **View all bookings** |
 | SlotAlternatives | 2–3 alternative slots as chips | Tapping a chip sends a confirmation message (`kind: action`) |
 | BookingFormCard | Package, fasting note, date chips (Today, Tomorrow, then dates), time-window chips (full slots disabled and marked), address chips (Home, Office, Other with a text field), patient name field, inline validation | **Confirm booking** (structured `kind: action` message); afterwards a read-only summary |
 | UrgentCareCard | Red, high-contrast fixed urgent-care copy, no avatar | **Call 112**, **Call 108** (phone links), "I understand" |
