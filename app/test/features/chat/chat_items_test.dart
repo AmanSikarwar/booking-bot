@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_chat_core/flutter_chat_core.dart' as fc;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:saathi/core/db/database.dart';
@@ -51,21 +52,40 @@ void main() {
     expect((items.last as fc.CustomMessage).metadata!['code'], 'quota_exhausted');
   });
 
-  test('assistant reply becomes text, then one item per card, then the tool chip', () {
+  test('finished reply shows text first, then one item per card', () {
     final reply = row(
       'reply:a',
       role: MessageRole.assistant,
-      status: MessageStatus.streaming,
       body: 'These are commonly ordered.',
       cards: const [ChatCard.urgent('x'), ChatCard.crisis('y')],
-      tool: 'search_packages',
     );
-    expect(ids(toChatItems([reply], online: true)), [
+    expect(ids(toChatItems([reply], online: true)), ['reply:a', 'reply:a#card0', 'reply:a#card1']);
+  });
+
+  test('cards wait until the streamed text is finished', () {
+    const cards = [ChatCard.urgent('x')];
+    Message streaming({String body = '', String? tool}) => row(
       'reply:a',
-      'reply:a#card0',
-      'reply:a#card1',
-      'reply:a#tool',
-    ]);
+      role: MessageRole.assistant,
+      status: MessageStatus.streaming,
+      body: body,
+      cards: cards,
+      tool: tool,
+    );
+    expect(ids(toChatItems([streaming(tool: 'search_packages')], online: true)), ['reply:a#tool']);
+    expect(ids(toChatItems([streaming()], online: true)), ['reply:a#typing']);
+    expect(ids(toChatItems([streaming(body: 'These are ')], online: true)), ['reply:a']);
+  });
+
+  test('cards from an interrupted reply are still shown', () {
+    final reply = row(
+      'reply:a',
+      role: MessageRole.assistant,
+      status: MessageStatus.incomplete,
+      body: 'These',
+      cards: const [ChatCard.urgent('x')],
+    );
+    expect(ids(toChatItems([reply], online: true)), ['reply:a', 'reply:a#card0']);
   });
 
   test('empty streaming reply shows typing dots', () {
@@ -105,5 +125,23 @@ void main() {
             ], online: true).single
             as fc.TextMessage;
     expect(item.text, 'X · Sat 21 Nov');
+  });
+
+  test('typing dots show as soon as a message is sending, before the reply starts', () {
+    expect(ids(toChatItems([row('a', status: MessageStatus.sending)], online: true)), [
+      'a',
+      'reply:a#typing',
+    ]);
+    final withReply = [
+      row('a', status: MessageStatus.streaming),
+      row(
+        'reply:a',
+        role: MessageRole.assistant,
+        status: MessageStatus.streaming,
+        body: '',
+        at: 1,
+      ).copyWith(replyTo: const Value('a')),
+    ];
+    expect(ids(toChatItems(withReply, online: true)), ['a', 'reply:a#typing']);
   });
 }

@@ -335,7 +335,6 @@ class _Translations$followUps$hi extends Translations$followUps$en {
 	@override String get prepare => 'तैयारी कैसे करूँ?';
 	@override String get prepareText => 'सैंपल कलेक्शन के लिए तैयारी कैसे करूँ?';
 	@override String get anotherDay => 'दूसरा दिन';
-	@override String get anotherDayText => 'किसी दूसरे दिन के खाली स्लॉट दिखाइए';
 	@override String get suggest => 'मेरे लिए टेस्ट सुझाएँ';
 	@override String get suggestText => 'रूटीन चेकअप के लिए आप कौन से टेस्ट सुझाएँगे?';
 	@override String get fullBody => 'फुल बॉडी चेकअप';
@@ -483,7 +482,6 @@ extension on TranslationsHi {
 			'followUps.prepare' => 'तैयारी कैसे करूँ?',
 			'followUps.prepareText' => 'सैंपल कलेक्शन के लिए तैयारी कैसे करूँ?',
 			'followUps.anotherDay' => 'दूसरा दिन',
-			'followUps.anotherDayText' => 'किसी दूसरे दिन के खाली स्लॉट दिखाइए',
 			'followUps.suggest' => 'मेरे लिए टेस्ट सुझाएँ',
 			'followUps.suggestText' => 'रूटीन चेकअप के लिए आप कौन से टेस्ट सुझाएँगे?',
 			'followUps.fullBody' => 'फुल बॉडी चेकअप',

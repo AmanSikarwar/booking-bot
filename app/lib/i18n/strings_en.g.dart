@@ -546,9 +546,6 @@ class Translations$followUps$en {
 	/// en: 'Try another day'
 	String get anotherDay => 'Try another day';
 
-	/// en: 'Show me open slots on another day'
-	String get anotherDayText => 'Show me open slots on another day';
-
 	/// en: 'Suggest tests for me'
 	String get suggest => 'Suggest tests for me';
 
@@ -715,7 +712,6 @@ extension on Translations {
 			'followUps.prepare' => 'How do I prepare?',
 			'followUps.prepareText' => 'How should I prepare for the sample collection?',
 			'followUps.anotherDay' => 'Try another day',
-			'followUps.anotherDayText' => 'Show me open slots on another day',
 			'followUps.suggest' => 'Suggest tests for me',
 			'followUps.suggestText' => 'Which tests would you suggest for a routine checkup?',
 			'followUps.fullBody' => 'Full body checkup',

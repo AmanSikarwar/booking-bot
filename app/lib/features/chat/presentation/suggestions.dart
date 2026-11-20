@@ -73,8 +73,9 @@ List<Suggestion> suggestionsFor(
       SendSuggestion(f.prepare, Icons.help_outline, f.prepareText),
     ];
   }
-  if (cards.any((c) => c is SlotsCard)) {
-    return [SendSuggestion(f.anotherDay, Icons.event_outlined, f.anotherDayText)];
+  final slots = cards.whereType<SlotsCard>().lastOrNull?.offer;
+  if (slots != null) {
+    return [BookSuggestion(f.anotherDay, Icons.event_outlined, slots.packageId, slots.packageName)];
   }
   final packages = cards.whereType<PackagesCard>().lastOrNull?.packages;
   if (packages != null && packages.isNotEmpty) {

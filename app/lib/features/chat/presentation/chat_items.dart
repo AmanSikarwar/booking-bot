@@ -1,6 +1,7 @@
 import 'package:flutter_chat_core/flutter_chat_core.dart' as fc;
 
 import '../../../core/db/database.dart';
+import '../domain/models.dart';
 
 const meId = 'me';
 const saathiId = 'saathi';
@@ -12,6 +13,7 @@ List<fc.Message> toChatItems(List<Message> rows, {required bool online}) {
   final lastQueued = rows.lastWhereOrNull(
     (r) => r.role == MessageRole.user && r.status == MessageStatus.queued,
   );
+  final answered = {for (final r in rows) ?r.replyTo};
   for (final r in rows) {
     final at = r.createdAt;
     DateTime tick(int n) => at.add(Duration(microseconds: n));
@@ -25,6 +27,17 @@ List<fc.Message> toChatItems(List<Message> rows, {required bool online}) {
           metadata: {'status': r.status.name, 'error': r.error, 'kind': r.kind.name},
         ),
       );
+      if ((r.status == MessageStatus.sending || r.status == MessageStatus.streaming) &&
+          !answered.contains(r.id)) {
+        items.add(
+          fc.Message.custom(
+            id: '${replyIdFor(r.id)}#typing',
+            authorId: saathiId,
+            createdAt: tick(2),
+            metadata: {'kind': 'typing'},
+          ),
+        );
+      }
       final notice = _noticeCodes.contains(r.error)
           ? r.error
           : (!online && r.id == lastQueued?.id ? 'queued_offline' : null);
@@ -51,7 +64,8 @@ List<fc.Message> toChatItems(List<Message> rows, {required bool online}) {
         ),
       );
     }
-    for (final (i, card) in r.cards.indexed) {
+    final streaming = r.status == MessageStatus.streaming;
+    for (final (i, card) in streaming ? const <(int, ChatCard)>[] : r.cards.indexed) {
       items.add(
         fc.Message.custom(
           id: '${r.id}#card$i',
@@ -70,7 +84,7 @@ List<fc.Message> toChatItems(List<Message> rows, {required bool online}) {
           metadata: {'kind': 'tool', 'tool': r.activeTool},
         ),
       );
-    } else if (r.status == MessageStatus.streaming && r.body.isEmpty && r.cards.isEmpty) {
+    } else if (streaming && r.body.isEmpty) {
       items.add(
         fc.Message.custom(
           id: '${r.id}#typing',

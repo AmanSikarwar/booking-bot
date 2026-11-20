@@ -122,15 +122,12 @@ void main() {
       addressLabel: 'Home',
       patientName: 'Priya',
     );
-    expect(
-      labels(
-        f([
-          user('a'),
-          reply(const [ChatCard.slots(offer)]),
-        ]),
-      ),
-      ['Try another day'],
-    );
+    final s = f([
+      user('a'),
+      reply(const [ChatCard.slots(offer)]),
+    ]);
+    expect(labels(s), ['Try another day']);
+    expect((s.single as BookSuggestion).packageId, 'p', reason: 'reopens the booking form');
   });
 
   test('an open booking form, safety cards and flagged chats show nothing', () {
