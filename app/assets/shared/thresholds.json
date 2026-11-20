@@ -1,5 +1,5 @@
 {
-  "emergency": 0.25,
+  "emergency": 0.45,
   "mental_health_crisis": 0.25,
   "decider_timeout_ms": 1500
 }

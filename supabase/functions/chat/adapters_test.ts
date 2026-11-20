@@ -129,10 +129,12 @@ Deno.test("decider: fails open on refusal, malformed, rate limit and timeout", a
 });
 
 Deno.test("decider: threshold boundaries", () => {
-  assertEquals(escalation({ emergency: 0.25, mental_health_crisis: 0, routine: 0.75 }), "urgent");
-  assertEquals(escalation({ emergency: 0.2499, mental_health_crisis: 0.25, routine: 0.5 }), "crisis");
+  assertEquals(escalation({ emergency: 0.45, mental_health_crisis: 0, routine: 0.55 }), "urgent");
+  assertEquals(escalation({ emergency: 0.4499, mental_health_crisis: 0.25, routine: 0.3 }), "crisis");
+  assertEquals(escalation({ emergency: 0.32, mental_health_crisis: 0.01, routine: 0.67 }), null);
   assertEquals(escalation({ emergency: 0.24, mental_health_crisis: 0.24, routine: 0.52 }), null);
-  assertEquals(escalation({ emergency: 0.3, mental_health_crisis: 0.9, routine: 0 }), "urgent");
+  assertEquals(escalation({ emergency: 0.5, mental_health_crisis: 0.5, routine: 0 }), "urgent");
+  assertEquals(escalation({ emergency: 0.3, mental_health_crisis: 0.7, routine: 0 }), "crisis");
 });
 
 Deno.test("chat adapter: sends fallback models after the primary", async () => {

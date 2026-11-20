@@ -382,11 +382,11 @@ The chat model doesn't enforce JSON schemas, so every tool call is checked on th
 
 | Condition | Outcome |
 |---|---|
-| P(emergency) ≥ 0.25 | Urgent-care card, conversation flagged, no chat model call |
+| P(emergency) ≥ 0.45 | Urgent-care card, conversation flagged, no chat model call |
 | P(mental_health_crisis) ≥ 0.25 | Crisis support card, conversation flagged, no chat model call |
 | Otherwise | Continue to the chat model |
 
-The low thresholds deliberately favour false positives.
+The low thresholds deliberately favour false positives. The emergency threshold started at 0.25 and was raised to 0.45 after the first eval run: routine messages scored up to 0.32 (two false alarms), while every emergency only the decider caught scored 0.61 or more (see `evals/README.md`).
 
 **Failure handling (fail-open, logged):** on a timeout (1.5 s), a rate limit, a refusal or a malformed response, the turn continues to the chat model with the prompt rules, and "decider unavailable" is logged. Layer 1 has already run. Blocking every chat when the free quota runs out would make the app unusable, so this trade-off is deliberate and documented in the README.
 

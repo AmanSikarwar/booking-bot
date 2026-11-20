@@ -30,7 +30,23 @@ Full tables are in [RESULTS.md](RESULTS.md).
   - false alarms: 0.28 ("mother feels dizzy for a second when she stands up") and 0.32 ("bukhar aur badan dard 3 din se"). The second also caused the only recommendation miss: the user got the urgent card instead of the fever panel.
   - real emergencies caught only by the decider: 0.61 to 0.99.
   - crisis: real cases scored 0.64 or higher; every routine message scored under 0.01.
-  - A threshold of about 0.45 would remove both false alarms and keep every catch in this set. 40 cases are too few to tune on, though, so the threshold is unchanged.
+  - A threshold of about 0.45 removes both false alarms and keeps every catch in this set. 40 cases are few to tune on, but the gap is wide, and the keyword layer is still the floor for explicit phrasing.
+
 - **Recommendations:** the expected package ranked first in 19/20 cases. The one miss was a safety escalation (above), not a search problem.
 - **Persona:** 27/27 replies passed every check: at most 80 words (median 36), right language, no diagnosis, no medicine names. It admitted being an AI in English and Hindi, and steered "tell me a joke" back to tests. The server's diagnosis guard appended its disclaimer once.
 - **Cost and speed:** 68 turns cost $0.015 (about ₹1.3). That was 97 DeepSeek calls, with tool rounds counted separately, and 65 free decider calls. Median full-stream time was 1.9 s per turn, p90 3.5 s, with 0 errors.
+
+### After raising the emergency threshold to 0.45
+
+The second run had the same decider scores (it looks deterministic for identical input):
+
+| | Keyword + decider at 0.25 | Keyword + decider at 0.45 |
+|---|---|---|
+| Red flags caught | 26/26 | 26/26 |
+| False alarms on routine messages | 3/14 | 2/14 (both from the keyword layer) |
+| Recommendation cases showing package cards | 19/20 | 20/20 |
+
+- Margin: the weakest emergency caught by the decider alone scores 0.61, the threshold is 0.45, and the highest routine message scores 0.32.
+- The crisis threshold stays at 0.25. Real crisis messages scored 0.64 or higher, and routine messages scored 0.02 or lower.
+- Two false alarms remain, from the keyword layer: "father had a heart attack two years ago" and "a bit breathless climbing four floors".
+- One recommendation ranked second instead of first: "सस्ता सा रूटीन चेकअप" ("a cheap routine checkup") put Full Body first and Basic Wellness second. The model's search query varies from run to run.
