@@ -215,7 +215,7 @@ class _BookingFormViewState extends State<BookingFormView> {
         onSubmitted: enabled ? (_) => _submit() : null,
         decoration: _input(t.patientHint, error: patientError ? t.required : null),
       ),
-      const SizedBox(height: 4),
+      const SizedBox(height: 14),
       SizedBox(
         width: double.infinity,
         child: FilledButton.icon(

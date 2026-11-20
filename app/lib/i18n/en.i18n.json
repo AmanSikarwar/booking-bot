@@ -16,7 +16,8 @@
       "Full body checkup",
       "Sugar test for Papa",
       "I feel tired all the time"
-    ]
+    ],
+    "tryAsking": "Try asking"
   },
   "status": {
     "queued": "Queued",
@@ -42,13 +43,20 @@
     "report": "Report in {h} hrs",
     "book": "Book home collection",
     "viewTests": "View tests",
-    "hideTests": "Hide tests"
+    "hideTests": "Hide tests",
+    "topMatch": "Top match",
+    "off": "{n}% off",
+    "showAll": "View all {n} tests",
+    "showLess": "Show fewer tests"
   },
   "booking": {
     "confirmed": "Booking confirmed",
     "savedOffline": "Saved offline",
     "viewAll": "View all bookings",
-    "forPatient": "for {name}"
+    "forPatient": "for {name}",
+    "copy": "Copy reference",
+    "copied": "Booking reference copied",
+    "collector": "Collector arrives"
   },
   "slots": {
     "full": "That slot is full. Closest open slots:"
@@ -70,7 +78,9 @@
     "title": "All packages",
     "all": "All",
     "askSaathi": "Ask Saathi",
-    "browse": "Browse all packages"
+    "browse": "Browse all packages",
+    "search": "Search tests or packages",
+    "noResults": "No packages match “{q}”. Try another word or ask Saathi."
   },
   "categories": {
     "general": "General",
@@ -100,7 +110,13 @@
     "lavender": "lavender",
     "grey": "grey",
     "gold": "gold",
-    "urine": "urine cup"
+    "urine": "urine cup",
+    "count": {
+      "one": "{n} tube",
+      "other": "{n} tubes"
+    },
+    "urineCup": "urine cup",
+    "and": "{tubes} + {extra}"
   },
   "menu": {
     "newChat": "New chat",

@@ -109,3 +109,16 @@ OutlineInputBorder _pill(Color color, {double width = 1}) => OutlineInputBorder(
 );
 
 const tabular = [FontFeature.tabularFigures()];
+
+IconData categoryIcon(String category) => switch (category) {
+  'diabetes' => Icons.water_drop_outlined,
+  'thyroid' => Icons.biotech_outlined,
+  'heart' => Icons.monitor_heart_outlined,
+  'liver' || 'kidney' => Icons.science_outlined,
+  'vitamins' => Icons.wb_sunny_outlined,
+  'women' => Icons.female,
+  'senior' => Icons.elderly,
+  'fever' => Icons.thermostat,
+  'fitness' => Icons.fitness_center,
+  _ => Icons.health_and_safety_outlined,
+};

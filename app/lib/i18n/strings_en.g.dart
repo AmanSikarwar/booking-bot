@@ -120,6 +120,9 @@ class Translations$chat$en {
 		'Sugar test for Papa',
 		'I feel tired all the time',
 	];
+
+	/// en: 'Try asking'
+	String get tryAsking => 'Try asking';
 }
 
 // Path: status
@@ -210,6 +213,18 @@ class Translations$package$en {
 
 	/// en: 'Hide tests'
 	String get hideTests => 'Hide tests';
+
+	/// en: 'Top match'
+	String get topMatch => 'Top match';
+
+	/// en: '{n}% off'
+	String off({required Object n}) => '${n}% off';
+
+	/// en: 'View all {n} tests'
+	String showAll({required Object n}) => 'View all ${n} tests';
+
+	/// en: 'Show fewer tests'
+	String get showLess => 'Show fewer tests';
 }
 
 // Path: booking
@@ -231,6 +246,15 @@ class Translations$booking$en {
 
 	/// en: 'for {name}'
 	String forPatient({required Object name}) => 'for ${name}';
+
+	/// en: 'Copy reference'
+	String get copy => 'Copy reference';
+
+	/// en: 'Booking reference copied'
+	String get copied => 'Booking reference copied';
+
+	/// en: 'Collector arrives'
+	String get collector => 'Collector arrives';
 }
 
 // Path: slots
@@ -312,6 +336,12 @@ class Translations$catalog$en {
 
 	/// en: 'Browse all packages'
 	String get browse => 'Browse all packages';
+
+	/// en: 'Search tests or packages'
+	String get search => 'Search tests or packages';
+
+	/// en: 'No packages match “{q}”. Try another word or ask Saathi.'
+	String noResults({required Object q}) => 'No packages match “${q}”. Try another word or ask Saathi.';
 }
 
 // Path: windows
@@ -372,6 +402,18 @@ class Translations$tubes$en {
 
 	/// en: 'urine cup'
 	String get urine => 'urine cup';
+
+	/// en: '(one) {{n} tube} (other) {{n} tubes}'
+	String count({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} tube',
+		other: '${n} tubes',
+	);
+
+	/// en: 'urine cup'
+	String get urineCup => 'urine cup';
+
+	/// en: '{tubes} + {extra}'
+	String and({required Object tubes, required Object extra}) => '${tubes} + ${extra}';
 }
 
 // Path: menu
@@ -481,6 +523,7 @@ extension on Translations {
 			'chat.suggestions.1' => 'Full body checkup',
 			'chat.suggestions.2' => 'Sugar test for Papa',
 			'chat.suggestions.3' => 'I feel tired all the time',
+			'chat.tryAsking' => 'Try asking',
 			'status.queued' => 'Queued',
 			'status.sending' => 'Sending',
 			'status.failed' => 'Failed · tap to retry',
@@ -499,10 +542,17 @@ extension on Translations {
 			'package.book' => 'Book home collection',
 			'package.viewTests' => 'View tests',
 			'package.hideTests' => 'Hide tests',
+			'package.topMatch' => 'Top match',
+			'package.off' => ({required Object n}) => '${n}% off',
+			'package.showAll' => ({required Object n}) => 'View all ${n} tests',
+			'package.showLess' => 'Show fewer tests',
 			'booking.confirmed' => 'Booking confirmed',
 			'booking.savedOffline' => 'Saved offline',
 			'booking.viewAll' => 'View all bookings',
 			'booking.forPatient' => ({required Object name}) => 'for ${name}',
+			'booking.copy' => 'Copy reference',
+			'booking.copied' => 'Booking reference copied',
+			'booking.collector' => 'Collector arrives',
 			'slots.full' => 'That slot is full. Closest open slots:',
 			'urgent.call112' => 'Call 112',
 			'urgent.call108' => 'Call 108',
@@ -515,6 +565,8 @@ extension on Translations {
 			'catalog.all' => 'All',
 			'catalog.askSaathi' => 'Ask Saathi',
 			'catalog.browse' => 'Browse all packages',
+			'catalog.search' => 'Search tests or packages',
+			'catalog.noResults' => ({required Object q}) => 'No packages match “${q}”. Try another word or ask Saathi.',
 			'categories.general' => 'General',
 			'categories.diabetes' => 'Diabetes',
 			'categories.thyroid' => 'Thyroid',
@@ -537,6 +589,9 @@ extension on Translations {
 			'tubes.grey' => 'grey',
 			'tubes.gold' => 'gold',
 			'tubes.urine' => 'urine cup',
+			'tubes.count' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} tube', other: '${n} tubes', ), 
+			'tubes.urineCup' => 'urine cup',
+			'tubes.and' => ({required Object tubes, required Object extra}) => '${tubes} + ${extra}',
 			'menu.newChat' => 'New chat',
 			'menu.packages' => 'All packages',
 			'menu.bookings' => 'My bookings',

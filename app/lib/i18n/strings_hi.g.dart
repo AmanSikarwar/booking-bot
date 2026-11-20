@@ -94,6 +94,7 @@ class _Translations$chat$hi extends Translations$chat$en {
 		'पापा के लिए शुगर टेस्ट',
 		'मुझे हर समय थकान रहती है',
 	];
+	@override String get tryAsking => 'ऐसे पूछें';
 }
 
 // Path: status
@@ -148,6 +149,10 @@ class _Translations$package$hi extends Translations$package$en {
 	@override String get book => 'घर पर सैंपल बुक करें';
 	@override String get viewTests => 'टेस्ट देखें';
 	@override String get hideTests => 'टेस्ट छिपाएँ';
+	@override String get topMatch => 'सबसे सही';
+	@override String off({required Object n}) => '${n}% छूट';
+	@override String showAll({required Object n}) => 'सभी ${n} टेस्ट देखें';
+	@override String get showLess => 'कम टेस्ट दिखाएँ';
 }
 
 // Path: booking
@@ -161,6 +166,9 @@ class _Translations$booking$hi extends Translations$booking$en {
 	@override String get savedOffline => 'ऑफ़लाइन सेव';
 	@override String get viewAll => 'सभी बुकिंग देखें';
 	@override String forPatient({required Object name}) => '${name} के लिए';
+	@override String get copy => 'रेफ़रेंस कॉपी करें';
+	@override String get copied => 'बुकिंग रेफ़रेंस कॉपी हो गया';
+	@override String get collector => 'सैंपल लेने वाले आएँगे';
 }
 
 // Path: slots
@@ -218,6 +226,8 @@ class _Translations$catalog$hi extends Translations$catalog$en {
 	@override String get all => 'सभी';
 	@override String get askSaathi => 'साथी से पूछें';
 	@override String get browse => 'सभी पैकेज देखें';
+	@override String get search => 'टेस्ट या पैकेज खोजें';
+	@override String noResults({required Object q}) => '“${q}” से कोई पैकेज नहीं मिला। कोई दूसरा शब्द लिखें या साथी से पूछें।';
 }
 
 // Path: windows
@@ -256,6 +266,12 @@ class _Translations$tubes$hi extends Translations$tubes$en {
 	@override String get grey => 'स्लेटी';
 	@override String get gold => 'सुनहरी';
 	@override String get urine => 'यूरिन कप';
+	@override String count({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('hi'))(n,
+		one: '${n} ट्यूब',
+		other: '${n} ट्यूब',
+	);
+	@override String get urineCup => 'यूरिन कप';
+	@override String and({required Object tubes, required Object extra}) => '${tubes} + ${extra}';
 }
 
 // Path: menu
@@ -321,6 +337,7 @@ extension on TranslationsHi {
 			'chat.suggestions.1' => 'फुल बॉडी चेकअप',
 			'chat.suggestions.2' => 'पापा के लिए शुगर टेस्ट',
 			'chat.suggestions.3' => 'मुझे हर समय थकान रहती है',
+			'chat.tryAsking' => 'ऐसे पूछें',
 			'status.queued' => 'कतार में',
 			'status.sending' => 'भेज रहा हूँ',
 			'status.failed' => 'नहीं भेजा गया · दोबारा भेजने के लिए टैप करें',
@@ -339,10 +356,17 @@ extension on TranslationsHi {
 			'package.book' => 'घर पर सैंपल बुक करें',
 			'package.viewTests' => 'टेस्ट देखें',
 			'package.hideTests' => 'टेस्ट छिपाएँ',
+			'package.topMatch' => 'सबसे सही',
+			'package.off' => ({required Object n}) => '${n}% छूट',
+			'package.showAll' => ({required Object n}) => 'सभी ${n} टेस्ट देखें',
+			'package.showLess' => 'कम टेस्ट दिखाएँ',
 			'booking.confirmed' => 'बुकिंग पक्की',
 			'booking.savedOffline' => 'ऑफ़लाइन सेव',
 			'booking.viewAll' => 'सभी बुकिंग देखें',
 			'booking.forPatient' => ({required Object name}) => '${name} के लिए',
+			'booking.copy' => 'रेफ़रेंस कॉपी करें',
+			'booking.copied' => 'बुकिंग रेफ़रेंस कॉपी हो गया',
+			'booking.collector' => 'सैंपल लेने वाले आएँगे',
 			'slots.full' => 'वह स्लॉट भर गया है। सबसे नज़दीकी खाली स्लॉट:',
 			'urgent.call112' => '112 पर कॉल करें',
 			'urgent.call108' => '108 पर कॉल करें',
@@ -355,6 +379,8 @@ extension on TranslationsHi {
 			'catalog.all' => 'सभी',
 			'catalog.askSaathi' => 'साथी से पूछें',
 			'catalog.browse' => 'सभी पैकेज देखें',
+			'catalog.search' => 'टेस्ट या पैकेज खोजें',
+			'catalog.noResults' => ({required Object q}) => '“${q}” से कोई पैकेज नहीं मिला। कोई दूसरा शब्द लिखें या साथी से पूछें।',
 			'categories.general' => 'सामान्य',
 			'categories.diabetes' => 'डायबिटीज़',
 			'categories.thyroid' => 'थायरॉइड',
@@ -377,6 +403,9 @@ extension on TranslationsHi {
 			'tubes.grey' => 'स्लेटी',
 			'tubes.gold' => 'सुनहरी',
 			'tubes.urine' => 'यूरिन कप',
+			'tubes.count' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('hi'))(n, one: '${n} ट्यूब', other: '${n} ट्यूब', ), 
+			'tubes.urineCup' => 'यूरिन कप',
+			'tubes.and' => ({required Object tubes, required Object extra}) => '${tubes} + ${extra}',
 			'menu.newChat' => 'नई चैट',
 			'menu.packages' => 'सभी पैकेज',
 			'menu.bookings' => 'मेरी बुकिंग',

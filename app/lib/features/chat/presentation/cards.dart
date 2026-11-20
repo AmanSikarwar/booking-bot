@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,329 +26,210 @@ String dateLabel(BuildContext context, String isoDate) {
 
 String _lang(BuildContext context) => TranslationProvider.of(context).flutterLocale.languageCode;
 
-class TubeCaps extends StatelessWidget {
-  const TubeCaps({super.key, required this.tests});
-
-  final List<String> tests;
-
-  @override
-  Widget build(BuildContext context) {
-    final tubes = tubesFor(tests);
-    final t = context.t.tubes;
-    final names = tubes
-        .map(
-          (tube) => switch (tube) {
-            Tube.lavender => t.lavender,
-            Tube.grey => t.grey,
-            Tube.gold => t.gold,
-            Tube.urine => t.urine,
-          },
-        )
-        .join(', ');
-    return Semantics(
-      container: true,
-      label: t.label(names: names),
-      child: ExcludeSemantics(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final tube in tubes)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(start: 3),
-                child: Container(
-                  width: tube == Tube.urine ? 12 : 10,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: tube.color,
-                    borderRadius: tube == Tube.urine
-                        ? BorderRadius.circular(3)
-                        : const BorderRadius.vertical(
-                            top: Radius.circular(5),
-                            bottom: Radius.circular(2),
-                          ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PackageCardView extends StatefulWidget {
-  const PackageCardView({
-    super.key,
-    required this.pkg,
-    required this.allTests,
-    required this.onBook,
-  });
-
-  final PackageSummary pkg;
-  final List<String> allTests;
-  final VoidCallback? onBook;
-
-  @override
-  State<PackageCardView> createState() => _PackageCardViewState();
-}
-
-class _PackageCardViewState extends State<PackageCardView> {
-  bool _expanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final p = widget.pkg;
-    final t = context.t.package;
-    final lang = _lang(context);
-    final tests = widget.allTests.isEmpty ? p.topTests : widget.allTests;
-    final strip = tubesFor(tests).firstOrNull?.color ?? Palette.lavender;
-    final facts = [
-      t.tests(n: p.testCount),
-      p.fastingHours > 0 ? t.fasting(h: p.fastingHours) : t.noFasting,
-      t.report(h: p.reportTatHours),
-    ].join(' · ');
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Palette.line),
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(width: 5, color: strip),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            p.name.of(lang),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Palette.ink,
-                              height: 1.3,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 3),
-                          child: TubeCaps(tests: tests),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      p.matchReason.of(lang),
-                      style: const TextStyle(fontSize: 13, color: Palette.lavender),
-                    ),
-                    const SizedBox(height: 2),
-                    Semantics(
-                      button: true,
-                      expanded: _expanded,
-                      label: _expanded ? t.hideTests : t.viewTests,
-                      child: InkWell(
-                        onTap: () => setState(() => _expanded = !_expanded),
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  facts,
-                                  style: const TextStyle(fontSize: 13, color: Palette.inkMuted),
-                                ),
-                              ),
-                              const SizedBox(width: 2),
-                              AnimatedRotation(
-                                turns: _expanded ? 0.5 : 0,
-                                duration: const Duration(milliseconds: 180),
-                                child: const Icon(
-                                  Icons.expand_more,
-                                  size: 18,
-                                  color: Palette.inkMuted,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 8,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          formatRupees(p.priceInr),
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: Palette.ink,
-                            fontFeatures: tabular,
-                          ),
-                        ),
-                        if (p.mrpInr > p.priceInr)
-                          Text(
-                            formatRupees(p.mrpInr),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Palette.inkMuted,
-                              decoration: TextDecoration.lineThrough,
-                              fontFeatures: tabular,
-                            ),
-                          ),
-                      ],
-                    ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 180),
-                      alignment: Alignment.topCenter,
-                      child: _expanded
-                          ? Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Wrap(
-                                spacing: 6,
-                                runSpacing: 6,
-                                children: [
-                                  for (final test in tests)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Palette.paper,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(test, style: const TextStyle(fontSize: 12)),
-                                    ),
-                                ],
-                              ),
-                            )
-                          : const SizedBox(width: double.infinity),
-                    ),
-                    const SizedBox(height: 10),
-                    if (widget.onBook != null)
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: widget.onBook,
-                          icon: const Icon(Icons.home_outlined, size: 18),
-                          label: Text(t.book),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class BookingCardView extends StatelessWidget {
   const BookingCardView({super.key, required this.booking, required this.onViewAll});
 
   final BookingInfo booking;
   final VoidCallback? onViewAll;
 
+  Future<void> _copy(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: booking.bookingRef));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(content: Text(context.t.booking.copied), behavior: SnackBarBehavior.floating),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final t = context.t.booking;
+    final t = context.t;
     final b = booking;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              alignment: WrapAlignment.spaceBetween,
+    return Container(
+      decoration: BoxDecoration(
+        color: Palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Palette.line),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  alignment: WrapAlignment.spaceBetween,
                   children: [
-                    const Icon(Icons.check_circle, color: Palette.success, size: 20),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        t.confirmed,
-                        style: const TextStyle(fontWeight: FontWeight.w600, color: Palette.success),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.check_circle, color: Palette.success, size: 20),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            t.booking.confirmed,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Palette.success,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Palette.paper,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.offline_pin_outlined, size: 13, color: Palette.inkMuted),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              t.booking.savedOffline,
+                              style: const TextStyle(fontSize: 11, color: Palette.inkMuted),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: Palette.paper,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.offline_pin_outlined, size: 13, color: Palette.inkMuted),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          t.savedOffline,
-                          style: const TextStyle(fontSize: 11, color: Palette.inkMuted),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Flexible(
+                      child: SelectableText(
+                        b.bookingRef,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.5,
+                          fontFeatures: tabular,
+                          color: Palette.ink,
                         ),
                       ),
-                    ],
+                    ),
+                    IconButton(
+                      tooltip: t.booking.copy,
+                      onPressed: () => _copy(context),
+                      icon: const Icon(Icons.copy_rounded, size: 18, color: Palette.inkMuted),
+                    ),
+                  ],
+                ),
+                Text(
+                  b.packageName.of(_lang(context)),
+                  style: const TextStyle(fontWeight: FontWeight.w600, color: Palette.ink),
+                ),
+              ],
+            ),
+          ),
+          const _Perforation(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _InfoRow(
+                  Icons.event_outlined,
+                  '${dateLabel(context, b.date)} · ${windowLabel(context, b.timeWindow)}',
+                  caption: t.booking.collector,
+                ),
+                _InfoRow(Icons.place_outlined, b.addressLabel),
+                _InfoRow(Icons.person_outline, b.patientName),
+                if (b.fastingHours > 0)
+                  _InfoRow(
+                    Icons.no_food_outlined,
+                    t.form.fasting(h: b.fastingHours),
+                    emphasis: true,
+                  ),
+                if (onViewAll != null) ...[
+                  const SizedBox(height: 6),
+                  OutlinedButton(onPressed: onViewAll, child: Text(t.booking.viewAll)),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow(this.icon, this.text, {this.caption, this.emphasis = false});
+
+  final IconData icon;
+  final String text;
+  final String? caption;
+  final bool emphasis;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = emphasis ? const Color(0xFF8A5A00) : Palette.ink;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: emphasis ? color : Palette.inkMuted),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (caption != null)
+                  Text(caption!, style: const TextStyle(fontSize: 11, color: Palette.inkMuted)),
+                Text(
+                  text,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: emphasis ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            SelectableText(
-              b.bookingRef,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.5,
-                fontFeatures: tabular,
-                color: Palette.ink,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              b.packageName.of(_lang(context)),
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              '${dateLabel(context, b.date)} · ${windowLabel(context, b.timeWindow)}',
-              style: const TextStyle(color: Palette.ink),
-            ),
-            Text(
-              '${b.addressLabel} · ${t.forPatient(name: b.patientName)}',
-              style: const TextStyle(color: Palette.inkMuted),
-            ),
-            if (onViewAll != null) ...[
-              const SizedBox(height: 10),
-              OutlinedButton(onPressed: onViewAll, child: Text(t.viewAll)),
-            ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+}
+
+class _Perforation extends StatelessWidget {
+  const _Perforation();
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    height: 12,
+    width: double.infinity,
+    child: CustomPaint(painter: _PerforationPainter()),
+  );
+}
+
+class _PerforationPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final y = size.height / 2;
+    final dash = Paint()
+      ..color = Palette.line
+      ..strokeWidth = 1;
+    for (var x = 14.0; x < size.width - 14; x += 8) {
+      canvas.drawLine(Offset(x, y), Offset(x + 4, y), dash);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class SlotsCardView extends StatelessWidget {
@@ -358,29 +240,55 @@ class SlotsCardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(context.t.slots.full, style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final s in offer.alternatives)
-                  ActionChip(
-                    label: Text(
-                      '${dateLabel(context, s.date)} · ${windowLabel(context, s.timeWindow)}',
+    return Container(
+      decoration: BoxDecoration(
+        color: Palette.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Palette.line),
+      ),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.event_busy_outlined, size: 20, color: Palette.inkMuted),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(context.t.slots.full, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    Text(
+                      '${dateLabel(context, offer.requested.date)} · ${windowLabel(context, offer.requested.timeWindow)}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Palette.inkMuted,
+                        decoration: TextDecoration.lineThrough,
+                      ),
                     ),
-                    onPressed: onPick == null ? null : () => onPick!(s),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final s in offer.alternatives)
+                ActionChip(
+                  avatar: const Icon(Icons.schedule, size: 16, color: Palette.lavender),
+                  label: Text(
+                    '${dateLabel(context, s.date)} · ${windowLabel(context, s.timeWindow)}',
                   ),
-              ],
-            ),
-          ],
-        ),
+                  onPressed: onPick == null ? null : () => onPick!(s),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

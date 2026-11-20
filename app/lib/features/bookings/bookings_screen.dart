@@ -55,6 +55,7 @@ class BookingsList extends StatelessWidget {
               ),
             );
           }
+          final fasting = {for (final p in getIt<Catalog>().packages) p.id: p.fastingHours};
           return SingleChildScrollView(
             padding: padding,
             child: Center(
@@ -75,6 +76,7 @@ class BookingsList extends StatelessWidget {
                           addressLabel: b.addressLabel,
                           patientName: b.patientName,
                           status: b.status,
+                          fastingHours: fasting[b.packageId] ?? 0,
                         ),
                       ),
                   ],

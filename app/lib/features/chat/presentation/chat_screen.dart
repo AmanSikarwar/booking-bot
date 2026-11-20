@@ -22,6 +22,7 @@ import 'bubbles.dart';
 import 'cards.dart';
 import 'chat_cubit.dart';
 import 'chat_items.dart';
+import 'package_card.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -32,9 +33,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final _controller = SyncedChatController();
-  late final Map<String, List<String>> _testsById = {
-    for (final p in getIt<Catalog>().packages) p.id: p.tests,
-  };
+  late final Map<String, LabPackage> _byId = {for (final p in getIt<Catalog>().packages) p.id: p};
 
   String get _locale => context.read<LocaleCubit>().state.languageCode;
 
@@ -200,7 +199,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _openForm(String packageId, Localized name) {
-    final pkg = getIt<Catalog>().packages.where((p) => p.id == packageId).firstOrNull;
+    final pkg = _byId[packageId];
     unawaited(
       context.read<ChatCubit>().openBookingForm(
         BookingFormData(
@@ -224,10 +223,12 @@ class _ChatScreenState extends State<ChatScreen> {
           minItemWidth: 300,
           maxColumns: 2,
           children: [
-            for (final p in packages)
+            for (final (i, p) in packages.indexed)
               PackageCardView(
                 pkg: p,
-                allTests: _testsById[p.id] ?? const [],
+                details: _byId[p.id],
+                highlight: p.matchReason,
+                topMatch: i == 0 && packages.length > 1,
                 onBook: flagged ? null : () => _openForm(p.id, p.name),
               ),
           ],
@@ -480,6 +481,13 @@ class _SidePanel extends StatelessWidget {
   }
 }
 
+const _suggestionIcons = [
+  Icons.biotech_outlined,
+  Icons.health_and_safety_outlined,
+  Icons.water_drop_outlined,
+  Icons.battery_alert_outlined,
+];
+
 class _Welcome extends StatelessWidget {
   const _Welcome({required this.onPick});
 
@@ -493,15 +501,33 @@ class _Welcome extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       children: [
         SaathiBubble(child: SaathiText(text: t.chat.greeting)),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         Padding(
           padding: const EdgeInsetsDirectional.only(start: 40),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              for (final s in t.chat.suggestions)
-                ActionChip(label: Text(s), onPressed: () => onPick(s)),
+              Text(
+                t.chat.tryAsking,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Palette.inkMuted,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final (i, s) in t.chat.suggestions.indexed)
+                    ActionChip(
+                      avatar: Icon(_suggestionIcons[i % _suggestionIcons.length], size: 16),
+                      label: Text(s),
+                      onPressed: () => onPick(s),
+                    ),
+                ],
+              ),
             ],
           ),
         ),

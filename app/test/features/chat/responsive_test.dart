@@ -8,6 +8,7 @@ import 'package:saathi/features/catalog/package.dart';
 import 'package:saathi/features/chat/domain/models.dart';
 import 'package:saathi/features/chat/presentation/bubbles.dart';
 import 'package:saathi/features/chat/presentation/cards.dart';
+import 'package:saathi/features/chat/presentation/package_card.dart';
 import 'package:saathi/i18n/strings.g.dart';
 
 const name = Localized(
@@ -36,6 +37,22 @@ const allTests = [
   'Vitamin D',
   'Urine Routine',
 ];
+const details = LabPackage(
+  id: 'pkg_full_body',
+  name: name,
+  category: 'general',
+  tests: allTests,
+  testCount: 11,
+  priceInr: 12499,
+  mrpInr: 24999,
+  fastingHours: 10,
+  sampleType: 'blood, urine',
+  reportTatHours: 48,
+  description: Localized(
+    en: 'A wide checkup that covers sugar, heart, liver, kidney and more.',
+    hi: 'एक बड़ी जाँच।',
+  ),
+);
 const booking = BookingInfo(
   bookingRef: 'LAB-7Q3K9',
   packageId: 'pkg_full_body',
@@ -45,6 +62,7 @@ const booking = BookingInfo(
   addressLabel: 'Office near the main market',
   patientName: 'Ramesh Kumar Sharma',
   status: 'confirmed',
+  fastingHours: 10,
 );
 const offer = SlotOffer(
   requested: Slot(date: '2026-11-21', timeWindow: '07-09'),
@@ -103,7 +121,13 @@ void main() {
                               maxColumns: 2,
                               children: [
                                 for (var i = 0; i < 3; i++)
-                                  PackageCardView(pkg: pkg, allTests: allTests, onBook: () {}),
+                                  PackageCardView(
+                                    pkg: pkg,
+                                    details: details,
+                                    highlight: pkg.matchReason,
+                                    topMatch: true,
+                                    onBook: () {},
+                                  ),
                               ],
                             ),
                           ),
@@ -146,7 +170,13 @@ void main() {
                   maxColumns: 2,
                   children: [
                     for (var i = 0; i < 2; i++)
-                      PackageCardView(pkg: pkg, allTests: allTests, onBook: () {}),
+                      PackageCardView(
+                        pkg: pkg,
+                        details: details,
+                        highlight: pkg.matchReason,
+                        topMatch: true,
+                        onBook: () {},
+                      ),
                   ],
                 ),
               ),
