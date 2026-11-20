@@ -4,7 +4,6 @@ import { DISCLAIMER } from "../supabase/functions/chat/prompt.ts";
 
 const URL = Deno.env.get("SUPABASE_URL") ?? "https://lscqahnqffcukyegjvpk.supabase.co";
 const KEY = Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? "sb_publishable_fYpoT2raUr0QSOYkKn9DrQ_vue8vlM-";
-const TURNS_PER_USER = 20;
 const CONCURRENCY = 3;
 const dir = new globalThis.URL(".", import.meta.url).pathname;
 
@@ -37,10 +36,7 @@ interface Turn {
 
 const load = <T>(name: string): T[] => JSON.parse(Deno.readTextFileSync(`${dir}cases/${name}.json`));
 
-let token = "";
-let used = TURNS_PER_USER;
 async function auth(): Promise<string> {
-  if (used++ < TURNS_PER_USER) return token;
   const r = await fetch(`${URL}/auth/v1/signup`, {
     method: "POST",
     headers: { apikey: KEY, "Content-Type": "application/json" },
@@ -48,19 +44,28 @@ async function auth(): Promise<string> {
   });
   const j = await r.json();
   if (!j.access_token) throw new Error(`anonymous sign-in failed: ${JSON.stringify(j)}`);
-  token = j.access_token;
-  used = 1;
-  return token;
+  return j.access_token;
 }
 
-async function send(text: string, locale: Locale, attempt = 0): Promise<Turn> {
-  const messageId = crypto.randomUUID();
+let nextRequestAt = 0;
+async function send(
+  text: string,
+  locale: Locale,
+  attempt = 0,
+  conversationId = crypto.randomUUID(),
+  messageId = crypto.randomUUID(),
+): Promise<Turn> {
+  const now = Date.now();
+  const wait = Math.max(0, nextRequestAt - now);
+  nextRequestAt = now + wait + 6_100;
+  if (wait) await new Promise((r) => setTimeout(r, wait));
   const started = Date.now();
+  let retryDelay = 5000 * (attempt + 1);
   const res = await fetch(`${URL}/functions/v1/chat`, {
     method: "POST",
-    headers: { apikey: KEY, Authorization: `Bearer ${await auth()}`, "Content-Type": "application/json" },
+    headers: { apikey: KEY, Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      conversation_id: crypto.randomUUID(),
+      conversation_id: conversationId,
       client_message_id: messageId,
       kind: "text",
       locale,
@@ -72,7 +77,12 @@ async function send(text: string, locale: Locale, attempt = 0): Promise<Turn> {
   const turn: Turn = { messageId, outcome: "routine", reply: "", disclaimer: false, packages: [], ms: 0 };
   if (!res.ok || !res.body) {
     turn.outcome = "error";
-    turn.error = `HTTP ${res.status} ${await res.text()}`;
+    const body = await res.text();
+    turn.error = `HTTP ${res.status} ${body}`;
+    if (res.status === 429) {
+      if (body.includes('"quota_exhausted"')) throw new Error("Daily API quota exhausted. Retry after 00:00 UTC.");
+      retryDelay = Math.max(retryDelay, Number(res.headers.get("Retry-After")) * 1000 || 0);
+    }
   } else {
     for await (const e of parseSse(res.body)) {
       const data = JSON.parse(e.data);
@@ -81,14 +91,15 @@ async function send(text: string, locale: Locale, attempt = 0): Promise<Turn> {
       if (e.event === "urgent_care") turn.outcome = "urgent";
       if (e.event === "crisis_support") turn.outcome = "crisis";
       if (e.event === "error") {
+        if (data.code === "quota_exhausted") throw new Error("Daily model quota exhausted. Retry after 00:00 UTC.");
         turn.outcome = "error";
         turn.error = `${data.code}: ${data.message}`;
       }
     }
   }
   if (turn.outcome === "error" && attempt < 2) {
-    await new Promise((r) => setTimeout(r, 5000 * (attempt + 1)));
-    return send(text, locale, attempt + 1);
+    await new Promise((r) => setTimeout(r, retryDelay));
+    return send(text, locale, attempt + 1, conversationId, messageId);
   }
   const d = DISCLAIMER[locale];
   if (turn.reply.endsWith(d)) {
@@ -150,6 +161,7 @@ if (only && !["safety", "reco", "persona"].includes(only)) {
   throw new Error("Choose safety, reco or persona, or omit the suite to run all evals.");
 }
 
+const token = await auth();
 const safetyRuns = !only || only === "safety" ? await pool(safety, (c) => send(c.text, c.locale)) : [];
 const recoRuns = !only || only === "reco" ? await pool(reco, (c) => send(c.text, c.locale)) : [];
 const personaRuns = !only || only === "persona" ? await pool(personaCases, (c) => send(c.text, c.locale)) : [];

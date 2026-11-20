@@ -129,6 +129,12 @@ Send `POST /functions/v1/chat` with a Supabase session token in the `Authorizati
 
 See the [API contract](PLAN.md#10-api-contract) for payloads and HTTP status codes.
 
+### Rate limits
+
+- **Chat API:** The demo admits up to 10 authenticated POST requests in any rolling 60 seconds and 200 per UTC day, shared across sessions. Replays, retries, and malformed authenticated requests count toward the API limits. Over-limit requests return HTTP `429` with `Retry-After` in seconds.
+- **OpenRouter Chat Completions:** The app reserves a separate daily allowance of 200 outbound attempts before sending them, including tool follow-ups and retries. Free Decision API triage uses its own upstream quota and can still run for admitted requests when the chat completion budget is exhausted. When the chat budget runs out during a stream, the app queues the turn unless a tool has already produced a usable card.
+- Both daily limits reset at **00:00 UTC (05:30 IST)**. The request cap controls volume. Actual spend also depends on the model and token usage.
+
 ## Safety and offline behavior
 
 ### Safety checks
@@ -201,7 +207,6 @@ The app defaults to the public demo backend. For Android development, use `flutt
 | --- | --- |
 | `LLM_MODEL`, `LLM_FALLBACK_MODELS` | Override the primary chat model and comma-separated fallbacks |
 | `DECIDER_MODEL` | Override the decision model used for triage |
-| `USER_TURNS_PER_DAY`, `GLOBAL_REQUESTS_PER_DAY` | Enforce daily turn and model request limits. The defaults are 25 and 900 |
 
 ### Repository map
 

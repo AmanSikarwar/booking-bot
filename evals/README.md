@@ -2,6 +2,8 @@
 
 Runs real conversations against the deployed `chat` function, the same way the app does: anonymous sign-in, then `POST /functions/v1/chat` over SSE, one new conversation per case. Nothing is mocked, so a run spends real (small) OpenRouter quota.
 
+The runner spaces requests just over six seconds apart and respects HTTP `Retry-After` when other traffic uses the shared minute limit. A daily API or chat completion quota error stops the run before it replaces a report. Use a project with enough daily capacity for the selected suites.
+
 ```sh
 deno run --allow-net --allow-read --allow-write --allow-env evals/run.ts          # all suites
 deno run --allow-net --allow-read --allow-write --allow-env evals/run.ts safety   # or: reco, persona

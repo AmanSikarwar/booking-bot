@@ -127,7 +127,7 @@ Today, users have to browse long test lists they don't understand, or call the l
 | State | BLoC / Cubit + Clean Architecture, freezed states and events | Testable, predictable states for streaming / queued / failed; generated equality and exhaustive unions |
 | Code generation | freezed, json_serializable, drift_dev, injectable, go_router_builder, slang, flutter_gen | Less hand-written boilerplate, type-safe routes, strings and assets; generated files are committed |
 | Localization | slang (JSON, en + hi) | Type-safe strings (`t.urgentCare.body`), one file per language including the fixed safety copy |
-| Auth | Supabase anonymous sign-in | Gives each install a `user_id` for RLS and rate limits, with no signup friction |
+| Auth | Supabase anonymous sign-in | Gives each install a `user_id` for conversation ownership and RLS |
 | Shared rules | `catalog/packages.json` and `safety/red_flags.json`, used by both app and function | One source of truth, synced by a script and checked in CI, so client and server checks can't drift apart |
 | Provider isolation | One small LLM interface and one decider interface, each with a mock | Swapping providers, or running entirely on mocks, is a one-file change |
 
@@ -154,16 +154,18 @@ Today, users have to browse long test lists they don't understand, or call the l
 ### Turn loop (server)
 
 ```
-user message
+authenticated POST ──over API limit──► HTTP 429 and Retry-After
+  └─► admitted user message
   └─► layer 1: keyword red-flag check ──match──► urgent_care, flag conversation, done (0 model requests)
-  └─► quota guard ──exhausted──► error event (user_daily_limit / quota_exhausted), done
   └─► layer 2: Decider Flash triage (text only) ──P ≥ threshold──► urgent_care / crisis card, flag, done (1 decision request)
+  └─► chat completion budget before each outbound attempt ──exhausted──► quota error or existing card
   └─► chat request 1 (stream) ──text──► text_delta…
                               └─tool_calls─► validate ─► run tool ─► card event ─► chat request 2 (stream) ─► text_delta… ─► done
   (max 3 tool rounds, then a forced final text answer with tools disabled)
 
-The quota guard runs after layer 1, so keyword red flags work even with the quota exhausted, and before layer 2, so an over-budget turn spends no decision request.
 ```
+
+The shared API limit applies before the server processes a turn. Hard keyword matches still show a local safety card. For admitted requests, free triage continues when chat completion quota is exhausted. Contextual matches still escalate when triage cannot run.
 
 ### Chat model settings
 
@@ -535,7 +537,7 @@ The catalogue also carries a version number, so the app knows when its bundled c
 
 - Users can read only their own rows in conversations, messages and bookings.
 - All writes go through the edge function with the service role, so a client can never insert a booking directly.
-- `safety_checks` and `llm_usage` have no client access. `llm_usage` powers the quota guard (today's request count in UTC) and the README's usage and spend report.
+- `safety_checks` and `llm_usage` have no client access. `llm_usage` records model usage and cost. A separate private table records atomic quota reservations.
 
 ### 9.3 Client (Drift / SQLite)
 
@@ -599,7 +601,7 @@ Each event has a type and a JSON payload.
 | slot_unavailable | The requested slot and up to 3 alternatives | Rendered as slot chips |
 | urgent_care | Category (cardiac, respiratory and so on) and helplines (112, 108) | Rendered with the fixed urgent-care copy from the app |
 | crisis_support | Helpline (Tele-MANAS 14416) | Rendered with the fixed crisis-support copy from the app |
-| error | Error code, message, whether it's retryable, optional retry-after seconds | `llm_unavailable`, `rate_limited` (retry with backoff); `user_daily_limit` (friendly message, keep queued); `quota_exhausted` (Saathi's fixed quota copy, back at 5:30 am IST, keep queued, offer the offline catalogue). The user message is marked failed on the server, so a resend is processed again |
+| error | Error code, message, whether it's retryable, optional retry-after seconds | `llm_unavailable` and upstream `rate_limited` use backoff. `quota_exhausted` leaves the turn queued until the UTC reset at 05:30 IST. An emitted error marks the turn retryable on the server. |
 | done | Assistant message id; usage (model requests, input and output tokens) | Always last |
 
 ### Errors before the stream starts
@@ -610,9 +612,10 @@ Each event has a type and a JSON payload.
 | 401 | unauthorized | Refresh the anonymous session, then retry once |
 | 403 | forbidden | Conversation belongs to another user; mark failed |
 | 409 | in_progress | The same message is still processing; retry with backoff |
+| 429 | rate_limited / quota_exhausted | Keep the message queued for the duration of the `Retry-After` response header |
 | 5xx | server_error | Retry with backoff |
 
-Quota errors arrive as `error` events after `ack`, not as HTTP statuses, because safety layer 1 must run first.
+The API returns HTTP `429` before starting a stream. Exhausting the separate model quota after admission can produce a streamed error.
 
 ### Idempotency guarantees
 
@@ -695,25 +698,12 @@ Measured on live turns: a search turn is 2 chat requests, ~2.9K input and ~140 o
 | Decider red-flag turn | 1 decision (chat model not called) | ₹0 |
 | Replayed turn (reconnect) | 0 (served from the DB) | ₹0 |
 
-### Take-home request budget
-
-| Activity | Requests |
-|---|---|
-| End-to-end testing during development (most work uses mocks) | ~300 |
-| Evals: 60 cases × 2 runs, ~2 requests each | ~250 |
-| Video recording and demo | ~60 |
-| Reviewers using the deployed build | ~450 |
-| **Total, across two UTC days** | **~1,060** |
-
-About two thirds are chat requests, at ~$0.00025 each: **~$0.20 (≈ ₹17) expected**. The one-time $10 credit purchase unlocks the 1,000-a-day free tier for the decider and the free fallbacks, and pays for the DeepSeek tokens. Actual spend is summed from `llm_usage.cost_usd` and checked against the OpenRouter activity page in the README.
-
 ### Guards
 
-- **Global daily request budget:** the quota guard counts today's requests (UTC) and stops at **900**, leaving headroom below the 1,000 free limit and capping daily paid spend at well under ₹50. Over budget, the app gets "quota exhausted". This is the hard limit.
-- **Per-user cap:** 25 turns a day per anonymous user, so one reviewer can't exhaust the day's quota. It's a soft cap: a fresh anonymous sign-in gets a new user id. Supabase's per-IP rate limit on anonymous sign-ins slows that down, and the global budget still holds.
-- **Rate limit:** 20 requests a minute is plenty for a demo. Rate-limited requests return a retryable error with a retry-after time, and the outbox handles it.
-- **Quota savers:** the keyword check, skipping the decider on card actions, and replay all avoid unnecessary model requests.
-- **Spend cap:** the API key carries a hard credit limit of $3 (about ₹300), so spend stays under ₹500 even if every guard fails.
+- **API limits** apply globally across all sessions. Postgres admits up to 10 authenticated POST requests in a rolling minute and 200 per UTC day. Over-limit requests return HTTP `429` with a retry time.
+- **Chat completion budget** permits 200 outbound OpenRouter Chat Completions attempts per UTC day, including tool follow-ups and retries. The database reserves capacity before each attempt. Free Decision API calls use their own upstream quota.
+- **Quota savers** include the keyword check, skipping the decider on card actions, and replay. These paths still use the API allowance.
+- **Provider spend** depends on tokens and model prices. The daily attempt quota bounds volume, and `llm_usage.cost_usd` tracks reported spend.
 - **Prompt size:** history is trimmed to 10 turns and output capped at 1000 tokens, keeping each request under 5K input tokens including the persona prompt.
 - **Infrastructure costs ₹0:** Supabase free tier, plus a free static host for the web build.
 
@@ -742,7 +732,7 @@ About two thirds are chat requests, at ~$0.00025 each: **~$0.20 (≈ ₹17) expe
 | Users mistake Saathi for a human or a doctor | "AI" badge, non-human avatar, Saathi states it's an AI assistant when asked |
 | Decider misclassifies an emergency as routine | Deterministic keyword floor, low thresholds, prompt rules as a third layer, measured on paraphrased eval cases |
 | Decisions API is an alpha endpoint and may change | Isolated adapter, mock for tests, fail-open handling, model set by environment variable |
-| Free daily quota runs out during review | 1,000/day tier, a 900-request global guard, per-user caps, quota savers, Saathi's fixed quota copy, offline catalogue browser |
+| Daily quota runs out during review | Global API and model limits, fixed quota copy, and the offline catalogue browser |
 | Free model is rate-limited or removed from OpenRouter | Model ids set by environment variables; free fallback list on by default; provider adapters; mock mode keeps the app demoable. Seen in practice: the free Gemma pool returned 429 (`upstream_provider_shared_pool`) on day one |
 | Free endpoints may log prompts | Synthetic data only (also required by the brief); zero-retention paid provider in production |
 | SSE doesn't stream on Flutter Web (the default client buffers) | Use `fetch_client` on web; fall back to non-streamed rendering if unsupported |
