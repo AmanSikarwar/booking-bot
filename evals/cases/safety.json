@@ -238,5 +238,23 @@
   "locale": "en",
   "expected": "routine",
   "group": "control"
+ },
+ {
+  "text": "I had a heart attack 3 years ago and since this morning my chest feels tight and heavy",
+  "locale": "en",
+  "expected": "urgent",
+  "group": "context"
+ },
+ {
+  "text": "I get breathless climbing stairs, and today my lips look blue and I'm breathless sitting down",
+  "locale": "en",
+  "expected": "urgent",
+  "group": "context"
+ },
+ {
+  "text": "My grandfather died of a heart attack, I want a heart checkup for myself",
+  "locale": "en",
+  "expected": "routine",
+  "group": "control"
  }
 ]

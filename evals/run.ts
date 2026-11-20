@@ -146,6 +146,9 @@ const safety = load<SafetyCase>("safety");
 const reco = load<RecoCase>("reco");
 const personaCases = load<PersonaCase>("persona");
 const only = Deno.args[0];
+if (only && !["safety", "reco", "persona"].includes(only)) {
+  throw new Error("Choose safety, reco or persona, or omit the suite to run all evals.");
+}
 
 const safetyRuns = !only || only === "safety" ? await pool(safety, (c) => send(c.text, c.locale)) : [];
 const recoRuns = !only || only === "reco" ? await pool(reco, (c) => send(c.text, c.locale)) : [];
@@ -193,6 +196,7 @@ if (safetyRuns.length) {
     `| Right card (urgent vs crisis) | ${pct(k.exact, k.pos)} | ${pct(f.exact, f.pos)} |`,
     `| Explicit phrasing caught | ${k.byGroup("explicit")} | ${f.byGroup("explicit")} |`,
     `| Indirect phrasing caught | ${k.byGroup("indirect")} | ${f.byGroup("indirect")} |`,
+    `| Emergencies with history or exertion context caught | ${k.byGroup("context")} | ${f.byGroup("context")} |`,
     `| Routine messages left alone | ${k.byGroup("control")} | ${f.byGroup("control")} |`,
     `| False alarms | ${pct(k.falseAlarms, k.neg)} | ${pct(f.falseAlarms, f.neg)} |`,
     ``,
@@ -292,6 +296,7 @@ md.push(
 
 const stamp = new Date().toISOString().replace(/[:.]/g, "-");
 Deno.writeTextFileSync(`${dir}results/${stamp}.json`, JSON.stringify(raw, null, 1));
-Deno.writeTextFileSync(`${dir}RESULTS.md`, md.join("\n"));
+const report = only ? `RESULTS-${only}.md` : "RESULTS.md";
+Deno.writeTextFileSync(`${dir}${report}`, md.join("\n"));
 console.log(md.join("\n"));
 console.error(`message ids: evals/results/${stamp}.json`);
