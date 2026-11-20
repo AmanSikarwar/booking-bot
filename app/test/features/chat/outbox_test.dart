@@ -113,6 +113,24 @@ void main() {
     expect(requests.single.clientMessageId, 'm1');
   });
 
+  test('tool activity survives its result card until the visible reply starts', () async {
+    await queue('m1', 'yes book it');
+    final replyId = replyIdFor('m1');
+    when(() => api.send(any())).thenAnswer((_) async* {
+      yield const ChatEvent.ack(replay: false);
+      yield const ChatEvent.toolStarted('book_slot');
+      yield const ChatEvent.card(ChatCard.booking(booking));
+      expect((await msg(replyId)).activeTool, 'book_slot');
+      yield const ChatEvent.textDelta('');
+      expect((await msg(replyId)).activeTool, 'book_slot');
+      yield const ChatEvent.textDelta('Done.');
+      expect((await msg(replyId)).activeTool, isNull);
+      yield const ChatEvent.done();
+    });
+    await outbox.drainOnce();
+    expect((await msg('m1')).status, MessageStatus.sent);
+  });
+
   test('sends oldest first, one at a time', () async {
     await queue('late', 'second');
     await queue('early', 'first', secondsAgo: 30);

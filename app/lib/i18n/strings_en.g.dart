@@ -111,8 +111,20 @@ class Translations$chat$en {
 	/// en: 'New chat'
 	String get newChat => 'New chat';
 
+	/// en: 'Thinking…'
+	String get thinking => 'Thinking…';
+
+	/// en: 'Typing…'
+	String get typing => 'Typing…';
+
+	/// en: 'Using a tool…'
+	String get usingTool => 'Using a tool…';
+
 	/// en: 'Finding packages…'
 	String get findingPackages => 'Finding packages…';
+
+	/// en: 'Preparing your booking…'
+	String get preparingBooking => 'Preparing your booking…';
 
 	/// en: 'Booking your slot…'
 	String get bookingSlot => 'Booking your slot…';
@@ -876,7 +888,11 @@ extension on Translations {
 			'chat.inputHint' => 'Describe a symptom or a test',
 			'chat.send' => 'Send',
 			'chat.newChat' => 'New chat',
+			'chat.thinking' => 'Thinking…',
+			'chat.typing' => 'Typing…',
+			'chat.usingTool' => 'Using a tool…',
 			'chat.findingPackages' => 'Finding packages…',
+			'chat.preparingBooking' => 'Preparing your booking…',
 			'chat.bookingSlot' => 'Booking your slot…',
 			'chat.flaggedNote' => 'Booking is paused in this chat. Start a new chat for a routine checkup.',
 			'chat.suggestions.0' => 'Check my thyroid',

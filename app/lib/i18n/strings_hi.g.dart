@@ -91,7 +91,11 @@ class _Translations$chat$hi extends Translations$chat$en {
 	@override String get inputHint => 'कोई लक्षण या टेस्ट लिखें';
 	@override String get send => 'भेजें';
 	@override String get newChat => 'नई चैट';
+	@override String get thinking => 'सोच रहा हूँ…';
+	@override String get typing => 'लिख रहा हूँ…';
+	@override String get usingTool => 'टूल चला रहा हूँ…';
 	@override String get findingPackages => 'पैकेज ढूँढ रहा हूँ…';
+	@override String get preparingBooking => 'बुकिंग फ़ॉर्म तैयार कर रहा हूँ…';
 	@override String get bookingSlot => 'स्लॉट बुक कर रहा हूँ…';
 	@override String get flaggedNote => 'इस चैट में बुकिंग रोकी गई है। रूटीन जाँच के लिए नई चैट शुरू करें।';
 	@override List<String> get suggestions => [
@@ -503,7 +507,11 @@ extension on TranslationsHi {
 			'chat.inputHint' => 'कोई लक्षण या टेस्ट लिखें',
 			'chat.send' => 'भेजें',
 			'chat.newChat' => 'नई चैट',
+			'chat.thinking' => 'सोच रहा हूँ…',
+			'chat.typing' => 'लिख रहा हूँ…',
+			'chat.usingTool' => 'टूल चला रहा हूँ…',
 			'chat.findingPackages' => 'पैकेज ढूँढ रहा हूँ…',
+			'chat.preparingBooking' => 'बुकिंग फ़ॉर्म तैयार कर रहा हूँ…',
 			'chat.bookingSlot' => 'स्लॉट बुक कर रहा हूँ…',
 			'chat.flaggedNote' => 'इस चैट में बुकिंग रोकी गई है। रूटीन जाँच के लिए नई चैट शुरू करें।',
 			'chat.suggestions.0' => 'थायरॉइड की जाँच',

@@ -223,12 +223,15 @@ class SaathiText extends StatelessWidget {
 }
 
 class ActivityChip extends StatelessWidget {
-  const ActivityChip({super.key, required this.label});
+  const ActivityChip({super.key, required this.label, this.showTypingDots = false});
 
   final String label;
+  final bool showTypingDots;
 
   @override
   Widget build(BuildContext context) {
+    final animate = Motion.on(context);
+    final text = Text(label, style: const TextStyle(fontSize: 13, color: Palette.teal));
     return Semantics(
       liveRegion: true,
       child: Container(
@@ -237,22 +240,58 @@ class ActivityChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox.square(
-              dimension: 14,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Palette.teal),
-            ),
+            if (showTypingDots)
+              animate ? const _TypingDots() : const Icon(Icons.more_horiz, size: 18)
+            else if (animate)
+              const SizedBox.square(
+                dimension: 14,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Palette.teal),
+              )
+            else
+              const Icon(Icons.hourglass_top_outlined, size: 14),
             const SizedBox(width: 8),
-            Flexible(
-              child: _shimmer(
-                context,
-                Text(label, style: const TextStyle(fontSize: 13, color: Palette.teal)),
-              ),
-            ),
+            Flexible(child: showTypingDots ? text : _shimmer(context, text)),
           ],
         ),
       ),
     );
   }
+}
+
+class _TypingDots extends StatefulWidget {
+  const _TypingDots();
+
+  @override
+  State<_TypingDots> createState() => _TypingDotsState();
+}
+
+class _TypingDotsState extends State<_TypingDots> with SingleTickerProviderStateMixin {
+  late final _anim = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))
+    ..repeat();
+
+  @override
+  void dispose() {
+    _anim.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _anim,
+    builder: (_, _) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < 3; i++)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Opacity(
+              opacity: (_anim.value * 3 - i) % 3 < 1 ? 1.0 : 0.3,
+              child: const CircleAvatar(radius: 2.5, backgroundColor: Palette.teal),
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 class NoticeBubble extends StatelessWidget {

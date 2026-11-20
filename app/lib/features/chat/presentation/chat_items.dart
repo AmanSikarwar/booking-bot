@@ -29,14 +29,7 @@ List<fc.Message> toChatItems(List<Message> rows, {required bool online}) {
       );
       if ((r.status == MessageStatus.sending || r.status == MessageStatus.streaming) &&
           !answered.contains(r.id)) {
-        items.add(
-          fc.Message.custom(
-            id: '${replyIdFor(r.id)}#typing',
-            authorId: saathiId,
-            createdAt: tick(2),
-            metadata: {'kind': 'typing'},
-          ),
-        );
+        items.add(_activity(replyIdFor(r.id), tick(2)));
       }
       final notice = _noticeCodes.contains(r.error)
           ? r.error
@@ -75,28 +68,20 @@ List<fc.Message> toChatItems(List<Message> rows, {required bool online}) {
         ),
       );
     }
-    if (r.activeTool != null) {
-      items.add(
-        fc.Message.custom(
-          id: '${r.id}#tool',
-          authorId: saathiId,
-          createdAt: tick(100),
-          metadata: {'kind': 'tool', 'tool': r.activeTool},
-        ),
-      );
-    } else if (streaming && r.body.isEmpty) {
-      items.add(
-        fc.Message.custom(
-          id: '${r.id}#typing',
-          authorId: saathiId,
-          createdAt: tick(100),
-          metadata: {'kind': 'typing'},
-        ),
-      );
+    if (streaming) {
+      items.add(_activity(r.id, tick(100), tool: r.activeTool, hasText: r.body.isNotEmpty));
     }
   }
   return items;
 }
+
+fc.Message _activity(String replyId, DateTime at, {String? tool, bool hasText = false}) =>
+    fc.Message.custom(
+      id: '$replyId#activity',
+      authorId: saathiId,
+      createdAt: at,
+      metadata: {'kind': 'activity', 'tool': tool, 'hasText': hasText},
+    );
 
 class SyncedChatController extends fc.InMemoryChatController {
   Future<void> _pending = Future.value();

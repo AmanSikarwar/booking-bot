@@ -115,20 +115,23 @@ class Outbox {
                 locale: Value(m.locale),
                 replyTo: Value(m.id),
                 status: MessageStatus.streaming,
+                activeTool: const Value(null),
                 createdAt: m.createdAt.add(const Duration(milliseconds: 1)),
               ),
             );
           case TextDeltaEvent(:final text):
+            if (text.isEmpty) continue;
             body += text;
-            await _db.patchMessage(replyId, MessagesCompanion(body: Value(body)));
+            await _db.patchMessage(
+              replyId,
+              MessagesCompanion(body: Value(body), activeTool: const Value(null)),
+            );
           case ToolStartedEvent(:final tool):
             await _db.patchMessage(replyId, MessagesCompanion(activeTool: Value(tool)));
           case CardEvent(:final card):
             cards = [...cards, card];
-            await _db.patchMessage(
-              replyId,
-              MessagesCompanion(cards: Value(cards), activeTool: const Value(null)),
-            );
+            // A tool result may arrive in the same frame as its activity event.
+            await _db.patchMessage(replyId, MessagesCompanion(cards: Value(cards)));
             switch (card) {
               case BookingCardData(:final booking):
                 await _db.saveBooking(m.conversationId, booking, _clock.now());
@@ -152,7 +155,10 @@ class Outbox {
     }
 
     if (error != null) {
-      await _db.patchMessage(replyId, const MessagesCompanion(status: Value(MessageStatus.sent)));
+      await _db.patchMessage(
+        replyId,
+        const MessagesCompanion(status: Value(MessageStatus.sent), activeTool: Value(null)),
+      );
       if (body.isEmpty && cards.isEmpty) await _deleteReply(replyId);
       if (_quotaCodes.contains(error.code)) {
         return _waitWithoutAttempt(m, error.code, Duration(seconds: error.retryAfter ?? 3600));
@@ -163,7 +169,10 @@ class Outbox {
       await _markIncomplete(replyId);
       return _retryLater(m, 'incomplete', status: MessageStatus.incomplete);
     }
-    await _db.patchMessage(replyId, const MessagesCompanion(status: Value(MessageStatus.sent)));
+    await _db.patchMessage(
+      replyId,
+      const MessagesCompanion(status: Value(MessageStatus.sent), activeTool: Value(null)),
+    );
     await _db.patchMessage(
       m.id,
       const MessagesCompanion(

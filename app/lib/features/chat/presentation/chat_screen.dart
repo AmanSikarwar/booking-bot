@@ -210,17 +210,21 @@ class _ChatScreenState extends State<ChatScreen> {
     final t = context.t;
     final meta = m.metadata ?? const {};
     return switch (meta['kind']) {
-      'tool' => SaathiBubble(
-        showAvatar: false,
+      'activity' => SaathiBubble(
+        showAvatar: meta['hasText'] != true,
         child: Align(
           alignment: AlignmentDirectional.centerStart,
           child: ActivityChip(
-            label: meta['tool'] == 'book_slot' ? t.chat.bookingSlot : t.chat.findingPackages,
+            label: switch (meta['tool']) {
+              'search_packages' => t.chat.findingPackages,
+              'show_booking_form' => t.chat.preparingBooking,
+              'book_slot' => t.chat.bookingSlot,
+              String() => t.chat.usingTool,
+              _ => meta['hasText'] == true ? t.chat.typing : t.chat.thinking,
+            },
+            showTypingDots: meta['tool'] == null,
           ),
         ),
-      ),
-      'typing' => const SaathiBubble(
-        child: Align(alignment: AlignmentDirectional.centerStart, child: _TypingDots()),
       ),
       'notice' => SaathiBubble(
         showAvatar: false,
@@ -614,53 +618,6 @@ class _Strip extends StatelessWidget {
                 style: TextButton.styleFrom(foregroundColor: Colors.white),
                 onPressed: action!.onTap,
                 child: Text(action!.label),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TypingDots extends StatefulWidget {
-  const _TypingDots();
-
-  @override
-  State<_TypingDots> createState() => _TypingDotsState();
-}
-
-class _TypingDotsState extends State<_TypingDots> with SingleTickerProviderStateMixin {
-  late final _anim = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))
-    ..repeat();
-
-  @override
-  void dispose() {
-    _anim.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final reduce = MediaQuery.disableAnimationsOf(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Palette.surface,
-        border: Border.all(color: Palette.line),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: AnimatedBuilder(
-        animation: _anim,
-        builder: (_, _) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var i = 0; i < 3; i++)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: Opacity(
-                  opacity: reduce ? 0.6 : 0.3 + 0.7 * ((_anim.value * 3 - i) % 3 < 1 ? 1 : 0),
-                  child: const CircleAvatar(radius: 3.5, backgroundColor: Palette.teal),
-                ),
               ),
           ],
         ),

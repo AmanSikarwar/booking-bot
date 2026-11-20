@@ -8,7 +8,11 @@
     "inputHint": "Describe a symptom or a test",
     "send": "Send",
     "newChat": "New chat",
+    "thinking": "Thinking…",
+    "typing": "Typing…",
+    "usingTool": "Using a tool…",
     "findingPackages": "Finding packages…",
+    "preparingBooking": "Preparing your booking…",
     "bookingSlot": "Booking your slot…",
     "flaggedNote": "Booking is paused in this chat. Start a new chat for a routine checkup.",
     "suggestions": [

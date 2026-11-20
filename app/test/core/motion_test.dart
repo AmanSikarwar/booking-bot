@@ -62,6 +62,15 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets('thinking and typing keep their labels with reduced motion', (tester) async {
+    for (final label in ['Thinking…', 'Typing…']) {
+      await pump(tester, (_) => ActivityChip(label: label, showTypingDots: true), reduce: true);
+      await tester.pumpAndSettle();
+      expect(find.text(label), findsOneWidget);
+      expect(find.byIcon(Icons.more_horiz), findsOneWidget);
+    }
+  });
+
   testWidgets('reduced motion skips every effect', (tester) async {
     await pump(
       tester,

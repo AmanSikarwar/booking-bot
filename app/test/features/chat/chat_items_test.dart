@@ -62,7 +62,7 @@ void main() {
     expect(ids(toChatItems([reply], online: true)), ['reply:a', 'reply:a#card0', 'reply:a#card1']);
   });
 
-  test('cards wait until the streamed text is finished', () {
+  test('thinking, tool activity and typing share one indicator while cards wait', () {
     const cards = [ChatCard.urgent('x')];
     Message streaming({String body = '', String? tool}) => row(
       'reply:a',
@@ -72,9 +72,15 @@ void main() {
       cards: cards,
       tool: tool,
     );
-    expect(ids(toChatItems([streaming(tool: 'search_packages')], online: true)), ['reply:a#tool']);
-    expect(ids(toChatItems([streaming()], online: true)), ['reply:a#typing']);
-    expect(ids(toChatItems([streaming(body: 'These are ')], online: true)), ['reply:a']);
+    final thinking = toChatItems([streaming()], online: true).single as fc.CustomMessage;
+    final tool =
+        toChatItems([streaming(tool: 'search_packages')], online: true).single as fc.CustomMessage;
+    final typing = toChatItems([streaming(body: 'These are ')], online: true);
+    expect([thinking.id, tool.id], ['reply:a#activity', 'reply:a#activity']);
+    expect(thinking.metadata, {'kind': 'activity', 'tool': null, 'hasText': false});
+    expect(tool.metadata!['tool'], 'search_packages');
+    expect(ids(typing), ['reply:a', 'reply:a#activity']);
+    expect((typing.last as fc.CustomMessage).metadata!['hasText'], isTrue);
   });
 
   test('cards from an interrupted reply are still shown', () {
@@ -84,18 +90,20 @@ void main() {
       status: MessageStatus.incomplete,
       body: 'These',
       cards: const [ChatCard.urgent('x')],
+      tool: 'search_packages',
     );
     expect(ids(toChatItems([reply], online: true)), ['reply:a', 'reply:a#card0']);
   });
 
-  test('empty streaming reply shows typing dots', () {
+  test('a completed card-only reply omits stale tool activity', () {
     final reply = row(
       'reply:a',
       role: MessageRole.assistant,
-      status: MessageStatus.streaming,
       body: '',
+      cards: const [ChatCard.urgent('x')],
+      tool: 'book_slot',
     );
-    expect(ids(toChatItems([reply], online: true)), ['reply:a#typing']);
+    expect(ids(toChatItems([reply], online: true)), ['reply:a#card0']);
   });
 
   test('synced controller applies inserts, updates and removals in order', () async {
@@ -127,10 +135,10 @@ void main() {
     expect(item.text, 'X · Sat 21 Nov');
   });
 
-  test('typing dots show as soon as a message is sending, before the reply starts', () {
+  test('activity appears before acknowledgement and keeps its id after acknowledgement', () {
     expect(ids(toChatItems([row('a', status: MessageStatus.sending)], online: true)), [
       'a',
-      'reply:a#typing',
+      'reply:a#activity',
     ]);
     final withReply = [
       row('a', status: MessageStatus.streaming),
@@ -142,6 +150,6 @@ void main() {
         at: 1,
       ).copyWith(replyTo: const Value('a')),
     ];
-    expect(ids(toChatItems(withReply, online: true)), ['a', 'reply:a#typing']);
+    expect(ids(toChatItems(withReply, online: true)), ['a', 'reply:a#activity']);
   });
 }
