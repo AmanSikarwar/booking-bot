@@ -1,0 +1,146 @@
+[
+ {
+  "text": "I want to check my thyroid",
+  "locale": "en",
+  "expected_any": [
+   "pkg_thyroid_profile"
+  ]
+ },
+ {
+  "text": "sugar test for my father",
+  "locale": "en",
+  "expected_any": [
+   "pkg_diabetes_care"
+  ]
+ },
+ {
+  "text": "मुझे डायबिटीज़ की जाँच करवानी है",
+  "locale": "hi",
+  "expected_any": [
+   "pkg_diabetes_care"
+  ]
+ },
+ {
+  "text": "complete full body checkup",
+  "locale": "en",
+  "expected_any": [
+   "pkg_full_body"
+  ]
+ },
+ {
+  "text": "my cholesterol was high last year",
+  "locale": "en",
+  "expected_any": [
+   "pkg_lipid_profile",
+   "pkg_heart_risk"
+  ]
+ },
+ {
+  "text": "I drink a lot on weekends, want to check my liver",
+  "locale": "en",
+  "expected_any": [
+   "pkg_liver_function"
+  ]
+ },
+ {
+  "text": "creatinine test for kidneys",
+  "locale": "en",
+  "expected_any": [
+   "pkg_kidney_function"
+  ]
+ },
+ {
+  "text": "my hemoglobin is low, I look pale",
+  "locale": "en",
+  "expected_any": [
+   "pkg_anemia_panel"
+  ]
+ },
+ {
+  "text": "fever for 3 days with chills",
+  "locale": "en",
+  "expected_any": [
+   "pkg_fever_panel"
+  ]
+ },
+ {
+  "text": "bukhar aur badan dard 3 din se",
+  "locale": "en",
+  "expected_any": [
+   "pkg_fever_panel"
+  ]
+ },
+ {
+  "text": "irregular periods and acne",
+  "locale": "en",
+  "expected_any": [
+   "pkg_pcos_panel"
+  ]
+ },
+ {
+  "text": "tests for my 70 year old grandmother",
+  "locale": "en",
+  "expected_any": [
+   "pkg_senior_care"
+  ]
+ },
+ {
+  "text": "I go to the gym daily, want to track performance",
+  "locale": "en",
+  "expected_any": [
+   "pkg_fitness"
+  ]
+ },
+ {
+  "text": "vitamin D and B12 deficiency check",
+  "locale": "en",
+  "expected_any": [
+   "pkg_vitamin_d_b12"
+  ]
+ },
+ {
+  "text": "बाल बहुत झड़ रहे हैं और थकान रहती है",
+  "locale": "hi",
+  "expected_any": [
+   "pkg_thyroid_profile",
+   "pkg_vitamin_d_b12",
+   "pkg_anemia_panel"
+  ]
+ },
+ {
+  "text": "heart checkup, my dad smokes and has high BP",
+  "locale": "en",
+  "expected_any": [
+   "pkg_heart_risk"
+  ]
+ },
+ {
+  "text": "basic yearly health check",
+  "locale": "en",
+  "expected_any": [
+   "pkg_basic_wellness",
+   "pkg_full_body"
+  ]
+ },
+ {
+  "text": "health checkup for my wife",
+  "locale": "en",
+  "expected_any": [
+   "pkg_womens_wellness"
+  ]
+ },
+ {
+  "text": "dengue test",
+  "locale": "en",
+  "expected_any": [
+   "pkg_fever_panel"
+  ]
+ },
+ {
+  "text": "सस्ता सा रूटीन चेकअप",
+  "locale": "hi",
+  "expected_any": [
+   "pkg_basic_wellness"
+  ]
+ }
+]
