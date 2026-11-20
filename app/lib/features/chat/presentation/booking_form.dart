@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/layout.dart';
 import '../../../core/motion.dart';
 import '../../../core/theme.dart';
 import '../../../i18n/strings.g.dart';
@@ -113,13 +114,14 @@ class _BookingFormViewState extends State<BookingFormView> {
     final t = context.t.form;
     final lang = TranslationProvider.of(context).flutterLocale.languageCode;
     final submitted = widget.form.submitted;
+    final compact = context.windowSize == WindowSize.compact;
     return Container(
       decoration: BoxDecoration(
         color: Palette.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Palette.line),
       ),
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(compact ? 12 : 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -148,7 +150,7 @@ class _BookingFormViewState extends State<BookingFormView> {
                 style: const TextStyle(fontSize: 13, color: Palette.inkMuted),
               ),
             ),
-          const SizedBox(height: 12),
+          SizedBox(height: compact ? 8 : 12),
           AnimatedSwitcher(
             duration: Motion.on(context) ? Motion.normal : Duration.zero,
             switchInCurve: Motion.curve,
@@ -169,7 +171,7 @@ class _BookingFormViewState extends State<BookingFormView> {
                 : Column(
                     key: const ValueKey('fields'),
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _fields(context),
+                    children: _fields(context, compact),
                   ),
           ),
         ],
@@ -177,7 +179,7 @@ class _BookingFormViewState extends State<BookingFormView> {
     );
   }
 
-  List<Widget> _fields(BuildContext context) {
+  List<Widget> _fields(BuildContext context, bool compact) {
     final t = context.t.form;
     final enabled = widget.onSubmit != null;
     final dateError = _showErrors && _date == null;
@@ -186,6 +188,9 @@ class _BookingFormViewState extends State<BookingFormView> {
     final patientError = _showErrors && _personId == _other && _otherPatient.text.trim().isEmpty;
     final tp = context.t.profile;
     final selectedAddress = widget.profile.addresses.where((a) => a.id == _addressId).firstOrNull;
+    final sectionGap = compact ? 8.0 : 12.0;
+    final chipSpacing = compact ? 6.0 : 8.0;
+    final chipRunSpacing = compact ? 4.0 : 8.0;
     return [
       _Label(t.date, error: dateError ? t.pickDate : null),
       SizedBox(
@@ -195,7 +200,7 @@ class _BookingFormViewState extends State<BookingFormView> {
           children: [
             for (final d in _dates)
               Padding(
-                padding: const EdgeInsetsDirectional.only(end: 8),
+                padding: EdgeInsetsDirectional.only(end: chipSpacing),
                 child: ChoiceChip(
                   label: Text(_dayLabel(context, d)),
                   selected: _date == d,
@@ -210,21 +215,21 @@ class _BookingFormViewState extends State<BookingFormView> {
           ],
         ),
       ),
-      const SizedBox(height: 12),
+      SizedBox(height: sectionGap),
       _Label(t.time, error: timeError ? t.pickTime : null),
       Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: chipSpacing,
+        runSpacing: chipRunSpacing,
         children: [
           for (final w in timeWindows)
             _windowChip(context, w, enabled && (_date == null || _open(_date!).contains(w))),
         ],
       ),
-      const SizedBox(height: 12),
+      SizedBox(height: sectionGap),
       _Label(t.patient),
       Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: chipSpacing,
+        runSpacing: chipRunSpacing,
         children: [
           for (final p in widget.profile.people)
             ChoiceChip(
@@ -241,7 +246,7 @@ class _BookingFormViewState extends State<BookingFormView> {
       ),
       if (_personId == _other)
         Padding(
-          padding: const EdgeInsets.only(top: 8),
+          padding: EdgeInsets.only(top: chipSpacing),
           child: TextField(
             controller: _otherPatient,
             enabled: enabled,
@@ -253,11 +258,11 @@ class _BookingFormViewState extends State<BookingFormView> {
             decoration: _input(t.patientHint, error: patientError ? t.required : null),
           ),
         ),
-      const SizedBox(height: 12),
+      SizedBox(height: sectionGap),
       _Label(t.address),
       Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: chipSpacing,
+        runSpacing: chipRunSpacing,
         children: [
           for (final a in widget.profile.addresses)
             ChoiceChip(
@@ -274,7 +279,7 @@ class _BookingFormViewState extends State<BookingFormView> {
       ),
       if (selectedAddress != null)
         Padding(
-          padding: const EdgeInsets.only(top: 8),
+          padding: EdgeInsets.only(top: chipSpacing),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -291,7 +296,7 @@ class _BookingFormViewState extends State<BookingFormView> {
         ),
       if (_addressId == _other)
         Padding(
-          padding: const EdgeInsets.only(top: 8),
+          padding: EdgeInsets.only(top: chipSpacing),
           child: TextField(
             controller: _otherAddress,
             enabled: enabled,
@@ -301,7 +306,7 @@ class _BookingFormViewState extends State<BookingFormView> {
             decoration: _input(t.otherHint, error: addressError ? t.required : null),
           ),
         ),
-      const SizedBox(height: 14),
+      SizedBox(height: compact ? 10 : 14),
       SizedBox(
         width: double.infinity,
         child: FilledButton.icon(
@@ -352,7 +357,7 @@ class _Label extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: EdgeInsets.only(bottom: context.windowSize == WindowSize.compact ? 4 : 6),
       child: Wrap(
         spacing: 8,
         children: [

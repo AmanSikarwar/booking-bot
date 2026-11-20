@@ -16,8 +16,9 @@ Future<void> pump(
   BookingFormData form, {
   void Function(SlotRequest)? onSubmit,
   AppLocale locale = AppLocale.en,
+  double windowWidth = 420,
 }) async {
-  tester.view.physicalSize = const Size(420, 1400);
+  tester.view.physicalSize = Size(windowWidth, 1400);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   LocaleSettings.setLocaleSync(locale);
@@ -45,6 +46,21 @@ ChoiceChip chip(WidgetTester tester, String label) =>
 
 void main() {
   setUpAll(() => initializeDateFormatting());
+
+  testWidgets('phone spacing tightens without shrinking booking controls', (tester) async {
+    const form = BookingFormData(packageId: 'pkg_thyroid_profile', packageName: thyroid);
+    final lastWindow = find.widgetWithText(ChoiceChip, '4–6 pm');
+    double gap() =>
+        tester.getTopLeft(find.text('Patient name')).dy - tester.getBottomLeft(lastWindow).dy;
+
+    await pump(tester, form);
+    final phoneGap = gap();
+    final phoneChipHeight = tester.getSize(lastWindow).height;
+
+    await pump(tester, form, windowWidth: 720);
+    expect(phoneGap, lessThan(gap()));
+    expect(phoneChipHeight, tester.getSize(lastWindow).height);
+  });
 
   testWidgets('pre-filled form submits exactly what was shown', (tester) async {
     SlotRequest? sent;

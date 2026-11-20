@@ -327,6 +327,7 @@ class _PersonEditorState extends State<PersonEditor> {
   @override
   Widget build(BuildContext context) {
     final t = context.t.profile;
+    final compact = context.windowSize == WindowSize.compact;
     return _EditorFrame(
       title: widget.person.id.isEmpty ? t.addPerson : t.editPerson,
       onSave: _save,
@@ -353,8 +354,8 @@ class _PersonEditorState extends State<PersonEditor> {
         if (!_isSelf) ...[
           _EditorLabel(t.relation),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: compact ? 6 : 8,
+            runSpacing: compact ? 4 : 8,
             children: [
               for (final r in Relation.values.where((r) => r != Relation.self))
                 ChoiceChip(
@@ -367,7 +368,7 @@ class _PersonEditorState extends State<PersonEditor> {
         ],
         _EditorLabel(t.gender),
         Wrap(
-          spacing: 8,
+          spacing: compact ? 6 : 8,
           children: [
             for (final g in Gender.values)
               ChoiceChip(
@@ -389,7 +390,7 @@ class _PersonEditorState extends State<PersonEditor> {
     List<TextInputFormatter>? formatters,
     TextCapitalization caps = TextCapitalization.none,
   }) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
+    padding: EdgeInsets.only(bottom: context.windowSize == WindowSize.compact ? 8 : 12),
     child: TextField(
       controller: c,
       keyboardType: keyboard,
@@ -451,11 +452,12 @@ class _AddressEditorState extends State<AddressEditor> {
   @override
   Widget build(BuildContext context) {
     final t = context.t.profile;
+    final compact = context.windowSize == WindowSize.compact;
     String? req(TextEditingController c) =>
         _showErrors && c.text.trim().isEmpty ? context.t.form.required : null;
     Widget field(TextEditingController c, String label, {String? error, TextInputType? keyboard}) =>
         Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: EdgeInsets.only(bottom: compact ? 8 : 12),
           child: TextField(
             controller: c,
             keyboardType: keyboard,
@@ -520,8 +522,11 @@ class _EditorFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.t.profile;
+    final compact = context.windowSize == WindowSize.compact;
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+      padding: compact
+          ? const EdgeInsets.fromLTRB(16, 8, 16, 16)
+          : const EdgeInsets.fromLTRB(20, 8, 20, 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -530,13 +535,13 @@ class _EditorFrame extends StatelessWidget {
             title,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Palette.ink),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: compact ? 12 : 16),
           ...children,
-          const SizedBox(height: 16),
+          SizedBox(height: compact ? 12 : 16),
           Wrap(
             alignment: WrapAlignment.end,
             spacing: 8,
-            runSpacing: 8,
+            runSpacing: compact ? 4 : 8,
             children: [
               if (onRemove != null)
                 TextButton.icon(
@@ -562,7 +567,7 @@ class _EditorLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 4, bottom: 8),
+    padding: EdgeInsets.only(top: 4, bottom: context.windowSize == WindowSize.compact ? 6 : 8),
     child: Text(
       text,
       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Palette.ink),
