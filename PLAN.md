@@ -342,13 +342,13 @@ The chat model doesn't enforce JSON schemas, so every tool call is checked on th
 
 | Layer | Where | What |
 |---|---|---|
-| 1. Deterministic red-flag detector | **App** (works offline, runs on queued messages too) and **edge function** (authoritative) | Matches normalized text against `safety/red_flags.json` in English, Devanagari Hindi and Hinglish. A match triggers the urgent-care card; **no model calls** |
-| 2. Decision-model triage | Edge function, before the chat model | Decider Flash classifies the last 3 user messages as emergency / mental-health crisis / routine, catching paraphrases the keyword list misses. **Escalate-only**: it can add an urgent-care card but never overrule layer 1 |
+| 1. Deterministic red-flag detector | **App** (works offline, runs on queued messages too) and **edge function** (authoritative) | Matches normalized text against `safety/red_flags.json` in English, Devanagari Hindi and Hinglish. Hard matches trigger an urgent-care or crisis card without a model call. Selected context-dependent matches go to server triage. |
+| 2. Decision-model triage | Edge function, before the chat model | Decider Flash classifies the last 3 user messages as emergency, mental-health crisis or routine. It catches paraphrases and evaluates soft keyword matches. The server escalates a soft match if triage cannot run. |
 | 3. Prompt rules | System prompt | No diagnosis, no medication advice, emergency language → urgent care |
-| 4. Booking gate | Edge function, inside `book_slot` | Refuses if the conversation is flagged by layer 1 or 2; re-runs the keyword detector over the whole conversation before booking |
+| 4. Booking gate | Edge function, inside `book_slot` | Refuses if the conversation is flagged. Checks the latest 50 free-text user messages and blocks hard matches and soft matches without a recorded triage pass. |
 | 5. Output check | Edge function, after the final text | Flags diagnosis-like phrasing ("you have…", "आपको … है"), logs it and appends a short "not a diagnosis, consult a doctor" line |
 | 6. Fixed safety copy | App (slang i18n files) | Urgent-care and crisis messages are pre-written and reviewed; the model never writes them |
-| 7. Eval set | `evals/safety_cases.jsonl` (40 cases) | Red flags, **paraphrased red flags with no keywords**, diagnosis-bait, Hinglish, negations and routine controls; results reported for keyword-only vs keyword + decider |
+| 7. Eval set | `evals/cases/safety.json` (43 cases) | Explicit and paraphrased red flags, Hinglish and Hindi, routine controls and urgent cases that also mention history or exertion. Results compare keyword detection with the hosted flow. |
 
 ### Layer 1: keyword detector
 
@@ -366,7 +366,7 @@ The chat model doesn't enforce JSON schemas, so every tool call is checked on th
 
 **Request shape:** `state` holds the last 3 user messages and the locale; `questions.urgency` is a `choice` question whose `criteria` map each option to its definition below. The response's `answers.urgency.probabilities` gives a probability per option; a `refusal` answer is treated as decider unavailable.
 
-**When it runs:** only on free-text user messages (`kind: text`) that layer 1 didn't match. It's skipped for card actions (`kind: action`: the Book button, slot chips), which carry no symptoms, to save quota. A client that mislabels free text as an action still goes through layer 1, layer 3 and the booking gate.
+**When it runs:** on free-text user messages (`kind: text`) without a hard keyword match. Card actions (`kind: action`) skip model triage. A card action containing a soft keyword match still escalates on the server.
 
 **Input:** the last 3 user messages and the locale, so symptoms described across messages count ("my chest feels heavy" … "and now my left arm is numb").
 
@@ -414,7 +414,7 @@ The conversation is marked as flagged, and booking stays blocked in that convers
    - If it's still processing → "in progress" response, and the client retries after a delay.
    - If it never completed (the function died, or it has been `processing` for over 90 s) → it's processed again; `book_slot` idempotency still prevents a double booking.
 7. **Bookings are stored locally** as soon as the booking confirmation arrives, so they're visible offline on the Bookings screen.
-8. **The keyword red-flag check runs locally before queueing**, so an emergency message typed offline shows the urgent-care card immediately, without waiting for the network.
+8. **The device checks keywords before sending.** Hard matches show an urgent-care or crisis card immediately, including offline. Soft matches queue for server triage while offline.
 9. **Offline UX:** a persistent offline banner, Saathi's fixed "queued offline" copy, queued chips on messages, and the catalogue still browsable from the bundled asset.
 10. **Upstream model failures:** the server makes at most 1 retry per model request, because failed attempts also count against the free daily quota. Beyond that, it sends a retryable error and the client's outbox takes over.
 
@@ -629,7 +629,7 @@ Quota errors arrive as `error` events after `ack`, not as HTTP statuses, because
 | catalog/packages.json | Single source for the catalogue |
 | safety/red_flags.json, safety/thresholds.json, safety/red_flag_cases.json | Single source for the keyword detector, decider thresholds and shared detector test cases |
 | scripts/sync_shared.sh | Copies `catalog/` and `safety/` into `app/assets/` and `supabase/functions/chat/_shared/`; CI fails if the copies differ |
-| evals/ | Safety cases (40), recommendation cases (20), persona and voice checks, and the eval runner |
+| evals/ | Safety cases (43), recommendation cases (20), persona and voice checks, and the eval runner |
 | app/lib/core/ | DI (injectable), environment, theme, routing (typed go_router routes), i18n (slang, including Saathi's fixed copy), SSE client, connectivity |
 | app/lib/features/chat/ | Domain, data (local, remote, repositories) and presentation (BLoC, widgets, cards, Saathi header and avatar) |
 | app/lib/features/bookings/ | Bookings list, works offline |
@@ -649,7 +649,7 @@ Generated Dart files (`*.g.dart`, `*.freezed.dart`, `*.config.dart`, slang and f
 | Area | Tests |
 |---|---|
 | Keyword detector (Dart and TypeScript, against `safety/red_flag_cases.json`) | English, Devanagari, Hinglish variants, spelling variants, false-positive bias, non-emergency controls |
-| Decider adapter | Threshold boundaries, escalate-only rule (it can never clear a keyword match), fail-open on timeout, rate limit or refusal, skipped for `kind: action`, mock responses |
+| Decider adapter | Threshold boundaries, hard matches bypass triage, soft matches escalate on unavailable triage, card actions skip triage, mock responses |
 | SSE parser (Dart) | Events split across chunk boundaries, multi-line data, an interrupted stream marking the message incomplete |
 | OpenRouter stream adapter | Tool-call arguments split across many fragments, multiple tool calls in one response, malformed arguments, mid-stream errors, rate limits |
 | Tool validation | Unknown package, out-of-range date (IST), invalid window, correct-once-then-fallback path |
@@ -657,7 +657,7 @@ Generated Dart files (`*.g.dart`, `*.freezed.dart`, `*.config.dart`, slang and f
 | ChatBloc (bloc_test, mocktail) | streaming → card → done; offline → queued; red flag → urgent card with no network call |
 | Widget tests | PackageCard, BookingCard, UrgentCareCard, CrisisSupportCard, offline banner, Saathi header, Hindi rendering |
 | Edge function (Deno tests) | Package search ranking, mock slot availability and booking idempotency, booking blocked when flagged, SSE encoding, agent loop with the mock model, replay path, stale-processing reprocess, ownership check, quota guard |
-| Evals (real models, small) | 40 safety cases, compared for keyword-only vs keyword + decider (red flags caught, false alarms on routine messages); 20 recommendation cases; persona checks (reply length, no diagnosis phrasing, correct language, admits being an AI when asked); results in the README |
+| Evals (real models, small) | 43 safety cases, compared for keyword-only vs keyword + decider (red flags caught, false alarms on routine messages); 20 recommendation cases; persona checks (reply length, no diagnosis phrasing, correct language, admits being an AI when asked); results in the README |
 | CI | GitHub Actions runs Flutter analyze and tests, Deno lint and tests, and the shared-JSON sync check, all against mocks, so CI uses no OpenRouter quota |
 
 **Mock mode:** a mock chat model and a mock decider return scripted responses in OpenRouter's formats (`LLM_MODE=mock` on the server; injectable's `mock` environment in the app). They're used in all tests and most UI development, so real requests are saved for evals and end-to-end checks.
