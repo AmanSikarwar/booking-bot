@@ -72,6 +72,7 @@ class TranslationsHi extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$followUps$hi followUps = _Translations$followUps$hi._(_root);
 	@override late final _Translations$history$hi history = _Translations$history$hi._(_root);
 	@override late final _Translations$nav$hi nav = _Translations$nav$hi._(_root);
+	@override late final _Translations$details$hi details = _Translations$details$hi._(_root);
 }
 
 // Path: chat
@@ -154,8 +155,6 @@ class _Translations$package$hi extends Translations$package$en {
 	@override String get hideTests => 'टेस्ट छिपाएँ';
 	@override String get topMatch => 'सबसे सही';
 	@override String off({required Object n}) => '${n}% छूट';
-	@override String showAll({required Object n}) => 'सभी ${n} टेस्ट देखें';
-	@override String get showLess => 'कम टेस्ट दिखाएँ';
 }
 
 // Path: booking
@@ -371,6 +370,28 @@ class _Translations$nav$hi extends Translations$nav$en {
 	@override String get back => 'चैट पर वापस';
 }
 
+// Path: details
+class _Translations$details$hi extends Translations$details$en {
+	_Translations$details$hi._(TranslationsHi root) : this._root = root, super.internal(root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get view => 'जानकारी';
+	@override String get about => 'पैकेज के बारे में';
+	@override String get facts => 'एक नज़र में';
+	@override String get included => 'इसमें शामिल';
+	@override String get prep => 'तैयारी कैसे करें';
+	@override String fastPrep({required Object h}) => 'सैंपल से पहले ${h} घंटे खाली पेट रहें। सादा पानी पी सकते हैं।';
+	@override String get noFastPrep => 'खाली पेट रहने की ज़रूरत नहीं। आप हमेशा की तरह खा-पी सकते हैं।';
+	@override String get sample => 'सैंपल';
+	@override String get blood => 'खून';
+	@override String get urine => 'यूरिन';
+	@override String get doctorNote => 'इन टेस्ट से निदान नहीं होता। रिपोर्ट का मतलब डॉक्टर बता सकते हैं।';
+	@override String get close => 'बंद करें';
+	@override String more({required Object n}) => '+${n} और';
+}
+
 /// The flat map containing all translations for locale <hi>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -415,8 +436,6 @@ extension on TranslationsHi {
 			'package.hideTests' => 'टेस्ट छिपाएँ',
 			'package.topMatch' => 'सबसे सही',
 			'package.off' => ({required Object n}) => '${n}% छूट',
-			'package.showAll' => ({required Object n}) => 'सभी ${n} टेस्ट देखें',
-			'package.showLess' => 'कम टेस्ट दिखाएँ',
 			'booking.confirmed' => 'बुकिंग पक्की',
 			'booking.savedOffline' => 'ऑफ़लाइन सेव',
 			'booking.viewAll' => 'सभी बुकिंग देखें',
@@ -512,6 +531,19 @@ extension on TranslationsHi {
 			'nav.bookings' => 'बुकिंग',
 			'nav.packages' => 'पैकेज',
 			'nav.back' => 'चैट पर वापस',
+			'details.view' => 'जानकारी',
+			'details.about' => 'पैकेज के बारे में',
+			'details.facts' => 'एक नज़र में',
+			'details.included' => 'इसमें शामिल',
+			'details.prep' => 'तैयारी कैसे करें',
+			'details.fastPrep' => ({required Object h}) => 'सैंपल से पहले ${h} घंटे खाली पेट रहें। सादा पानी पी सकते हैं।',
+			'details.noFastPrep' => 'खाली पेट रहने की ज़रूरत नहीं। आप हमेशा की तरह खा-पी सकते हैं।',
+			'details.sample' => 'सैंपल',
+			'details.blood' => 'खून',
+			'details.urine' => 'यूरिन',
+			'details.doctorNote' => 'इन टेस्ट से निदान नहीं होता। रिपोर्ट का मतलब डॉक्टर बता सकते हैं।',
+			'details.close' => 'बंद करें',
+			'details.more' => ({required Object n}) => '+${n} और',
 			_ => null,
 		};
 	}

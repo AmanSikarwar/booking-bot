@@ -65,30 +65,20 @@ Future<void> pump(WidgetTester tester, Widget child, {AppLocale locale = AppLoca
 void main() {
   setUpAll(() => initializeDateFormatting());
 
-  testWidgets('package card shows highlight, tests, icon facts, tubes and discount', (
+  testWidgets('package card shows description, preview tests, facts, tubes and discount', (
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
     var booked = false;
     await pump(
       tester,
-      PackageCardView(
-        pkg: diabetes,
-        details: details,
-        highlight: diabetes.matchReason,
-        onBook: () => booked = true,
-      ),
+      PackageCardView(pkg: diabetes, details: details, onBook: () => booked = true),
     );
     expect(find.text('Diabetes Care'), findsOneWidget);
     expect(find.text('Diabetes'), findsOneWidget, reason: 'category label');
-    expect(find.text('Matches: sugar'), findsOneWidget);
-    expect(
-      find.text(details.description.en),
-      findsNothing,
-      reason: 'highlight replaces the description',
-    );
+    expect(find.text(details.description.en), findsOneWidget);
+    expect(find.textContaining('Matches'), findsNothing);
     expect(find.text('₹1,299'), findsOneWidget);
-    expect(find.text('₹1,999'), findsOneWidget);
     expect(find.text('35% off'), findsOneWidget);
     expect(find.text('4 tests'), findsOneWidget);
     expect(find.text('Report in 24 hrs'), findsOneWidget);
@@ -96,19 +86,65 @@ void main() {
     expect(find.text('2 tubes + urine cup'), findsOneWidget);
     expect(find.bySemanticsLabel('Sample tubes: lavender, grey, urine cup'), findsOneWidget);
     expect(find.text('Urine Microalbumin'), findsNothing, reason: 'only 3 tests preview');
-    await tester.tap(find.text('View all 4 tests'));
-    await tester.pump();
-    expect(find.text('Urine Microalbumin'), findsOneWidget);
-    expect(find.text('Show fewer tests'), findsOneWidget);
+    expect(find.text('+1 more'), findsOneWidget);
     await tester.tap(find.text('Book home collection'));
     expect(booked, isTrue);
     semantics.dispose();
   });
 
-  testWidgets('catalogue cards show the description and no top-match badge', (tester) async {
+  testWidgets(
+    'tapping a card on a phone opens a bottom sheet with every detail and a booking CTA',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      var booked = 0;
+      await pump(tester, PackageCardView(pkg: diabetes, details: details, onBook: () => booked++));
+      await tester.tap(find.text('Diabetes Care'));
+      await tester.pumpAndSettle();
+      expect(find.byType(BottomSheet), findsOneWidget);
+      for (final text in [
+        'About this package',
+        'What\'s included',
+        'Urine Microalbumin',
+        'How to prepare',
+        'Fast for 10 hours before collection. Plain water is fine.',
+        'Sample: Blood, Urine',
+      ]) {
+        await tester.scrollUntilVisible(
+          find.text(text),
+          100,
+          scrollable: find.byType(Scrollable).last,
+        );
+        expect(find.text(text), findsOneWidget, reason: text);
+      }
+      expect(find.text('Book home collection'), findsNWidgets(2));
+      await tester.tap(find.text('Book home collection').last);
+      await tester.pumpAndSettle();
+      expect(booked, 1);
+      expect(find.byType(BottomSheet), findsNothing);
+    },
+  );
+
+  testWidgets('tablets and desktop get a dialog with a close button', (tester) async {
+    tester.view.physicalSize = const Size(1024, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await pump(tester, PackageCardView(pkg: diabetes, details: details, onBook: () {}));
-    expect(find.text(details.description.en), findsOneWidget);
-    expect(find.text('Top match'), findsNothing);
+    await tester.tap(find.text('Diabetes Care'));
+    await tester.pumpAndSettle();
+    expect(find.byType(Dialog), findsOneWidget);
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pumpAndSettle();
+    expect(find.byType(Dialog), findsNothing);
+  });
+
+  testWidgets('details without booking hide the CTA (flagged chat)', (tester) async {
+    await pump(tester, PackageCardView(pkg: diabetes, details: details, onBook: null));
+    expect(find.text('Book home collection'), findsNothing);
+    await tester.tap(find.text('Diabetes Care'));
+    await tester.pumpAndSettle();
+    expect(find.text('Book home collection'), findsNothing);
   });
 
   testWidgets('first search result is marked as the top match', (tester) async {
@@ -117,11 +153,6 @@ void main() {
       PackageCardView(pkg: diabetes, details: details, topMatch: true, onBook: () {}),
     );
     expect(find.text('Top match'), findsOneWidget);
-  });
-
-  testWidgets('package card hides booking when the chat is flagged', (tester) async {
-    await pump(tester, const PackageCardView(pkg: diabetes, details: details, onBook: null));
-    expect(find.text('Book home collection'), findsNothing);
   });
 
   testWidgets('package card renders Hindi names and copy', (tester) async {
@@ -134,6 +165,7 @@ void main() {
     expect(find.text('घर पर सैंपल बुक करें'), findsOneWidget);
     expect(find.text('35% छूट'), findsOneWidget);
     expect(find.text('2 ट्यूब + यूरिन कप'), findsOneWidget);
+    expect(find.text('+1 और'), findsOneWidget);
   });
 
   testWidgets('booking card shows reference, when, where, who and the fasting reminder', (

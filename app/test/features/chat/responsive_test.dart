@@ -124,12 +124,15 @@ void main() {
                                   PackageCardView(
                                     pkg: pkg,
                                     details: details,
-                                    highlight: pkg.matchReason,
                                     topMatch: true,
                                     onBook: () {},
                                   ),
                               ],
                             ),
+                          ),
+                          SizedBox(
+                            height: 900,
+                            child: PackageDetailsView(pkg: pkg, details: details, onBook: () {}),
                           ),
                           BookingCardView(booking: booking, onViewAll: () {}),
                           SlotsCardView(offer: offer, onPick: (_) {}),
@@ -146,8 +149,6 @@ void main() {
               ),
             ),
           );
-          await tester.tap(find.byIcon(Icons.expand_more).first);
-          await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
         });
       }
@@ -170,13 +171,7 @@ void main() {
                   maxColumns: 2,
                   children: [
                     for (var i = 0; i < 2; i++)
-                      PackageCardView(
-                        pkg: pkg,
-                        details: details,
-                        highlight: pkg.matchReason,
-                        topMatch: true,
-                        onBook: () {},
-                      ),
+                      PackageCardView(pkg: pkg, details: details, topMatch: true, onBook: () {}),
                   ],
                 ),
               ),

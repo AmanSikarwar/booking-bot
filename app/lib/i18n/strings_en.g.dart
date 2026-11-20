@@ -77,6 +77,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$followUps$en followUps = Translations$followUps$en.internal(_root);
 	late final Translations$history$en history = Translations$history$en.internal(_root);
 	late final Translations$nav$en nav = Translations$nav$en.internal(_root);
+	late final Translations$details$en details = Translations$details$en.internal(_root);
 }
 
 // Path: chat
@@ -222,12 +223,6 @@ class Translations$package$en {
 
 	/// en: '{n}% off'
 	String off({required Object n}) => '${n}% off';
-
-	/// en: 'View all {n} tests'
-	String showAll({required Object n}) => 'View all ${n} tests';
-
-	/// en: 'Show fewer tests'
-	String get showLess => 'Show fewer tests';
 }
 
 // Path: booking
@@ -611,6 +606,54 @@ class Translations$nav$en {
 	String get back => 'Back to chat';
 }
 
+// Path: details
+class Translations$details$en {
+	Translations$details$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Details'
+	String get view => 'Details';
+
+	/// en: 'About this package'
+	String get about => 'About this package';
+
+	/// en: 'At a glance'
+	String get facts => 'At a glance';
+
+	/// en: 'What's included'
+	String get included => 'What\'s included';
+
+	/// en: 'How to prepare'
+	String get prep => 'How to prepare';
+
+	/// en: 'Fast for {h} hours before collection. Plain water is fine.'
+	String fastPrep({required Object h}) => 'Fast for ${h} hours before collection. Plain water is fine.';
+
+	/// en: 'No fasting needed. You can eat and drink as usual.'
+	String get noFastPrep => 'No fasting needed. You can eat and drink as usual.';
+
+	/// en: 'Sample'
+	String get sample => 'Sample';
+
+	/// en: 'Blood'
+	String get blood => 'Blood';
+
+	/// en: 'Urine'
+	String get urine => 'Urine';
+
+	/// en: 'These tests don't give a diagnosis. A doctor can help interpret your results.'
+	String get doctorNote => 'These tests don\'t give a diagnosis. A doctor can help interpret your results.';
+
+	/// en: 'Close'
+	String get close => 'Close';
+
+	/// en: '+{n} more'
+	String more({required Object n}) => '+${n} more';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -655,8 +698,6 @@ extension on Translations {
 			'package.hideTests' => 'Hide tests',
 			'package.topMatch' => 'Top match',
 			'package.off' => ({required Object n}) => '${n}% off',
-			'package.showAll' => ({required Object n}) => 'View all ${n} tests',
-			'package.showLess' => 'Show fewer tests',
 			'booking.confirmed' => 'Booking confirmed',
 			'booking.savedOffline' => 'Saved offline',
 			'booking.viewAll' => 'View all bookings',
@@ -752,6 +793,19 @@ extension on Translations {
 			'nav.bookings' => 'Bookings',
 			'nav.packages' => 'Packages',
 			'nav.back' => 'Back to chat',
+			'details.view' => 'Details',
+			'details.about' => 'About this package',
+			'details.facts' => 'At a glance',
+			'details.included' => 'What\'s included',
+			'details.prep' => 'How to prepare',
+			'details.fastPrep' => ({required Object h}) => 'Fast for ${h} hours before collection. Plain water is fine.',
+			'details.noFastPrep' => 'No fasting needed. You can eat and drink as usual.',
+			'details.sample' => 'Sample',
+			'details.blood' => 'Blood',
+			'details.urine' => 'Urine',
+			'details.doctorNote' => 'These tests don\'t give a diagnosis. A doctor can help interpret your results.',
+			'details.close' => 'Close',
+			'details.more' => ({required Object n}) => '+${n} more',
 			_ => null,
 		};
 	}

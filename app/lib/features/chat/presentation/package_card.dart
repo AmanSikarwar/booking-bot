@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../core/layout.dart';
 import '../../../core/theme.dart';
 import '../../../i18n/strings.g.dart';
 import '../../catalog/package.dart';
@@ -70,218 +71,486 @@ class TubeCaps extends StatelessWidget {
   }
 }
 
-class PackageCardView extends StatefulWidget {
+class PackageCardView extends StatelessWidget {
   const PackageCardView({
     super.key,
     required this.pkg,
     this.details,
-    this.highlight,
     this.topMatch = false,
     required this.onBook,
   });
 
+  static const _preview = 3;
+
   final PackageSummary pkg;
   final LabPackage? details;
-  final Localized? highlight;
   final bool topMatch;
   final VoidCallback? onBook;
 
   @override
-  State<PackageCardView> createState() => _PackageCardViewState();
-}
-
-class _PackageCardViewState extends State<PackageCardView> {
-  static const _preview = 3;
-  bool _expanded = false;
-
-  @override
   Widget build(BuildContext context) {
-    final p = widget.pkg;
-    final d = widget.details;
+    final p = pkg;
+    final d = details;
     final t = context.t;
     final lang = TranslationProvider.of(context).flutterLocale.languageCode;
     final tests = d?.tests ?? p.topTests;
-    final shown = _expanded ? tests : tests.take(_preview).toList();
-    final off = p.mrpInr > p.priceInr ? ((p.mrpInr - p.priceInr) * 100 / p.mrpInr).round() : 0;
     final category = d?.category;
-    return Container(
-      decoration: BoxDecoration(
-        color: Palette.surface,
+    final more = p.testCount - tests.take(_preview).length;
+    return Material(
+      color: Palette.surface,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: widget.topMatch ? Palette.lavender.withAlpha(110) : Palette.line),
+        side: BorderSide(color: topMatch ? Palette.lavender.withAlpha(110) : Palette.line),
       ),
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ExcludeSemantics(
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    color: Palette.lavenderSoft,
-                    shape: BoxShape.circle,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => showPackageDetails(context, pkg: p, details: d, onBook: onBook),
+        child: Semantics(
+          button: true,
+          hint: t.details.view,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Title(pkg: p, category: category, topMatch: topMatch),
+                if (d != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    d.description.of(lang),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13, color: Palette.inkMuted, height: 1.4),
                   ),
-                  child: Icon(categoryIcon(category ?? ''), color: Palette.lavender, size: 22),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                ],
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
                   children: [
-                    if (widget.topMatch)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: _Badge(t.package.topMatch),
-                      ),
+                    for (final test in tests.take(_preview)) _TestTag(test),
+                    if (more > 0) _TestTag(t.details.more(n: more), accent: true),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _Facts(pkg: p),
+                const SizedBox(height: 8),
+                TubeCaps(tests: tests),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(height: 1, color: Palette.line),
+                ),
+                Row(
+                  children: [
+                    Expanded(child: _Price(pkg: p)),
                     Text(
-                      p.name.of(lang),
+                      t.details.view,
                       style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Palette.ink,
-                        height: 1.3,
+                        color: Palette.lavender,
                       ),
                     ),
-                    if (category != null)
-                      Text(
-                        t.categories[category] ?? category,
-                        style: const TextStyle(fontSize: 12, color: Palette.inkMuted),
+                    const Icon(Icons.chevron_right, size: 18, color: Palette.lavender),
+                  ],
+                ),
+                if (onBook != null) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: onBook,
+                      icon: const Icon(Icons.home_outlined, size: 18),
+                      label: Text(t.package.book),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> showPackageDetails(
+  BuildContext context, {
+  required PackageSummary pkg,
+  LabPackage? details,
+  VoidCallback? onBook,
+}) {
+  void book(BuildContext sheet) {
+    Navigator.of(sheet).pop();
+    onBook?.call();
+  }
+
+  if (context.windowSize == WindowSize.compact) {
+    return showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: Palette.surface,
+      builder: (sheet) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.85,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, controller) => PackageDetailsView(
+          pkg: pkg,
+          details: details,
+          controller: controller,
+          onBook: onBook == null ? null : () => book(sheet),
+        ),
+      ),
+    );
+  }
+  return showDialog<void>(
+    context: context,
+    useRootNavigator: true,
+    builder: (dialog) => Dialog(
+      backgroundColor: Palette.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 560,
+          maxHeight: MediaQuery.sizeOf(dialog).height * 0.85,
+        ),
+        child: PackageDetailsView(
+          pkg: pkg,
+          details: details,
+          showClose: true,
+          onBook: onBook == null ? null : () => book(dialog),
+        ),
+      ),
+    ),
+  );
+}
+
+class PackageDetailsView extends StatelessWidget {
+  const PackageDetailsView({
+    super.key,
+    required this.pkg,
+    this.details,
+    this.controller,
+    this.showClose = false,
+    this.onBook,
+  });
+
+  final PackageSummary pkg;
+  final LabPackage? details;
+  final ScrollController? controller;
+  final bool showClose;
+  final VoidCallback? onBook;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = pkg;
+    final d = details;
+    final t = context.t;
+    final lang = TranslationProvider.of(context).flutterLocale.languageCode;
+    final tests = d?.tests ?? p.topTests;
+    final samples = [
+      for (final s in (d?.sampleType ?? 'blood').split(','))
+        switch (s.trim()) {
+          'urine' => t.details.urine,
+          _ => t.details.blood,
+        },
+    ].join(', ');
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: ListView(
+            controller: controller,
+            shrinkWrap: true,
+            padding: EdgeInsets.fromLTRB(20, showClose ? 20 : 0, 20, 20),
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: _Title(pkg: p, category: d?.category, large: true),
+                  ),
+                  if (showClose)
+                    IconButton(
+                      tooltip: t.details.close,
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              _Price(pkg: p, large: true),
+              if (d != null) ...[
+                _Section(t.details.about),
+                Text(
+                  d.description.of(lang),
+                  style: const TextStyle(fontSize: 15, color: Palette.ink, height: 1.5),
+                ),
+              ],
+              _Section(t.details.facts),
+              _FactRow(Icons.science_outlined, t.package.tests(n: p.testCount)),
+              _FactRow(Icons.schedule, t.package.report(h: p.reportTatHours)),
+              _FactRow(Icons.water_drop_outlined, '${t.details.sample}: $samples'),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: TubeCaps(tests: tests),
+              ),
+              _Section(t.details.included),
+              for (final test in tests)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.check_circle_outline, size: 18, color: Palette.success),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(test, style: const TextStyle(fontSize: 15, color: Palette.ink)),
                       ),
+                    ],
+                  ),
+                ),
+              _Section(t.details.prep),
+              _FactRow(
+                p.fastingHours > 0 ? Icons.no_food_outlined : Icons.restaurant_outlined,
+                p.fastingHours > 0 ? t.details.fastPrep(h: p.fastingHours) : t.details.noFastPrep,
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Palette.paper,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.info_outline, size: 18, color: Palette.inkMuted),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        t.details.doctorNote,
+                        style: const TextStyle(fontSize: 13, color: Palette.inkMuted, height: 1.4),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          if (widget.highlight != null)
-            _Highlight(widget.highlight!.of(lang))
-          else if (d != null)
-            Text(
-              d.description.of(lang),
-              style: const TextStyle(fontSize: 13, color: Palette.inkMuted, height: 1.4),
+        ),
+        if (onBook != null)
+          Container(
+            decoration: const BoxDecoration(
+              color: Palette.surface,
+              border: Border(top: BorderSide(color: Palette.line)),
             ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              for (final test in shown) _TestTag(test),
-              if (tests.length > _preview)
-                Semantics(
-                  button: true,
-                  expanded: _expanded,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8),
-                    onTap: () => setState(() => _expanded = !_expanded),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              _expanded ? t.package.showLess : t.package.showAll(n: tests.length),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Palette.lavender,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            _expanded ? Icons.expand_less : Icons.expand_more,
-                            size: 16,
-                            color: Palette.lavender,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+            child: SafeArea(
+              top: false,
+              child: SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: onBook,
+                  icon: const Icon(Icons.home_outlined, size: 18),
+                  label: Text(t.package.book),
                 ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 14,
-            runSpacing: 6,
-            children: [
-              _Fact(Icons.science_outlined, t.package.tests(n: p.testCount)),
-              _Fact(Icons.schedule, t.package.report(h: p.reportTatHours)),
-              _Fact(
-                p.fastingHours > 0 ? Icons.no_food_outlined : Icons.restaurant_outlined,
-                p.fastingHours > 0 ? t.package.fasting(h: p.fastingHours) : t.package.noFasting,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          TubeCaps(tests: tests),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Divider(height: 1, color: Palette.line),
-          ),
-          Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              Text(
-                formatRupees(p.priceInr),
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: Palette.ink,
-                  fontFeatures: tabular,
-                ),
-              ),
-              if (off > 0) ...[
-                Text(
-                  formatRupees(p.mrpInr),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Palette.inkMuted,
-                    decoration: TextDecoration.lineThrough,
-                    fontFeatures: tabular,
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Palette.success.withAlpha(24),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    t.package.off(n: off),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Palette.success,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          if (widget.onBook != null) ...[
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: widget.onBook,
-                icon: const Icon(Icons.home_outlined, size: 18),
-                label: Text(t.package.book),
               ),
             ),
-          ],
-        ],
-      ),
+          ),
+      ],
     );
   }
+}
+
+class _Title extends StatelessWidget {
+  const _Title({
+    required this.pkg,
+    required this.category,
+    this.topMatch = false,
+    this.large = false,
+  });
+
+  final PackageSummary pkg;
+  final String? category;
+  final bool topMatch;
+  final bool large;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    final lang = TranslationProvider.of(context).flutterLocale.languageCode;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ExcludeSemantics(
+          child: Container(
+            width: large ? 48 : 40,
+            height: large ? 48 : 40,
+            decoration: const BoxDecoration(color: Palette.lavenderSoft, shape: BoxShape.circle),
+            child: Icon(
+              categoryIcon(category ?? ''),
+              color: Palette.lavender,
+              size: large ? 26 : 22,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (topMatch)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: _Badge(t.package.topMatch),
+                ),
+              Text(
+                pkg.name.of(lang),
+                style: TextStyle(
+                  fontSize: large ? 20 : 16,
+                  fontWeight: FontWeight.w600,
+                  color: Palette.ink,
+                  height: 1.3,
+                ),
+              ),
+              if (category != null)
+                Text(
+                  t.categories[category!] ?? category!,
+                  style: const TextStyle(fontSize: 12, color: Palette.inkMuted),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Price extends StatelessWidget {
+  const _Price({required this.pkg, this.large = false});
+
+  final PackageSummary pkg;
+  final bool large;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = pkg;
+    final off = p.mrpInr > p.priceInr ? ((p.mrpInr - p.priceInr) * 100 / p.mrpInr).round() : 0;
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          formatRupees(p.priceInr),
+          style: TextStyle(
+            fontSize: large ? 26 : 22,
+            fontWeight: FontWeight.w700,
+            color: Palette.ink,
+            fontFeatures: tabular,
+          ),
+        ),
+        if (off > 0) ...[
+          Text(
+            formatRupees(p.mrpInr),
+            style: const TextStyle(
+              fontSize: 14,
+              color: Palette.inkMuted,
+              decoration: TextDecoration.lineThrough,
+              fontFeatures: tabular,
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Palette.success.withAlpha(24),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              context.t.package.off(n: off),
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: Palette.success,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _Facts extends StatelessWidget {
+  const _Facts({required this.pkg});
+
+  final PackageSummary pkg;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t.package;
+    final p = pkg;
+    return Wrap(
+      spacing: 14,
+      runSpacing: 6,
+      children: [
+        _Fact(Icons.science_outlined, t.tests(n: p.testCount)),
+        _Fact(Icons.schedule, t.report(h: p.reportTatHours)),
+        _Fact(
+          p.fastingHours > 0 ? Icons.no_food_outlined : Icons.restaurant_outlined,
+          p.fastingHours > 0 ? t.fasting(h: p.fastingHours) : t.noFasting,
+        ),
+      ],
+    );
+  }
+}
+
+class _Section extends StatelessWidget {
+  const _Section(this.title);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 20, bottom: 8),
+    child: Text(
+      title,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+        color: Palette.inkMuted,
+        letterSpacing: 0.3,
+      ),
+    ),
+  );
+}
+
+class _FactRow extends StatelessWidget {
+  const _FactRow(this.icon, this.text);
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 5),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Palette.inkMuted),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(text, style: const TextStyle(fontSize: 15, color: Palette.ink, height: 1.4)),
+        ),
+      ],
+    ),
+  );
 }
 
 class _Badge extends StatelessWidget {
@@ -300,49 +569,28 @@ class _Badge extends StatelessWidget {
   );
 }
 
-class _Highlight extends StatelessWidget {
-  const _Highlight(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-    decoration: BoxDecoration(color: Palette.lavenderSoft, borderRadius: BorderRadius.circular(10)),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 1),
-          child: Icon(Icons.auto_awesome_outlined, size: 15, color: Palette.lavender),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(fontSize: 13, color: Palette.lavender, height: 1.35),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
 class _TestTag extends StatelessWidget {
-  const _TestTag(this.name);
+  const _TestTag(this.name, {this.accent = false});
 
   final String name;
+  final bool accent;
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     decoration: BoxDecoration(
-      color: Palette.paper,
+      color: accent ? Palette.lavenderSoft : Palette.paper,
       borderRadius: BorderRadius.circular(8),
-      border: Border.all(color: Palette.line),
+      border: Border.all(color: accent ? Palette.lavenderSoft : Palette.line),
     ),
-    child: Text(name, style: const TextStyle(fontSize: 12, color: Palette.ink)),
+    child: Text(
+      name,
+      style: TextStyle(
+        fontSize: 12,
+        color: accent ? Palette.lavender : Palette.ink,
+        fontWeight: accent ? FontWeight.w600 : FontWeight.w400,
+      ),
+    ),
   );
 }
 

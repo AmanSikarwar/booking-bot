@@ -257,7 +257,6 @@ class _ChatScreenState extends State<ChatScreen> {
               PackageCardView(
                 pkg: p,
                 details: _byId[p.id],
-                highlight: p.matchReason,
                 topMatch: i == 0 && packages.length > 1,
                 onBook: flagged ? null : () => _openForm(p.id, p.name),
               ),

@@ -45,9 +45,7 @@
     "viewTests": "View tests",
     "hideTests": "Hide tests",
     "topMatch": "Top match",
-    "off": "{n}% off",
-    "showAll": "View all {n} tests",
-    "showLess": "Show fewer tests"
+    "off": "{n}% off"
   },
   "booking": {
     "confirmed": "Booking confirmed",
@@ -176,5 +174,20 @@
     "bookings": "Bookings",
     "packages": "Packages",
     "back": "Back to chat"
+  },
+  "details": {
+    "view": "Details",
+    "about": "About this package",
+    "facts": "At a glance",
+    "included": "What's included",
+    "prep": "How to prepare",
+    "fastPrep": "Fast for {h} hours before collection. Plain water is fine.",
+    "noFastPrep": "No fasting needed. You can eat and drink as usual.",
+    "sample": "Sample",
+    "blood": "Blood",
+    "urine": "Urine",
+    "doctorNote": "These tests don't give a diagnosis. A doctor can help interpret your results.",
+    "close": "Close",
+    "more": "+{n} more"
   }
 }
