@@ -28,6 +28,7 @@ class CardListConverter extends TypeConverter<List<ChatCard>, String> {
 class Conversations extends Table {
   TextColumn get id => text()();
   TextColumn get locale => text()();
+  TextColumn get title => text().nullable()();
   BoolColumn get flagged => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
@@ -100,12 +101,21 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
       if (from < 2) await m.addColumn(messages, messages.display);
+      if (from < 3) {
+        await m.addColumn(conversations, conversations.title);
+        await customStatement('''
+          UPDATE conversations SET title = (
+            SELECT COALESCE(display, body) FROM messages
+            WHERE messages.conversation_id = conversations.id AND messages.role = 'user'
+            ORDER BY messages.created_at LIMIT 1
+          )''');
+      }
     },
   );
 
@@ -120,6 +130,21 @@ class AppDatabase extends _$AppDatabase {
         ConversationsCompanion.insert(id: id, locale: locale, createdAt: now, updatedAt: now),
         mode: InsertMode.insertOrIgnore,
       );
+
+  Future<void> touchConversation(String id, String firstText, DateTime now) async {
+    await (update(
+      conversations,
+    )..where((c) => c.id.equals(id))).write(ConversationsCompanion(updatedAt: Value(now)));
+    await (update(conversations)..where((c) => c.id.equals(id) & c.title.isNull())).write(
+      ConversationsCompanion(title: Value(firstText)),
+    );
+  }
+
+  Stream<List<Conversation>> watchConversations() =>
+      (select(conversations)
+            ..where((c) => c.title.isNotNull())
+            ..orderBy([(c) => OrderingTerm.desc(c.updatedAt)]))
+          .watch();
 
   Stream<Conversation?> watchConversation(String id) =>
       (select(conversations)..where((c) => c.id.equals(id))).watchSingleOrNull();

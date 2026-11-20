@@ -74,6 +74,8 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$tubes$en tubes = Translations$tubes$en.internal(_root);
 	late final Translations$menu$en menu = Translations$menu$en.internal(_root);
 	late final Translations$form$en form = Translations$form$en.internal(_root);
+	late final Translations$followUps$en followUps = Translations$followUps$en.internal(_root);
+	late final Translations$history$en history = Translations$history$en.internal(_root);
 }
 
 // Path: chat
@@ -432,6 +434,9 @@ class Translations$menu$en {
 
 	/// en: 'My bookings'
 	String get bookings => 'My bookings';
+
+	/// en: 'Chats'
+	String get history => 'Chats';
 }
 
 // Path: form
@@ -498,6 +503,90 @@ class Translations$form$en {
 
 	/// en: 'Details sent'
 	String get sent => 'Details sent';
+}
+
+// Path: followUps
+class Translations$followUps$en {
+	Translations$followUps$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Book {name}'
+	String book({required Object name}) => 'Book ${name}';
+
+	/// en: 'Something cheaper'
+	String get cheaper => 'Something cheaper';
+
+	/// en: 'Show me something cheaper'
+	String get cheaperText => 'Show me something cheaper';
+
+	/// en: 'No fasting needed'
+	String get noFasting => 'No fasting needed';
+
+	/// en: 'Which of these need no fasting?'
+	String get noFastingText => 'Which of these need no fasting?';
+
+	/// en: 'Book another test'
+	String get another => 'Book another test';
+
+	/// en: 'I want to book another test'
+	String get anotherText => 'I want to book another test';
+
+	/// en: 'My bookings'
+	String get bookings => 'My bookings';
+
+	/// en: 'How do I prepare?'
+	String get prepare => 'How do I prepare?';
+
+	/// en: 'How should I prepare for the sample collection?'
+	String get prepareText => 'How should I prepare for the sample collection?';
+
+	/// en: 'Try another day'
+	String get anotherDay => 'Try another day';
+
+	/// en: 'Show me open slots on another day'
+	String get anotherDayText => 'Show me open slots on another day';
+
+	/// en: 'Suggest tests for me'
+	String get suggest => 'Suggest tests for me';
+
+	/// en: 'Which tests would you suggest for a routine checkup?'
+	String get suggestText => 'Which tests would you suggest for a routine checkup?';
+
+	/// en: 'Full body checkup'
+	String get fullBody => 'Full body checkup';
+
+	/// en: 'Browse all packages'
+	String get browse => 'Browse all packages';
+}
+
+// Path: history
+class Translations$history$en {
+	Translations$history$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Chats'
+	String get title => 'Chats';
+
+	/// en: 'Your chats with Saathi will appear here.'
+	String get empty => 'Your chats with Saathi will appear here.';
+
+	/// en: 'Current'
+	String get current => 'Current';
+
+	/// en: 'Booking paused'
+	String get paused => 'Booking paused';
+
+	/// en: 'Today, {time}'
+	String today({required Object time}) => 'Today, ${time}';
+
+	/// en: 'Yesterday'
+	String get yesterday => 'Yesterday';
 }
 
 /// The flat map containing all translations for locale <en>.
@@ -595,6 +684,7 @@ extension on Translations {
 			'menu.newChat' => 'New chat',
 			'menu.packages' => 'All packages',
 			'menu.bookings' => 'My bookings',
+			'menu.history' => 'Chats',
 			'form.title' => 'Book home collection',
 			'form.date' => 'Date',
 			'form.time' => 'Time window',
@@ -614,6 +704,28 @@ extension on Translations {
 			'form.pickDate' => 'Pick a date',
 			'form.pickTime' => 'Pick a time window',
 			'form.sent' => 'Details sent',
+			'followUps.book' => ({required Object name}) => 'Book ${name}',
+			'followUps.cheaper' => 'Something cheaper',
+			'followUps.cheaperText' => 'Show me something cheaper',
+			'followUps.noFasting' => 'No fasting needed',
+			'followUps.noFastingText' => 'Which of these need no fasting?',
+			'followUps.another' => 'Book another test',
+			'followUps.anotherText' => 'I want to book another test',
+			'followUps.bookings' => 'My bookings',
+			'followUps.prepare' => 'How do I prepare?',
+			'followUps.prepareText' => 'How should I prepare for the sample collection?',
+			'followUps.anotherDay' => 'Try another day',
+			'followUps.anotherDayText' => 'Show me open slots on another day',
+			'followUps.suggest' => 'Suggest tests for me',
+			'followUps.suggestText' => 'Which tests would you suggest for a routine checkup?',
+			'followUps.fullBody' => 'Full body checkup',
+			'followUps.browse' => 'Browse all packages',
+			'history.title' => 'Chats',
+			'history.empty' => 'Your chats with Saathi will appear here.',
+			'history.current' => 'Current',
+			'history.paused' => 'Booking paused',
+			'history.today' => ({required Object time}) => 'Today, ${time}',
+			'history.yesterday' => 'Yesterday',
 			_ => null,
 		};
 	}

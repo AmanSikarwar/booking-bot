@@ -126,4 +126,29 @@ void main() {
     expect(sent.single.status, MessageStatus.queued);
     verify(() => outbox.kick()).called(1);
   });
+
+  test('chat history: titled by the first message, newest first, empty chats hidden', () async {
+    final clock = _StepClock();
+    final r = ChatRepository(db, outbox, detector, clock, const Uuid());
+    final a = await r.newConversation('en');
+    await r.submit(conversationId: a, text: 'sugar test for papa', locale: 'en');
+    final b = await r.newConversation('en');
+    await r.submit(conversationId: b, text: 'thyroid', locale: 'en');
+    await r.submit(conversationId: b, text: 'book it', locale: 'en');
+    await r.newConversation('en');
+    var chats = await r.watchConversations().first;
+    expect([for (final c in chats) c.title], ['thyroid', 'sugar test for papa']);
+    await r.submit(conversationId: a, text: 'any cheaper?', locale: 'en');
+    chats = await r.watchConversations().first;
+    expect([for (final c in chats) c.title], ['sugar test for papa', 'thyroid']);
+    await r.switchTo(b);
+    expect(await r.currentConversation('en'), b);
+  });
+}
+
+class _StepClock extends Clock {
+  var _t = DateTime.utc(2026, 11, 20);
+
+  @override
+  DateTime now() => _t = _t.add(const Duration(seconds: 1));
 }

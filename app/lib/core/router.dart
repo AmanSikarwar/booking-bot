@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../features/bookings/bookings_screen.dart';
 import '../features/catalog/catalog_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
+import '../features/history/history.dart';
 
 part 'router.g.dart';
 
@@ -12,6 +13,7 @@ part 'router.g.dart';
   routes: [
     TypedGoRoute<BookingsRoute>(path: 'bookings'),
     TypedGoRoute<CatalogRoute>(path: 'packages'),
+    TypedGoRoute<HistoryRoute>(path: 'chats'),
   ],
 )
 class ChatRoute extends GoRouteData with $ChatRoute {
@@ -33,6 +35,13 @@ class CatalogRoute extends GoRouteData with $CatalogRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const CatalogScreen();
+}
+
+class HistoryRoute extends GoRouteData with $HistoryRoute {
+  const HistoryRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const HistoryScreen();
 }
 
 final router = GoRouter(routes: $appRoutes);

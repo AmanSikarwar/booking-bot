@@ -26,6 +26,15 @@ class $ConversationsTable extends Conversations with TableInfo<$ConversationsTab
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _flaggedMeta = const VerificationMeta('flagged');
   @override
   late final GeneratedColumn<bool> flagged = GeneratedColumn<bool>(
@@ -56,7 +65,7 @@ class $ConversationsTable extends Conversations with TableInfo<$ConversationsTab
     requiredDuringInsert: true,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, locale, flagged, createdAt, updatedAt];
+  List<GeneratedColumn> get $columns => [id, locale, title, flagged, createdAt, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -78,6 +87,9 @@ class $ConversationsTable extends Conversations with TableInfo<$ConversationsTab
       context.handle(_localeMeta, locale.isAcceptableOrUnknown(data['locale']!, _localeMeta));
     } else if (isInserting) {
       context.missing(_localeMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(_titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
     }
     if (data.containsKey('flagged')) {
       context.handle(_flaggedMeta, flagged.isAcceptableOrUnknown(data['flagged']!, _flaggedMeta));
@@ -112,6 +124,10 @@ class $ConversationsTable extends Conversations with TableInfo<$ConversationsTab
         DriftSqlType.string,
         data['${effectivePrefix}locale'],
       )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      ),
       flagged: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}flagged'],
@@ -136,12 +152,14 @@ class $ConversationsTable extends Conversations with TableInfo<$ConversationsTab
 class Conversation extends DataClass implements Insertable<Conversation> {
   final String id;
   final String locale;
+  final String? title;
   final bool flagged;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Conversation({
     required this.id,
     required this.locale,
+    this.title,
     required this.flagged,
     required this.createdAt,
     required this.updatedAt,
@@ -151,6 +169,9 @@ class Conversation extends DataClass implements Insertable<Conversation> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['locale'] = Variable<String>(locale);
+    if (!nullToAbsent || title != null) {
+      map['title'] = Variable<String>(title);
+    }
     map['flagged'] = Variable<bool>(flagged);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -161,6 +182,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
     return ConversationsCompanion(
       id: Value(id),
       locale: Value(locale),
+      title: title == null && nullToAbsent ? const Value.absent() : Value(title),
       flagged: Value(flagged),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -172,6 +194,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
     return Conversation(
       id: serializer.fromJson<String>(json['id']),
       locale: serializer.fromJson<String>(json['locale']),
+      title: serializer.fromJson<String?>(json['title']),
       flagged: serializer.fromJson<bool>(json['flagged']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -183,6 +206,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'locale': serializer.toJson<String>(locale),
+      'title': serializer.toJson<String?>(title),
       'flagged': serializer.toJson<bool>(flagged),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -192,12 +216,14 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   Conversation copyWith({
     String? id,
     String? locale,
+    Value<String?> title = const Value.absent(),
     bool? flagged,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Conversation(
     id: id ?? this.id,
     locale: locale ?? this.locale,
+    title: title.present ? title.value : this.title,
     flagged: flagged ?? this.flagged,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -206,6 +232,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
     return Conversation(
       id: data.id.present ? data.id.value : this.id,
       locale: data.locale.present ? data.locale.value : this.locale,
+      title: data.title.present ? data.title.value : this.title,
       flagged: data.flagged.present ? data.flagged.value : this.flagged,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -217,6 +244,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
     return (StringBuffer('Conversation(')
           ..write('id: $id, ')
           ..write('locale: $locale, ')
+          ..write('title: $title, ')
           ..write('flagged: $flagged, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -225,13 +253,14 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   }
 
   @override
-  int get hashCode => Object.hash(id, locale, flagged, createdAt, updatedAt);
+  int get hashCode => Object.hash(id, locale, title, flagged, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Conversation &&
           other.id == this.id &&
           other.locale == this.locale &&
+          other.title == this.title &&
           other.flagged == this.flagged &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -240,6 +269,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
 class ConversationsCompanion extends UpdateCompanion<Conversation> {
   final Value<String> id;
   final Value<String> locale;
+  final Value<String?> title;
   final Value<bool> flagged;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -247,6 +277,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
   const ConversationsCompanion({
     this.id = const Value.absent(),
     this.locale = const Value.absent(),
+    this.title = const Value.absent(),
     this.flagged = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -255,6 +286,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
   ConversationsCompanion.insert({
     required String id,
     required String locale,
+    this.title = const Value.absent(),
     this.flagged = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
@@ -266,6 +298,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
   static Insertable<Conversation> custom({
     Expression<String>? id,
     Expression<String>? locale,
+    Expression<String>? title,
     Expression<bool>? flagged,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -274,6 +307,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (locale != null) 'locale': locale,
+      if (title != null) 'title': title,
       if (flagged != null) 'flagged': flagged,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -284,6 +318,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
   ConversationsCompanion copyWith({
     Value<String>? id,
     Value<String>? locale,
+    Value<String?>? title,
     Value<bool>? flagged,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -292,6 +327,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     return ConversationsCompanion(
       id: id ?? this.id,
       locale: locale ?? this.locale,
+      title: title ?? this.title,
       flagged: flagged ?? this.flagged,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -307,6 +343,9 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     }
     if (locale.present) {
       map['locale'] = Variable<String>(locale.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
     }
     if (flagged.present) {
       map['flagged'] = Variable<bool>(flagged.value);
@@ -328,6 +367,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     return (StringBuffer('ConversationsCompanion(')
           ..write('id: $id, ')
           ..write('locale: $locale, ')
+          ..write('title: $title, ')
           ..write('flagged: $flagged, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1936,6 +1976,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$ConversationsTableCreateCompanionBuilder = ConversationsCompanion Function({
   required String id,
   required String locale,
+  Value<String?> title,
   Value<bool> flagged,
   required DateTime createdAt,
   required DateTime updatedAt,
@@ -1944,6 +1985,7 @@ typedef $$ConversationsTableCreateCompanionBuilder = ConversationsCompanion Func
 typedef $$ConversationsTableUpdateCompanionBuilder = ConversationsCompanion Function({
   Value<String> id,
   Value<String> locale,
+  Value<String?> title,
   Value<bool> flagged,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -1984,6 +2026,9 @@ class $$ConversationsTableFilterComposer extends Composer<_$AppDatabase, $Conver
 
   ColumnFilters<String> get locale =>
       $composableBuilder(column: $table.locale, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get flagged =>
       $composableBuilder(column: $table.flagged, builder: (column) => ColumnFilters(column));
@@ -2027,6 +2072,9 @@ class $$ConversationsTableOrderingComposer extends Composer<_$AppDatabase, $Conv
   ColumnOrderings<String> get locale =>
       $composableBuilder(column: $table.locale, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<bool> get flagged =>
       $composableBuilder(column: $table.flagged, builder: (column) => ColumnOrderings(column));
 
@@ -2050,6 +2098,9 @@ class $$ConversationsTableAnnotationComposer extends Composer<_$AppDatabase, $Co
 
   GeneratedColumn<String> get locale =>
       $composableBuilder(column: $table.locale, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
 
   GeneratedColumn<bool> get flagged =>
       $composableBuilder(column: $table.flagged, builder: (column) => column);
@@ -2110,6 +2161,7 @@ class $$ConversationsTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> locale = const Value.absent(),
+                Value<String?> title = const Value.absent(),
                 Value<bool> flagged = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -2117,6 +2169,7 @@ class $$ConversationsTableTableManager
               }) => ConversationsCompanion(
                 id: id,
                 locale: locale,
+                title: title,
                 flagged: flagged,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -2126,6 +2179,7 @@ class $$ConversationsTableTableManager
               ({
                 required String id,
                 required String locale,
+                Value<String?> title = const Value.absent(),
                 Value<bool> flagged = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
@@ -2133,6 +2187,7 @@ class $$ConversationsTableTableManager
               }) => ConversationsCompanion.insert(
                 id: id,
                 locale: locale,
+                title: title,
                 flagged: flagged,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

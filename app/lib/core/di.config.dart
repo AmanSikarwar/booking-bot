@@ -25,6 +25,7 @@ import 'package:saathi/features/chat/data/chat_repository.dart' as _i971;
 import 'package:saathi/features/chat/data/outbox.dart' as _i415;
 import 'package:saathi/features/chat/data/session.dart' as _i468;
 import 'package:saathi/features/chat/presentation/chat_cubit.dart' as _i863;
+import 'package:saathi/features/history/history.dart' as _i215;
 import 'package:saathi/features/safety/red_flag_detector.dart' as _i891;
 import 'package:saathi/features/settings/locale_cubit.dart' as _i567;
 import 'package:supabase_flutter/supabase_flutter.dart' as _i454;
@@ -95,6 +96,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i863.ChatCubit>(
       () => _i863.ChatCubit(gh<_i971.ChatRepository>()),
+    );
+    gh.factory<_i215.HistoryCubit>(
+      () => _i215.HistoryCubit(gh<_i971.ChatRepository>()),
     );
     return this;
   }

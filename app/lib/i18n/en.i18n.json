@@ -121,7 +121,8 @@
   "menu": {
     "newChat": "New chat",
     "packages": "All packages",
-    "bookings": "My bookings"
+    "bookings": "My bookings",
+    "history": "Chats"
   },
   "form": {
     "title": "Book home collection",
@@ -143,5 +144,31 @@
     "pickDate": "Pick a date",
     "pickTime": "Pick a time window",
     "sent": "Details sent"
+  },
+  "followUps": {
+    "book": "Book {name}",
+    "cheaper": "Something cheaper",
+    "cheaperText": "Show me something cheaper",
+    "noFasting": "No fasting needed",
+    "noFastingText": "Which of these need no fasting?",
+    "another": "Book another test",
+    "anotherText": "I want to book another test",
+    "bookings": "My bookings",
+    "prepare": "How do I prepare?",
+    "prepareText": "How should I prepare for the sample collection?",
+    "anotherDay": "Try another day",
+    "anotherDayText": "Show me open slots on another day",
+    "suggest": "Suggest tests for me",
+    "suggestText": "Which tests would you suggest for a routine checkup?",
+    "fullBody": "Full body checkup",
+    "browse": "Browse all packages"
+  },
+  "history": {
+    "title": "Chats",
+    "empty": "Your chats with Saathi will appear here.",
+    "current": "Current",
+    "paused": "Booking paused",
+    "today": "Today, {time}",
+    "yesterday": "Yesterday"
   }
 }

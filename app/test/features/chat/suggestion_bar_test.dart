@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:saathi/core/theme.dart';
 import 'package:saathi/features/chat/presentation/chat_screen.dart';
+import 'package:saathi/features/chat/presentation/suggestions.dart';
 import 'package:saathi/i18n/strings.g.dart';
 
 Future<void> pump(
@@ -25,7 +26,17 @@ Future<void> pump(
           child: Scaffold(
             body: Align(
               alignment: Alignment.bottomCenter,
-              child: SuggestionBar(onPick: onPick),
+              child: Builder(
+                builder: (context) => SuggestionBar(
+                  items: suggestionsFor(
+                    context.t,
+                    const [],
+                    flagged: false,
+                    lang: locale.languageCode,
+                  ),
+                  onTap: (s) => onPick(s.label),
+                ),
+              ),
             ),
           ),
         ),

@@ -15,6 +15,7 @@ import '../../../i18n/strings.g.dart';
 import '../../bookings/bookings_screen.dart';
 import '../../catalog/catalog_screen.dart';
 import '../../catalog/package.dart';
+import '../../history/history.dart';
 import '../../settings/locale_cubit.dart';
 import '../domain/models.dart';
 import 'booking_form.dart';
@@ -23,6 +24,7 @@ import 'cards.dart';
 import 'chat_cubit.dart';
 import 'chat_items.dart';
 import 'package_card.dart';
+import 'suggestions.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -92,7 +94,7 @@ class _ChatScreenState extends State<ChatScreen> {
         BlocListener<ConnectivityCubit, bool>(listener: (_, _) => _sync()),
       ],
       child: Scaffold(
-        appBar: _SaathiAppBar(size: size, onNewChat: _newChat),
+        appBar: SaathiAppBar(size: size, onNewChat: _newChat),
         body: size == WindowSize.expanded
             ? Row(
                 children: [
@@ -110,7 +112,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final t = context.t;
     final flagged = context.select((ChatCubit c) => c.state.flagged);
     final online = context.watch<ConnectivityCubit>().state;
-    final empty = context.select((ChatCubit c) => c.state.messages.isEmpty);
+    final messages = context.select((ChatCubit c) => c.state.messages);
     return Chat(
       currentUserId: meId,
       chatController: _controller,
@@ -148,17 +150,29 @@ class _ChatScreenState extends State<ChatScreen> {
           emptyFieldSendIconColor: Palette.inkMuted,
           hintColor: Palette.inkMuted,
           textColor: Palette.ink,
-          topWidget: _composerTop(t, online: online, flagged: flagged, empty: empty),
+          topWidget: _composerTop(
+            t,
+            online: online,
+            flagged: flagged,
+            suggestions: suggestionsFor(t, messages, flagged: flagged, lang: _locale),
+          ),
         ),
       ),
     );
   }
 
+  void _onSuggestion(Suggestion s) => switch (s) {
+    SendSuggestion(:final text) => _send(text),
+    BookSuggestion(:final packageId, :final name) => _openForm(packageId, name),
+    OpenSuggestion(destination: Destination.bookings) => const BookingsRoute().go(context),
+    OpenSuggestion(destination: Destination.catalog) => const CatalogRoute().go(context),
+  };
+
   Widget? _composerTop(
     Translations t, {
     required bool online,
     required bool flagged,
-    required bool empty,
+    required List<Suggestion> suggestions,
   }) {
     final strip = !online
         ? _Strip(icon: Icons.wifi_off, text: t.offline.banner)
@@ -169,10 +183,12 @@ class _ChatScreenState extends State<ChatScreen> {
             action: (label: t.chat.newChat, onTap: _newChat),
           )
         : null;
-    final suggestions = empty ? SuggestionBar(onPick: _send) : null;
-    if (strip == null) return suggestions;
-    if (suggestions == null) return strip;
-    return Column(mainAxisSize: MainAxisSize.min, children: [strip, suggestions]);
+    final bar = suggestions.isEmpty
+        ? null
+        : SuggestionBar(items: suggestions, onTap: _onSuggestion);
+    if (strip == null) return bar;
+    if (bar == null) return strip;
+    return Column(mainAxisSize: MainAxisSize.min, children: [strip, bar]);
   }
 
   Widget _custom(BuildContext context, fc.CustomMessage m, {required bool flagged}) {
@@ -335,8 +351,8 @@ class _SafetyWidth extends StatelessWidget {
   );
 }
 
-class _SaathiAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _SaathiAppBar({required this.size, required this.onNewChat});
+class SaathiAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const SaathiAppBar({super.key, required this.size, required this.onNewChat});
 
   final WindowSize size;
   final VoidCallback onNewChat;
@@ -348,6 +364,7 @@ class _SaathiAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final t = context.t;
     final compact = size == WindowSize.compact;
+    final roomy = MediaQuery.sizeOf(context).width >= 1080 && !context.largeText;
     return AppBar(
       titleSpacing: compact ? 12 : 20,
       title: Row(
@@ -386,18 +403,15 @@ class _SaathiAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         _LanguageButton(showIcon: !compact),
-        if (size == WindowSize.medium) ...[
-          TextButton.icon(
-            onPressed: () => const BookingsRoute().go(context),
-            icon: const Icon(Icons.event_note_outlined),
-            label: Text(t.menu.bookings),
-          ),
-          TextButton.icon(
-            onPressed: () => const CatalogRoute().go(context),
-            icon: const Icon(Icons.science_outlined),
-            label: Text(t.menu.packages),
-          ),
-        ],
+        if (size == WindowSize.medium)
+          for (final (icon, label, go) in [
+            (Icons.forum_outlined, t.menu.history, () => const HistoryRoute().go(context)),
+            (Icons.event_note_outlined, t.menu.bookings, () => const BookingsRoute().go(context)),
+            (Icons.science_outlined, t.menu.packages, () => const CatalogRoute().go(context)),
+          ])
+            roomy
+                ? TextButton.icon(onPressed: go, icon: Icon(icon), label: Text(label))
+                : IconButton(tooltip: label, onPressed: go, icon: Icon(icon)),
         if (compact)
           IconButton(
             tooltip: t.menu.bookings,
@@ -406,20 +420,31 @@ class _SaathiAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         if (compact)
           PopupMenuButton<String>(
-            onSelected: (v) => v == 'new' ? onNewChat() : const CatalogRoute().go(context),
+            onSelected: (v) => switch (v) {
+              'new' => onNewChat(),
+              'history' => const HistoryRoute().go(context),
+              _ => const CatalogRoute().go(context),
+            },
             itemBuilder: (_) => [
               PopupMenuItem(value: 'new', child: Text(t.menu.newChat)),
+              PopupMenuItem(value: 'history', child: Text(t.menu.history)),
               PopupMenuItem(value: 'catalog', child: Text(t.menu.packages)),
             ],
           )
         else
           Padding(
             padding: const EdgeInsetsDirectional.only(start: 4, end: 12),
-            child: FilledButton.tonalIcon(
-              onPressed: onNewChat,
-              icon: const Icon(Icons.add_comment_outlined),
-              label: Text(t.menu.newChat),
-            ),
+            child: roomy || size == WindowSize.expanded
+                ? FilledButton.tonalIcon(
+                    onPressed: onNewChat,
+                    icon: const Icon(Icons.add_comment_outlined),
+                    label: Text(t.menu.newChat),
+                  )
+                : IconButton.filledTonal(
+                    tooltip: t.menu.newChat,
+                    onPressed: onNewChat,
+                    icon: const Icon(Icons.add_comment_outlined),
+                  ),
           ),
       ],
     );
@@ -468,7 +493,7 @@ class _SidePanel extends StatelessWidget {
     return ColoredBox(
       color: Palette.surface,
       child: DefaultTabController(
-        length: 2,
+        length: 3,
         child: Column(
           children: [
             TabBar(
@@ -476,6 +501,7 @@ class _SidePanel extends StatelessWidget {
               indicatorColor: Palette.lavender,
               unselectedLabelColor: Palette.inkMuted,
               tabs: [
+                Tab(text: t.menu.history),
                 Tab(text: t.menu.bookings),
                 Tab(text: t.menu.packages),
               ],
@@ -483,6 +509,7 @@ class _SidePanel extends StatelessWidget {
             const Expanded(
               child: TabBarView(
                 children: [
+                  HistoryList(),
                   BookingsList(padding: EdgeInsets.all(16)),
                   CatalogList(),
                 ],
@@ -496,36 +523,29 @@ class _SidePanel extends StatelessWidget {
 }
 
 class SuggestionBar extends StatelessWidget {
-  const SuggestionBar({super.key, required this.onPick});
+  const SuggestionBar({super.key, required this.items, required this.onTap});
 
-  static const _icons = [
-    Icons.biotech_outlined,
-    Icons.health_and_safety_outlined,
-    Icons.water_drop_outlined,
-    Icons.battery_alert_outlined,
-  ];
-
-  final void Function(String) onPick;
+  final List<Suggestion> items;
+  final void Function(Suggestion) onTap;
 
   @override
   Widget build(BuildContext context) {
-    final t = context.t.chat;
     final chips = [
-      for (final (i, s) in t.suggestions.indexed)
+      for (final s in items)
         ConstrainedBox(
           constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.8),
           child: ActionChip(
-            avatar: Icon(_icons[i % _icons.length], size: 16, color: Palette.lavender),
-            label: Text(s),
+            avatar: Icon(s.icon, size: 16, color: Palette.lavender),
+            label: Text(s.label),
             backgroundColor: Palette.surface,
-            onPressed: () => onPick(s),
+            onPressed: () => onTap(s),
           ),
         ),
     ];
     const padding = EdgeInsets.fromLTRB(16, 6, 16, 2);
     return Semantics(
       container: true,
-      label: t.tryAsking,
+      label: context.t.chat.tryAsking,
       child: context.windowSize == WindowSize.compact
           ? SingleChildScrollView(
               scrollDirection: Axis.horizontal,

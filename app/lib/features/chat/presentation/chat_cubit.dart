@@ -31,6 +31,12 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> newChat(String locale) async => _open(await _repo.newConversation(locale));
 
+  Future<void> openConversation(String id) async {
+    if (id == state.conversationId) return;
+    await _repo.switchTo(id);
+    await _open(id);
+  }
+
   Future<void> send(
     String text,
     String locale, {

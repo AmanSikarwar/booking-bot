@@ -69,6 +69,8 @@ class TranslationsHi extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$tubes$hi tubes = _Translations$tubes$hi._(_root);
 	@override late final _Translations$menu$hi menu = _Translations$menu$hi._(_root);
 	@override late final _Translations$form$hi form = _Translations$form$hi._(_root);
+	@override late final _Translations$followUps$hi followUps = _Translations$followUps$hi._(_root);
+	@override late final _Translations$history$hi history = _Translations$history$hi._(_root);
 }
 
 // Path: chat
@@ -284,6 +286,7 @@ class _Translations$menu$hi extends Translations$menu$en {
 	@override String get newChat => 'नई चैट';
 	@override String get packages => 'सभी पैकेज';
 	@override String get bookings => 'मेरी बुकिंग';
+	@override String get history => 'चैट';
 }
 
 // Path: form
@@ -312,6 +315,46 @@ class _Translations$form$hi extends Translations$form$en {
 	@override String get pickDate => 'तारीख़ चुनें';
 	@override String get pickTime => 'समय चुनें';
 	@override String get sent => 'जानकारी भेज दी';
+}
+
+// Path: followUps
+class _Translations$followUps$hi extends Translations$followUps$en {
+	_Translations$followUps$hi._(TranslationsHi root) : this._root = root, super.internal(root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String book({required Object name}) => '${name} बुक करें';
+	@override String get cheaper => 'कुछ सस्ता';
+	@override String get cheaperText => 'मुझे कुछ सस्ता दिखाइए';
+	@override String get noFasting => 'बिना खाली पेट वाले';
+	@override String get noFastingText => 'इनमें से किसके लिए खाली पेट ज़रूरी नहीं है?';
+	@override String get another => 'एक और टेस्ट बुक करें';
+	@override String get anotherText => 'मुझे एक और टेस्ट बुक करना है';
+	@override String get bookings => 'मेरी बुकिंग';
+	@override String get prepare => 'तैयारी कैसे करूँ?';
+	@override String get prepareText => 'सैंपल कलेक्शन के लिए तैयारी कैसे करूँ?';
+	@override String get anotherDay => 'दूसरा दिन';
+	@override String get anotherDayText => 'किसी दूसरे दिन के खाली स्लॉट दिखाइए';
+	@override String get suggest => 'मेरे लिए टेस्ट सुझाएँ';
+	@override String get suggestText => 'रूटीन चेकअप के लिए आप कौन से टेस्ट सुझाएँगे?';
+	@override String get fullBody => 'फुल बॉडी चेकअप';
+	@override String get browse => 'सभी पैकेज देखें';
+}
+
+// Path: history
+class _Translations$history$hi extends Translations$history$en {
+	_Translations$history$hi._(TranslationsHi root) : this._root = root, super.internal(root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'चैट';
+	@override String get empty => 'साथी के साथ आपकी चैट यहाँ दिखेंगी।';
+	@override String get current => 'अभी की';
+	@override String get paused => 'बुकिंग रुकी है';
+	@override String today({required Object time}) => 'आज, ${time}';
+	@override String get yesterday => 'कल';
 }
 
 /// The flat map containing all translations for locale <hi>.
@@ -409,6 +452,7 @@ extension on TranslationsHi {
 			'menu.newChat' => 'नई चैट',
 			'menu.packages' => 'सभी पैकेज',
 			'menu.bookings' => 'मेरी बुकिंग',
+			'menu.history' => 'चैट',
 			'form.title' => 'घर से सैंपल बुक करें',
 			'form.date' => 'तारीख़',
 			'form.time' => 'समय',
@@ -428,6 +472,28 @@ extension on TranslationsHi {
 			'form.pickDate' => 'तारीख़ चुनें',
 			'form.pickTime' => 'समय चुनें',
 			'form.sent' => 'जानकारी भेज दी',
+			'followUps.book' => ({required Object name}) => '${name} बुक करें',
+			'followUps.cheaper' => 'कुछ सस्ता',
+			'followUps.cheaperText' => 'मुझे कुछ सस्ता दिखाइए',
+			'followUps.noFasting' => 'बिना खाली पेट वाले',
+			'followUps.noFastingText' => 'इनमें से किसके लिए खाली पेट ज़रूरी नहीं है?',
+			'followUps.another' => 'एक और टेस्ट बुक करें',
+			'followUps.anotherText' => 'मुझे एक और टेस्ट बुक करना है',
+			'followUps.bookings' => 'मेरी बुकिंग',
+			'followUps.prepare' => 'तैयारी कैसे करूँ?',
+			'followUps.prepareText' => 'सैंपल कलेक्शन के लिए तैयारी कैसे करूँ?',
+			'followUps.anotherDay' => 'दूसरा दिन',
+			'followUps.anotherDayText' => 'किसी दूसरे दिन के खाली स्लॉट दिखाइए',
+			'followUps.suggest' => 'मेरे लिए टेस्ट सुझाएँ',
+			'followUps.suggestText' => 'रूटीन चेकअप के लिए आप कौन से टेस्ट सुझाएँगे?',
+			'followUps.fullBody' => 'फुल बॉडी चेकअप',
+			'followUps.browse' => 'सभी पैकेज देखें',
+			'history.title' => 'चैट',
+			'history.empty' => 'साथी के साथ आपकी चैट यहाँ दिखेंगी।',
+			'history.current' => 'अभी की',
+			'history.paused' => 'बुकिंग रुकी है',
+			'history.today' => ({required Object time}) => 'आज, ${time}',
+			'history.yesterday' => 'कल',
 			_ => null,
 		};
 	}

@@ -26,6 +26,10 @@ class ChatRepository {
     return newConversation(locale);
   }
 
+  Future<void> switchTo(String conversationId) => _db.setMeta(_currentKey, conversationId);
+
+  Stream<List<Conversation>> watchConversations() => _db.watchConversations();
+
   Future<String> newConversation(String locale) async {
     final id = _uuid.v4();
     await _db.ensureConversation(id, locale, _clock.now());
@@ -61,6 +65,7 @@ class ChatRepository {
         createdAt: now,
       ),
     );
+    await _db.touchConversation(conversationId, display ?? text, now);
     final hit = kind == MessageKind.text ? _detector.detect(text) : null;
     if (hit != null) {
       final category = hit.categories.first;

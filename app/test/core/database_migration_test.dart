@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:saathi/core/db/database.dart';
 
 void main() {
-  test('v1 database upgrades to v2 and keeps existing messages', () async {
+  test('v1 database upgrades to v3, keeps messages and back-fills chat titles', () async {
     final dir = await Directory.systemTemp.createTemp('saathi_db');
     addTearDown(() => dir.delete(recursive: true));
     final file = File('${dir.path}/saathi.sqlite');
@@ -25,6 +25,7 @@ void main() {
       ),
     );
     await v2.customStatement('ALTER TABLE messages DROP COLUMN display');
+    await v2.customStatement('ALTER TABLE conversations DROP COLUMN title');
     await v2.customStatement('PRAGMA user_version = 1');
     await v2.close();
 
@@ -34,5 +35,6 @@ void main() {
     expect([m.body, m.display], ['sugar test', null]);
     await upgraded.patchMessage('m1', const MessagesCompanion(display: Value('Sugar test')));
     expect((await upgraded.message('m1'))!.display, 'Sugar test');
+    expect((await upgraded.watchConversations().first).single.title, 'sugar test');
   });
 }
