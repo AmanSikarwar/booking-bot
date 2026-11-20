@@ -87,7 +87,39 @@ function calendar(now: Date): string {
   }).join(", ");
 }
 
-export function systemPrompt(locale: Locale, now: Date, flagged: boolean): string {
+export interface AgentProfile {
+  patients: { name: string; relation: string }[];
+  addresses: string[];
+}
+
+const RELATIONS = ["self", "father", "mother", "spouse", "son", "daughter", "brother", "sister", "other"];
+const clean = (s: unknown, max: number) => typeof s === "string" ? s.replace(/[\r\n`]/g, " ").trim().slice(0, max) : "";
+
+export function parseProfile(raw: unknown): AgentProfile | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const o = raw as Record<string, unknown>;
+  const patients = (Array.isArray(o.patients) ? o.patients : []).slice(0, 8).flatMap((p) => {
+    const name = clean((p as Record<string, unknown>)?.name, 60);
+    const relation = clean((p as Record<string, unknown>)?.relation, 12);
+    return name && RELATIONS.includes(relation) ? [{ name, relation }] : [];
+  });
+  const addresses = (Array.isArray(o.addresses) ? o.addresses : []).slice(0, 6).map((a) => clean(a, 40)).filter(
+    Boolean,
+  );
+  return patients.length || addresses.length ? { patients, addresses } : undefined;
+}
+
+function profileRules(p?: AgentProfile): string {
+  if (!p) return "";
+  const people = p.patients.map((x) =>
+    `${x.name} (${x.relation === "self" ? "the user" : `the user's ${x.relation}`})`
+  );
+  return `- Saved patients: ${people.join(", ")}. Saved address labels: ${
+    p.addresses.join(", ")
+  }. When the user refers to themselves or a family member (for example "Papa", "my father", "मम्मी", "wife"), pre-fill show_booking_form with that saved patient's exact name, and use a saved address label when one fits. Never ask for details you already have here.\n`;
+}
+
+export function systemPrompt(locale: Locale, now: Date, flagged: boolean, profile?: AgentProfile): string {
   const ex = bookableDates(now)[2];
   return `You are Saathi, the diagnostic lab's AI booking assistant. You help users choose diagnostic test packages and book home sample collection. You are not a doctor, a nurse or a human; say so plainly if asked.
 
@@ -106,6 +138,7 @@ ${
       ? "- This conversation was flagged for a possible emergency. Do not book anything; suggest starting a new chat for routine tests.\n"
       : ""
   }
+${profileRules(profile)}
 Voice: warm but brief, calm, clear, no emoji, under 80 words, at most one question per reply. No small talk.
 ${LANGUAGE[locale]}
 

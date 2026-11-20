@@ -4,7 +4,7 @@ import { Catalog } from "./catalog.ts";
 import type { Triage } from "./decider.ts";
 import type { ChatChunk, ChatModel, ChatRequest } from "./llm.ts";
 import { MockChat, MockDecider } from "./mocks.ts";
-import { systemPrompt } from "./prompt.ts";
+import { parseProfile, systemPrompt } from "./prompt.ts";
 import { RedFlagDetector } from "./redflag.ts";
 import { isFull, TIME_WINDOWS } from "./slots.ts";
 import type { StreamEvent } from "./sse.ts";
@@ -385,4 +385,36 @@ Deno.test("show_booking_form is allowed for Hindi booking requests and card acti
     const { names } = await turn(deps, input(text_, { kind }));
     assert(names.includes("booking_form"), text_);
   }
+});
+
+Deno.test("profile context reaches the prompt; junk profiles are ignored", () => {
+  const profile = parseProfile({
+    patients: [
+      { name: "Priya Sharma", relation: "self" },
+      { name: "Ramesh Sharma", relation: "father" },
+      { name: "x", relation: "boss" },
+      { name: "", relation: "mother" },
+    ],
+    addresses: ["Home", "Papa's house", 42],
+  })!;
+  assertEquals(profile.patients.map((p) => p.name), ["Priya Sharma", "Ramesh Sharma"]);
+  assertEquals(profile.addresses, ["Home", "Papa's house"]);
+  const prompt = systemPrompt("en", NOW, false, profile);
+  assert(prompt.includes("Ramesh Sharma (the user's father)"));
+  assert(prompt.includes("Saved address labels: Home, Papa's house"));
+  assertEquals(parseProfile("nope"), undefined);
+  assertEquals(parseProfile({ patients: "x" }), undefined);
+  assert(!systemPrompt("en", NOW, false).includes("Saved patients"));
+});
+
+Deno.test("the turn sends profile context to the model", async () => {
+  const chat = new ScriptedChat([[text("ok")]]);
+  const { deps } = setup({ chat });
+  await turn(
+    deps,
+    input("book a sugar test for papa", {
+      profile: { patients: [{ name: "Ramesh Sharma", relation: "father" }], addresses: ["Home"] },
+    }),
+  );
+  assert((chat.requests[0].messages[0] as { content: string }).content.includes("Ramesh Sharma"));
 });

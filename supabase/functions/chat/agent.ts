@@ -1,7 +1,15 @@
 import { type Catalog, forModel, type Locale } from "./catalog.ts";
 import { type Decider, escalation } from "./decider.ts";
 import { type ChatMessage, type ChatModel, LlmError, type ToolCall } from "./llm.ts";
-import { DISCLAIMER, EMPTY_REPLY, FALLBACK_REPLY, looksLikeDiagnosis, systemPrompt, TOOLS } from "./prompt.ts";
+import {
+  type AgentProfile,
+  DISCLAIMER,
+  EMPTY_REPLY,
+  FALLBACK_REPLY,
+  looksLikeDiagnosis,
+  systemPrompt,
+  TOOLS,
+} from "./prompt.ts";
 import type { RedFlagDetector } from "./redflag.ts";
 import { alternatives, bookableDates, bookingRef, idempotencyKey, isBookable, isFull, TIME_WINDOWS } from "./slots.ts";
 import type { StreamEvent } from "./sse.ts";
@@ -26,6 +34,7 @@ export interface TurnInput {
   kind: "text" | "action";
   locale: Locale;
   text: string;
+  profile?: AgentProfile;
 }
 
 export type Begin =
@@ -202,7 +211,7 @@ export async function runTurn(
 
     const history = await store.history(conv.id, messageId, HISTORY_TURNS);
     const messages: ChatMessage[] = [
-      { role: "system", content: systemPrompt(locale, now, conv.flagged) },
+      { role: "system", content: systemPrompt(locale, now, conv.flagged, input.profile) },
       ...history.map((h) => ({ role: h.role, content: h.text }) as ChatMessage),
       { role: "user", content: input.text },
     ];

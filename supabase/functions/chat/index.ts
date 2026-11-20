@@ -6,6 +6,7 @@ import { OpenRouterChat } from "./llm.ts";
 import { MockChat, MockDecider } from "./mocks.ts";
 import { RedFlagDetector } from "./redflag.ts";
 import { encodeEvent, type StreamEvent } from "./sse.ts";
+import { parseProfile } from "./prompt.ts";
 import { SupabaseStore } from "./store.ts";
 
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
@@ -76,6 +77,7 @@ function parseBody(b: unknown, userId: string): TurnInput | null {
     kind: (o.kind as "text" | "action") ?? "text",
     locale: o.locale as "en" | "hi",
     text: (o.text as string).trim(),
+    profile: parseProfile(o.profile),
   };
 }
 
