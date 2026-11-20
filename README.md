@@ -37,6 +37,6 @@ The [latest safety eval](evals/RESULTS-safety.md) compared keyword detection alo
 
 ## Release the demo
 
-Build the installable APK with `flutter build apk --release` from `app/`. The output is `app/build/app/outputs/flutter-apk/app-release.apk` relative to the repository root. The demo uses Android's debug signing configuration for sideloading.
+Place the release keystore in `app/android/app/` and keep `storeFile`, `storePassword`, `keyAlias`, and `keyPassword` in the local `app/android/key.properties` file. Set `storeFile` to the keystore filename when it is in the Android app module. Build the signed APK with `flutter build apk --release` from `app/`. The output is `app/build/app/outputs/flutter-apk/app-release.apk` relative to the repository root.
 
 Set the repository's Pages source to GitHub Actions and run the **Publish web demo** workflow on `main`. It builds Flutter for the configured Pages path. The Android APK is the primary way to try the offline flow. Web storage depends on browser support and can be cleared by the browser. The iOS project is included for development.
