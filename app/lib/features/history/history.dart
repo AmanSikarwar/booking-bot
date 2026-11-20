@@ -16,6 +16,7 @@ import '../../core/theme.dart';
 import '../../i18n/strings.g.dart';
 import '../chat/data/chat_repository.dart';
 import '../chat/presentation/chat_cubit.dart';
+import '../settings/locale_cubit.dart';
 
 @injectable
 class HistoryCubit extends Cubit<List<Conversation>?> {
@@ -44,6 +45,19 @@ class HistoryScreen extends StatelessWidget {
         title: Text(context.t.history.title),
       ),
       body: HistoryList(onOpened: () => const ChatRoute().go(context)),
+      floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'new-chat',
+        backgroundColor: Palette.lavender,
+        foregroundColor: Colors.white,
+        onPressed: () {
+          unawaited(
+            context.read<ChatCubit>().newChat(context.read<LocaleCubit>().state.languageCode),
+          );
+          const ChatRoute().go(context);
+        },
+        icon: const Icon(Icons.add_comment_outlined),
+        label: Text(context.t.menu.newChat),
+      ).pop(context),
     );
   }
 }
@@ -84,7 +98,7 @@ class HistoryList extends StatelessWidget {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 720),
               child: ListView.separated(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.only(top: 8, bottom: 96),
                 itemCount: chats.length,
                 separatorBuilder: (_, _) =>
                     const Divider(height: 1, indent: 72, color: Palette.line),
