@@ -557,3 +557,14 @@ Deno.test("booking: the same slot booked again with a new address moves the book
   assertEquals(store.bookings.length, 1);
   assertEquals(store.bookings[0].address_label, "Office");
 });
+
+Deno.test("text from separate model rounds is separated, not run together", async () => {
+  const chat = new ScriptedChat([
+    [text("Let me check."), call("search_packages", { query: "thyroid" })],
+    [text("Here are two options.")],
+  ]);
+  const { deps } = setup({ chat });
+  const { events } = await turn(deps, input("thyroid test"));
+  const reply = events.filter((e) => e.event === "text_delta").map((e) => e.data.text).join("");
+  assertEquals(reply, "Let me check.\n\nHere are two options.");
+});

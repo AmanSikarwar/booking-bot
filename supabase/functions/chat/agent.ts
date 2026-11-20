@@ -240,8 +240,12 @@ export async function runTurn(
       try {
         for await (const c of deps.chat.stream({ messages, tools: round < MAX_TOOL_ROUNDS ? TOOLS : undefined })) {
           if (c.type === "text") {
-            roundText += c.delta;
-            record("text_delta", { text: c.delta });
+            const before = text + roundText;
+            const delta = !roundText && before && !/\s$/.test(before) && !/^\s/.test(c.delta)
+              ? `\n\n${c.delta}`
+              : c.delta;
+            roundText += delta;
+            record("text_delta", { text: delta });
           } else if (c.type === "tool_calls") {
             calls = c.calls;
           } else {
