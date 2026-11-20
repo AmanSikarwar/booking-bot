@@ -160,6 +160,7 @@ class _ChatScreenState extends State<ChatScreen> {
             t,
             online: online,
             flagged: flagged,
+            orphaned: isOrphaned(messages),
             suggestions: suggestionsFor(t, messages, flagged: flagged, lang: _locale),
           ),
         ),
@@ -178,9 +179,17 @@ class _ChatScreenState extends State<ChatScreen> {
     Translations t, {
     required bool online,
     required bool flagged,
+    required bool orphaned,
     required List<Suggestion> suggestions,
   }) {
-    final strip = !online
+    final strip = orphaned
+        ? _Strip(
+            key: const ValueKey('orphaned'),
+            icon: Icons.lock_outline,
+            text: t.chat.orphanedNote,
+            action: (label: t.chat.newChat, onTap: _newChat),
+          ).enter(context, rise: 12)
+        : !online
         ? _Strip(
             key: const ValueKey('offline'),
             icon: Icons.wifi_off,

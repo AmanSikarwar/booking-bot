@@ -105,6 +105,7 @@ class _Translations$chat$hi extends Translations$chat$en {
 		'मुझे हर समय थकान रहती है',
 	];
 	@override String get tryAsking => 'ऐसे पूछें';
+	@override String get orphanedNote => 'यह चैट पिछले सेशन की है और आगे नहीं चल सकती। नई चैट शुरू करें।';
 }
 
 // Path: status
@@ -519,6 +520,7 @@ extension on TranslationsHi {
 			'chat.suggestions.2' => 'पापा के लिए शुगर टेस्ट',
 			'chat.suggestions.3' => 'मुझे हर समय थकान रहती है',
 			'chat.tryAsking' => 'ऐसे पूछें',
+			'chat.orphanedNote' => 'यह चैट पिछले सेशन की है और आगे नहीं चल सकती। नई चैट शुरू करें।',
 			'status.queued' => 'कतार में',
 			'status.sending' => 'भेज रहा हूँ',
 			'status.failed' => 'नहीं भेजा गया · दोबारा भेजने के लिए टैप करें',

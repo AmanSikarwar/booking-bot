@@ -21,7 +21,8 @@
       "Sugar test for Papa",
       "I feel tired all the time"
     ],
-    "tryAsking": "Try asking"
+    "tryAsking": "Try asking",
+    "orphanedNote": "This chat belongs to an earlier session and can't continue. Start a new chat."
   },
   "status": {
     "queued": "Queued",

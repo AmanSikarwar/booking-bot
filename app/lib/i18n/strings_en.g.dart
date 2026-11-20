@@ -141,6 +141,9 @@ class Translations$chat$en {
 
 	/// en: 'Try asking'
 	String get tryAsking => 'Try asking';
+
+	/// en: 'This chat belongs to an earlier session and can't continue. Start a new chat.'
+	String get orphanedNote => 'This chat belongs to an earlier session and can\'t continue. Start a new chat.';
 }
 
 // Path: status
@@ -900,6 +903,7 @@ extension on Translations {
 			'chat.suggestions.2' => 'Sugar test for Papa',
 			'chat.suggestions.3' => 'I feel tired all the time',
 			'chat.tryAsking' => 'Try asking',
+			'chat.orphanedNote' => 'This chat belongs to an earlier session and can\'t continue. Start a new chat.',
 			'status.queued' => 'Queued',
 			'status.sending' => 'Sending',
 			'status.failed' => 'Failed · tap to retry',

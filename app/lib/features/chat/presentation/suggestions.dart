@@ -4,6 +4,7 @@ import '../../../core/db/database.dart';
 import '../../../i18n/strings.g.dart';
 import '../../catalog/package.dart';
 import '../domain/models.dart';
+import 'chat_items.dart';
 
 sealed class Suggestion {
   const Suggestion(this.label, this.icon);
@@ -49,6 +50,7 @@ List<Suggestion> suggestionsFor(
   required String lang,
 }) {
   if (flagged) return const [];
+  if (isOrphaned(rows)) return const [];
   if (rows.isEmpty) {
     return [
       for (final (i, s) in t.chat.suggestions.indexed)

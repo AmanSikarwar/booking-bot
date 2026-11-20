@@ -1,7 +1,9 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:saathi/core/db/database.dart';
 import 'package:saathi/features/catalog/package.dart';
 import 'package:saathi/features/chat/domain/models.dart';
+import 'package:saathi/features/chat/presentation/chat_items.dart';
 import 'package:saathi/features/chat/presentation/suggestions.dart';
 import 'package:saathi/i18n/strings.g.dart';
 
@@ -147,6 +149,16 @@ void main() {
       isEmpty,
     );
     expect(f([user('a'), reply(const [])], flagged: true), isEmpty);
+  });
+
+  test('a chat the server no longer accepts offers nothing', () {
+    final rejected = user(
+      'a',
+      status: MessageStatus.failed,
+    ).copyWith(error: const Value('forbidden'));
+    expect(isOrphaned([rejected]), isTrue);
+    expect(isOrphaned([user('a', status: MessageStatus.failed)]), isFalse);
+    expect(f([user('b'), reply(const []), rejected]), isEmpty);
   });
 
   test('plain text reply offers general next steps', () {

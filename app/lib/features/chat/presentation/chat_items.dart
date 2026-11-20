@@ -8,6 +8,9 @@ const saathiId = 'saathi';
 
 const _noticeCodes = {'quota_exhausted', 'user_daily_limit'};
 
+bool isOrphaned(List<Message> rows) =>
+    rows.any((r) => r.role == MessageRole.user && r.error == 'forbidden');
+
 List<fc.Message> toChatItems(List<Message> rows, {required bool online}) {
   final items = <fc.Message>[];
   final lastQueued = rows.lastWhereOrNull(
