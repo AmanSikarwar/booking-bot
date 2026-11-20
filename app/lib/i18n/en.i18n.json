@@ -236,5 +236,21 @@
       "male": "Male",
       "other": "Other"
     }
+  },
+  "welcome": {
+    "morning": "Good morning, {name}",
+    "afternoon": "Good afternoon, {name}",
+    "evening": "Good evening, {name}",
+    "intro": "Tell me what you'd like to check, or how you've been feeling. I'll suggest the right tests and book a home sample collection.",
+    "bookFor": "Book a test for",
+    "forSelf": "Suggest tests for me",
+    "forPerson": "Suggest tests for my {relation}, {name}",
+    "nextCollection": "Next collection",
+    "popular": "Popular packages",
+    "seeAll": "See all",
+    "how": "How it works",
+    "step1": "Tell Saathi what to check",
+    "step2": "Pick a package and a slot",
+    "step3": "Sample collected at home"
   }
 }

@@ -548,6 +548,10 @@ The catalogue also carries a version number, so the app knows when its bundled c
 
 The anonymous session itself is persisted by `supabase_flutter`.
 
+### 9.3a New chat screen
+
+An empty chat shows, above the starter chips: a time-of-day greeting with the profile's first name; a "Next collection" card for the earliest upcoming confirmed booking (opens My bookings); "Book a test for" chips, one per profile person, that send "Suggest tests for my father, Ramesh Sharma"; four popular packages (Full Body, Diabetes, Thyroid, Senior Care) that open the details sheet with its Book CTA; and a three-step "How it works" strip.
+
 ### 9.4 Profile (device only, synthetic)
 
 A Profile tab (5th phone tab; header avatar on tablet and desktop) holds the user's personal details: name, age, gender, phone, email, family members (relation, age, gender) and saved addresses (label, two lines, city, 6-digit pincode). On first launch it is seeded with an obviously synthetic family (Priya Sharma, +91 90000 00001, priya.sharma@example.com, Gurugram addresses). Everything is editable, and a reset button restores the sample. It is stored as one JSON value in `app_meta`, so no schema migration is needed.

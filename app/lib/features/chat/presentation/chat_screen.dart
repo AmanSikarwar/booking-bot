@@ -28,6 +28,7 @@ import 'chat_cubit.dart';
 import 'chat_items.dart';
 import 'package_card.dart';
 import 'suggestions.dart';
+import 'welcome.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -141,7 +142,7 @@ class _ChatScreenState extends State<ChatScreen> {
             (m.metadata?['card'] as Map<String, Object?>?)?['type'] == 'packages'
             ? _custom(context, m, flagged: flagged)
             : _custom(context, m, flagged: flagged).enterOnce(context, m.id),
-        emptyChatListBuilder: (context) => const _Welcome(),
+        emptyChatListBuilder: (context) => Welcome(onSend: _send, onBook: _openForm),
         chatAnimatedListBuilder: (context, itemBuilder) =>
             ChatAnimatedListReversed(itemBuilder: itemBuilder),
         composerBuilder: (context) => Composer(
@@ -582,34 +583,6 @@ class SuggestionBar extends StatelessWidget {
                 child: Wrap(spacing: 8, runSpacing: 8, children: chips),
               ),
             ),
-    );
-  }
-}
-
-class _Welcome extends StatelessWidget {
-  const _Welcome();
-
-  @override
-  Widget build(BuildContext context) {
-    final t = context.t;
-    final showBrowse = context.windowSize == WindowSize.medium;
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-      children: [
-        SaathiBubble(child: SaathiText(text: t.chat.greeting)).enter(context),
-        if (showBrowse)
-          Padding(
-            padding: const EdgeInsetsDirectional.only(start: 32, top: 12),
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: TextButton.icon(
-                onPressed: () => const CatalogRoute().go(context),
-                icon: const Icon(Icons.science_outlined, size: 18),
-                label: Text(t.catalog.browse),
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

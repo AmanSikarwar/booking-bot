@@ -74,6 +74,7 @@ class TranslationsHi extends Translations with BaseTranslations<AppLocale, Trans
 	@override late final _Translations$nav$hi nav = _Translations$nav$hi._(_root);
 	@override late final _Translations$details$hi details = _Translations$details$hi._(_root);
 	@override late final _Translations$profile$hi profile = _Translations$profile$hi._(_root);
+	@override late final _Translations$welcome$hi welcome = _Translations$welcome$hi._(_root);
 }
 
 // Path: chat
@@ -433,6 +434,29 @@ class _Translations$profile$hi extends Translations$profile$en {
 	@override late final _Translations$profile$genders$hi genders = _Translations$profile$genders$hi._(_root);
 }
 
+// Path: welcome
+class _Translations$welcome$hi extends Translations$welcome$en {
+	_Translations$welcome$hi._(TranslationsHi root) : this._root = root, super.internal(root);
+
+	final TranslationsHi _root; // ignore: unused_field
+
+	// Translations
+	@override String morning({required Object name}) => 'सुप्रभात, ${name}';
+	@override String afternoon({required Object name}) => 'नमस्ते, ${name}';
+	@override String evening({required Object name}) => 'शुभ संध्या, ${name}';
+	@override String get intro => 'बताइए आप क्या जाँच करवाना चाहते हैं, या आपकी तबीयत कैसी है। मैं सही टेस्ट सुझाऊँगा और घर से सैंपल कलेक्शन बुक करूँगा।';
+	@override String get bookFor => 'किसके लिए टेस्ट बुक करें';
+	@override String get forSelf => 'मेरे लिए टेस्ट सुझाएँ';
+	@override String forPerson({required Object relation, required Object name}) => 'मेरे ${relation}, ${name} के लिए टेस्ट सुझाएँ';
+	@override String get nextCollection => 'अगला कलेक्शन';
+	@override String get popular => 'लोकप्रिय पैकेज';
+	@override String get seeAll => 'सभी देखें';
+	@override String get how => 'यह कैसे काम करता है';
+	@override String get step1 => 'साथी को बताएँ क्या जाँचना है';
+	@override String get step2 => 'पैकेज और समय चुनें';
+	@override String get step3 => 'घर से सैंपल लिया जाएगा';
+}
+
 // Path: profile.relations
 class _Translations$profile$relations$hi extends Translations$profile$relations$en {
 	_Translations$profile$relations$hi._(TranslationsHi root) : this._root = root, super.internal(root);
@@ -656,6 +680,20 @@ extension on TranslationsHi {
 			'profile.genders.female' => 'महिला',
 			'profile.genders.male' => 'पुरुष',
 			'profile.genders.other' => 'अन्य',
+			'welcome.morning' => ({required Object name}) => 'सुप्रभात, ${name}',
+			'welcome.afternoon' => ({required Object name}) => 'नमस्ते, ${name}',
+			'welcome.evening' => ({required Object name}) => 'शुभ संध्या, ${name}',
+			'welcome.intro' => 'बताइए आप क्या जाँच करवाना चाहते हैं, या आपकी तबीयत कैसी है। मैं सही टेस्ट सुझाऊँगा और घर से सैंपल कलेक्शन बुक करूँगा।',
+			'welcome.bookFor' => 'किसके लिए टेस्ट बुक करें',
+			'welcome.forSelf' => 'मेरे लिए टेस्ट सुझाएँ',
+			'welcome.forPerson' => ({required Object relation, required Object name}) => 'मेरे ${relation}, ${name} के लिए टेस्ट सुझाएँ',
+			'welcome.nextCollection' => 'अगला कलेक्शन',
+			'welcome.popular' => 'लोकप्रिय पैकेज',
+			'welcome.seeAll' => 'सभी देखें',
+			'welcome.how' => 'यह कैसे काम करता है',
+			'welcome.step1' => 'साथी को बताएँ क्या जाँचना है',
+			'welcome.step2' => 'पैकेज और समय चुनें',
+			'welcome.step3' => 'घर से सैंपल लिया जाएगा',
 			_ => null,
 		};
 	}

@@ -175,6 +175,18 @@ class PackageCardView extends StatelessWidget {
   }
 }
 
+PackageSummary summaryOf(LabPackage p) => PackageSummary(
+  id: p.id,
+  name: p.name,
+  priceInr: p.priceInr,
+  mrpInr: p.mrpInr,
+  testCount: p.testCount,
+  topTests: p.tests.take(4).toList(),
+  fastingHours: p.fastingHours,
+  reportTatHours: p.reportTatHours,
+  matchReason: p.description,
+);
+
 Future<void> showPackageDetails(
   BuildContext context, {
   required PackageSummary pkg,

@@ -136,17 +136,7 @@ class _CatalogListState extends State<CatalogList> {
                       for (final (i, p) in shown.indexed)
                         PackageCardView(
                           details: p,
-                          pkg: PackageSummary(
-                            id: p.id,
-                            name: p.name,
-                            priceInr: p.priceInr,
-                            mrpInr: p.mrpInr,
-                            testCount: p.testCount,
-                            topTests: p.tests.take(4).toList(),
-                            fastingHours: p.fastingHours,
-                            reportTatHours: p.reportTatHours,
-                            matchReason: p.description,
-                          ),
+                          pkg: summaryOf(p),
                           onBook: flagged
                               ? null
                               : () {

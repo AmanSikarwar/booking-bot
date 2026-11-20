@@ -79,6 +79,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$nav$en nav = Translations$nav$en.internal(_root);
 	late final Translations$details$en details = Translations$details$en.internal(_root);
 	late final Translations$profile$en profile = Translations$profile$en.internal(_root);
+	late final Translations$welcome$en welcome = Translations$welcome$en.internal(_root);
 }
 
 // Path: chat
@@ -754,6 +755,57 @@ class Translations$profile$en {
 	late final Translations$profile$genders$en genders = Translations$profile$genders$en.internal(_root);
 }
 
+// Path: welcome
+class Translations$welcome$en {
+	Translations$welcome$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Good morning, {name}'
+	String morning({required Object name}) => 'Good morning, ${name}';
+
+	/// en: 'Good afternoon, {name}'
+	String afternoon({required Object name}) => 'Good afternoon, ${name}';
+
+	/// en: 'Good evening, {name}'
+	String evening({required Object name}) => 'Good evening, ${name}';
+
+	/// en: 'Tell me what you'd like to check, or how you've been feeling. I'll suggest the right tests and book a home sample collection.'
+	String get intro => 'Tell me what you\'d like to check, or how you\'ve been feeling. I\'ll suggest the right tests and book a home sample collection.';
+
+	/// en: 'Book a test for'
+	String get bookFor => 'Book a test for';
+
+	/// en: 'Suggest tests for me'
+	String get forSelf => 'Suggest tests for me';
+
+	/// en: 'Suggest tests for my {relation}, {name}'
+	String forPerson({required Object relation, required Object name}) => 'Suggest tests for my ${relation}, ${name}';
+
+	/// en: 'Next collection'
+	String get nextCollection => 'Next collection';
+
+	/// en: 'Popular packages'
+	String get popular => 'Popular packages';
+
+	/// en: 'See all'
+	String get seeAll => 'See all';
+
+	/// en: 'How it works'
+	String get how => 'How it works';
+
+	/// en: 'Tell Saathi what to check'
+	String get step1 => 'Tell Saathi what to check';
+
+	/// en: 'Pick a package and a slot'
+	String get step2 => 'Pick a package and a slot';
+
+	/// en: 'Sample collected at home'
+	String get step3 => 'Sample collected at home';
+}
+
 // Path: profile.relations
 class Translations$profile$relations$en {
 	Translations$profile$relations$en.internal(this._root);
@@ -1001,6 +1053,20 @@ extension on Translations {
 			'profile.genders.female' => 'Female',
 			'profile.genders.male' => 'Male',
 			'profile.genders.other' => 'Other',
+			'welcome.morning' => ({required Object name}) => 'Good morning, ${name}',
+			'welcome.afternoon' => ({required Object name}) => 'Good afternoon, ${name}',
+			'welcome.evening' => ({required Object name}) => 'Good evening, ${name}',
+			'welcome.intro' => 'Tell me what you\'d like to check, or how you\'ve been feeling. I\'ll suggest the right tests and book a home sample collection.',
+			'welcome.bookFor' => 'Book a test for',
+			'welcome.forSelf' => 'Suggest tests for me',
+			'welcome.forPerson' => ({required Object relation, required Object name}) => 'Suggest tests for my ${relation}, ${name}',
+			'welcome.nextCollection' => 'Next collection',
+			'welcome.popular' => 'Popular packages',
+			'welcome.seeAll' => 'See all',
+			'welcome.how' => 'How it works',
+			'welcome.step1' => 'Tell Saathi what to check',
+			'welcome.step2' => 'Pick a package and a slot',
+			'welcome.step3' => 'Sample collected at home',
 			_ => null,
 		};
 	}
