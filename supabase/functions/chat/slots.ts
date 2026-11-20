@@ -63,8 +63,13 @@ export async function idempotencyKey(parts: {
 
 const REF_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 
-export function bookingRef(key: string): string {
+export const REF_VARIANTS = 6;
+
+export function bookingRef(key: string, variant = 0): string {
   let ref = "LAB-";
-  for (let i = 0; i < 5; i++) ref += REF_ALPHABET[parseInt(key.slice(i * 2, i * 2 + 2), 16) % 32];
+  for (let i = 0; i < 5; i++) {
+    const at = variant * 10 + i * 2;
+    ref += REF_ALPHABET[parseInt(key.slice(at, at + 2), 16) % 32];
+  }
   return ref;
 }

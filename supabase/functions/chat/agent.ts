@@ -12,7 +12,16 @@ import {
 } from "./prompt.ts";
 import { ModelQuotaExceeded } from "./quota.ts";
 import type { RedFlagDetector } from "./redflag.ts";
-import { alternatives, bookableDates, bookingRef, idempotencyKey, isBookable, isFull, TIME_WINDOWS } from "./slots.ts";
+import {
+  alternatives,
+  bookableDates,
+  bookingRef,
+  idempotencyKey,
+  isBookable,
+  isFull,
+  REF_VARIANTS,
+  TIME_WINDOWS,
+} from "./slots.ts";
 import type { StreamEvent } from "./sse.ts";
 import type { Conversation, Store } from "./store.ts";
 import { validateBook, validateForm, validateSearch } from "./validate.ts";
@@ -395,18 +404,22 @@ export async function runTurn(
           });
           return { content: { status: "unavailable", alternatives: alts } };
         }
-        booking = await store.insertBooking({
-          booking_ref: bookingRef(key),
-          user_id: input.userId,
-          conversation_id: conv.id,
-          package_id: a.package_id,
-          slot_date: a.date,
-          time_window: a.time_window,
-          address_label: a.address_label,
-          patient_name: a.patient_name,
-          status: "confirmed",
-          idempotency_key: key,
-        });
+        for (let variant = 0; !booking && variant < REF_VARIANTS; variant++) {
+          const row = await store.insertBooking({
+            booking_ref: bookingRef(key, variant),
+            user_id: input.userId,
+            conversation_id: conv.id,
+            package_id: a.package_id,
+            slot_date: a.date,
+            time_window: a.time_window,
+            address_label: a.address_label,
+            patient_name: a.patient_name,
+            status: "confirmed",
+            idempotency_key: key,
+          });
+          if (row !== "ref_taken") booking = row;
+        }
+        if (!booking) throw new Error("no free booking reference");
       }
       record("booking_confirmed", {
         booking_ref: booking.booking_ref,

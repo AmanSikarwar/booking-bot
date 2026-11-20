@@ -120,6 +120,7 @@ export class MemoryStore implements Store {
   insertBooking(b: BookingRow) {
     const existing = this.bookings.find((x) => x.idempotency_key === b.idempotency_key);
     if (existing) return Promise.resolve(existing);
+    if (this.bookings.some((x) => x.booking_ref === b.booking_ref)) return Promise.resolve("ref_taken" as const);
     this.bookings.push(b);
     return Promise.resolve(b);
   }

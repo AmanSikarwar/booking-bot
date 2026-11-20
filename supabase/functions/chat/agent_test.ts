@@ -7,7 +7,7 @@ import { MockChat, MockDecider } from "./mocks.ts";
 import { parseProfile, systemPrompt } from "./prompt.ts";
 import { ModelQuotaExceeded } from "./quota.ts";
 import { RedFlagDetector } from "./redflag.ts";
-import { isFull, TIME_WINDOWS } from "./slots.ts";
+import { bookingRef, idempotencyKey, isFull, TIME_WINDOWS } from "./slots.ts";
 import type { StreamEvent } from "./sse.ts";
 import { MemoryStore } from "./testing.ts";
 
@@ -511,4 +511,31 @@ Deno.test("follow-ups (replay or in-progress poll) are recognised; new messages 
   assert(await isFollowUp(store, first), "a replay of a completed turn is free");
   assert(!(await isFollowUp(store, { ...first, userId: "intruder" })), "someone else's ids are not");
   assert(!(await isFollowUp(store, { ...first, clientMessageId: "m-new" })), "a new id in the same chat pays");
+});
+
+Deno.test("booking: a reference already taken by another booking falls through to the next variant", async () => {
+  const date = "2026-11-22";
+  const w = free(date);
+  const { deps, store } = setup({
+    chat: new ScriptedChat([[call("book_slot", bookArgs(date, w))], [text("Done.")]]),
+  });
+  const key = await idempotencyKey({
+    userId: "u1",
+    packageId: bookArgs(date, w).package_id,
+    date,
+    window: w,
+    patientName: bookArgs(date, w).patient_name,
+  });
+  store.bookings.push({
+    ...bookArgs(date, w),
+    booking_ref: bookingRef(key),
+    user_id: "u2",
+    conversation_id: "c2",
+    slot_date: date,
+    status: "confirmed",
+    idempotency_key: "someone-else",
+  } as never);
+  const { names, events } = await turn(deps, input("yes, book it"));
+  assert(names.includes("booking_confirmed"));
+  assertEquals(events.find((e) => e.event === "booking_confirmed")!.data.booking_ref, bookingRef(key, 1));
 });
