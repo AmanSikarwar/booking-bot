@@ -352,7 +352,7 @@ $LocalizedCopyWith<$Res> get matchReason {
 /// @nodoc
 mixin _$BookingInfo {
 
- String get bookingRef; String get packageId; Localized get packageName; String get date; String get timeWindow; String get addressLabel; String get patientName; String get status; int get fastingHours;
+ String get bookingRef; String get packageId; Localized get packageName; String get date; String get timeWindow; String get addressLabel; String get patientName; String get status; int get fastingHours; String? get addressLine;
 /// Create a copy of BookingInfo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -366,20 +366,20 @@ $BookingInfoCopyWith<BookingInfo> get copyWith => _$BookingInfoCopyWithImpl<Book
 @override
 bool operator ==(Object other) {
   final _this = this as BookingInfo;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BookingInfo&&(identical(other.bookingRef, _this.bookingRef) || other.bookingRef == _this.bookingRef)&&(identical(other.packageId, _this.packageId) || other.packageId == _this.packageId)&&(identical(other.packageName, _this.packageName) || other.packageName == _this.packageName)&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.timeWindow, _this.timeWindow) || other.timeWindow == _this.timeWindow)&&(identical(other.addressLabel, _this.addressLabel) || other.addressLabel == _this.addressLabel)&&(identical(other.patientName, _this.patientName) || other.patientName == _this.patientName)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.fastingHours, _this.fastingHours) || other.fastingHours == _this.fastingHours));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BookingInfo&&(identical(other.bookingRef, _this.bookingRef) || other.bookingRef == _this.bookingRef)&&(identical(other.packageId, _this.packageId) || other.packageId == _this.packageId)&&(identical(other.packageName, _this.packageName) || other.packageName == _this.packageName)&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.timeWindow, _this.timeWindow) || other.timeWindow == _this.timeWindow)&&(identical(other.addressLabel, _this.addressLabel) || other.addressLabel == _this.addressLabel)&&(identical(other.patientName, _this.patientName) || other.patientName == _this.patientName)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.fastingHours, _this.fastingHours) || other.fastingHours == _this.fastingHours)&&(identical(other.addressLine, _this.addressLine) || other.addressLine == _this.addressLine));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as BookingInfo;
-  return Object.hash(runtimeType,_this.bookingRef,_this.packageId,_this.packageName,_this.date,_this.timeWindow,_this.addressLabel,_this.patientName,_this.status,_this.fastingHours);
+  return Object.hash(runtimeType,_this.bookingRef,_this.packageId,_this.packageName,_this.date,_this.timeWindow,_this.addressLabel,_this.patientName,_this.status,_this.fastingHours,_this.addressLine);
 }
 
 @override
 String toString() {
   final _this = this as BookingInfo;
-  return 'BookingInfo(bookingRef: ${_this.bookingRef}, packageId: ${_this.packageId}, packageName: ${_this.packageName}, date: ${_this.date}, timeWindow: ${_this.timeWindow}, addressLabel: ${_this.addressLabel}, patientName: ${_this.patientName}, status: ${_this.status}, fastingHours: ${_this.fastingHours})';
+  return 'BookingInfo(bookingRef: ${_this.bookingRef}, packageId: ${_this.packageId}, packageName: ${_this.packageName}, date: ${_this.date}, timeWindow: ${_this.timeWindow}, addressLabel: ${_this.addressLabel}, patientName: ${_this.patientName}, status: ${_this.status}, fastingHours: ${_this.fastingHours}, addressLine: ${_this.addressLine})';
 }
 
 
@@ -390,7 +390,7 @@ abstract mixin class $BookingInfoCopyWith<$Res>  {
   factory $BookingInfoCopyWith(BookingInfo value, $Res Function(BookingInfo) _then) = _$BookingInfoCopyWithImpl;
 @useResult
 $Res call({
- String bookingRef, String packageId, Localized packageName, String date, String timeWindow, String addressLabel, String patientName, String status, int fastingHours
+ String bookingRef, String packageId, Localized packageName, String date, String timeWindow, String addressLabel, String patientName, String status, int fastingHours, String? addressLine
 });
 
 
@@ -407,7 +407,7 @@ class _$BookingInfoCopyWithImpl<$Res>
 
 /// Create a copy of BookingInfo
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? bookingRef = null,Object? packageId = null,Object? packageName = null,Object? date = null,Object? timeWindow = null,Object? addressLabel = null,Object? patientName = null,Object? status = null,Object? fastingHours = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? bookingRef = null,Object? packageId = null,Object? packageName = null,Object? date = null,Object? timeWindow = null,Object? addressLabel = null,Object? patientName = null,Object? status = null,Object? fastingHours = null,Object? addressLine = freezed,}) {
   return _then(BookingInfo(
 bookingRef: null == bookingRef ? _self.bookingRef : bookingRef // ignore: cast_nullable_to_non_nullable
 as String,packageId: null == packageId ? _self.packageId : packageId // ignore: cast_nullable_to_non_nullable
@@ -418,7 +418,8 @@ as String,addressLabel: null == addressLabel ? _self.addressLabel : addressLabel
 as String,patientName: null == patientName ? _self.patientName : patientName // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,fastingHours: null == fastingHours ? _self.fastingHours : fastingHours // ignore: cast_nullable_to_non_nullable
-as int,
+as int,addressLine: freezed == addressLine ? _self.addressLine : addressLine // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 /// Create a copy of BookingInfo
@@ -512,10 +513,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String bookingRef,  String packageId,  Localized packageName,  String date,  String timeWindow,  String addressLabel,  String patientName,  String status,  int fastingHours)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String bookingRef,  String packageId,  Localized packageName,  String date,  String timeWindow,  String addressLabel,  String patientName,  String status,  int fastingHours,  String? addressLine)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BookingInfo() when $default != null:
-return $default(_that.bookingRef,_that.packageId,_that.packageName,_that.date,_that.timeWindow,_that.addressLabel,_that.patientName,_that.status,_that.fastingHours);case _:
+return $default(_that.bookingRef,_that.packageId,_that.packageName,_that.date,_that.timeWindow,_that.addressLabel,_that.patientName,_that.status,_that.fastingHours,_that.addressLine);case _:
   return orElse();
 
 }
@@ -533,10 +534,10 @@ return $default(_that.bookingRef,_that.packageId,_that.packageName,_that.date,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String bookingRef,  String packageId,  Localized packageName,  String date,  String timeWindow,  String addressLabel,  String patientName,  String status,  int fastingHours)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String bookingRef,  String packageId,  Localized packageName,  String date,  String timeWindow,  String addressLabel,  String patientName,  String status,  int fastingHours,  String? addressLine)  $default,) {final _that = this;
 switch (_that) {
 case _BookingInfo():
-return $default(_that.bookingRef,_that.packageId,_that.packageName,_that.date,_that.timeWindow,_that.addressLabel,_that.patientName,_that.status,_that.fastingHours);case _:
+return $default(_that.bookingRef,_that.packageId,_that.packageName,_that.date,_that.timeWindow,_that.addressLabel,_that.patientName,_that.status,_that.fastingHours,_that.addressLine);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -553,10 +554,10 @@ return $default(_that.bookingRef,_that.packageId,_that.packageName,_that.date,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String bookingRef,  String packageId,  Localized packageName,  String date,  String timeWindow,  String addressLabel,  String patientName,  String status,  int fastingHours)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String bookingRef,  String packageId,  Localized packageName,  String date,  String timeWindow,  String addressLabel,  String patientName,  String status,  int fastingHours,  String? addressLine)?  $default,) {final _that = this;
 switch (_that) {
 case _BookingInfo() when $default != null:
-return $default(_that.bookingRef,_that.packageId,_that.packageName,_that.date,_that.timeWindow,_that.addressLabel,_that.patientName,_that.status,_that.fastingHours);case _:
+return $default(_that.bookingRef,_that.packageId,_that.packageName,_that.date,_that.timeWindow,_that.addressLabel,_that.patientName,_that.status,_that.fastingHours,_that.addressLine);case _:
   return null;
 
 }
@@ -568,7 +569,7 @@ return $default(_that.bookingRef,_that.packageId,_that.packageName,_that.date,_t
 @JsonSerializable()
 
 class _BookingInfo implements BookingInfo {
-  const _BookingInfo({required this.bookingRef, required this.packageId, required this.packageName, required this.date, required this.timeWindow, required this.addressLabel, required this.patientName, required this.status, this.fastingHours = 0});
+  const _BookingInfo({required this.bookingRef, required this.packageId, required this.packageName, required this.date, required this.timeWindow, required this.addressLabel, required this.patientName, required this.status, this.fastingHours = 0, this.addressLine});
   factory _BookingInfo.fromJson(Map<String, dynamic> json) => _$BookingInfoFromJson(json);
 
 @override final  String bookingRef;
@@ -580,6 +581,7 @@ class _BookingInfo implements BookingInfo {
 @override final  String patientName;
 @override final  String status;
 @override@JsonKey() final  int fastingHours;
+@override final  String? addressLine;
 
 /// Create a copy of BookingInfo
 /// with the given fields replaced by the non-null parameter values.
@@ -594,18 +596,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BookingInfo&&(identical(other.bookingRef, bookingRef) || other.bookingRef == bookingRef)&&(identical(other.packageId, packageId) || other.packageId == packageId)&&(identical(other.packageName, packageName) || other.packageName == packageName)&&(identical(other.date, date) || other.date == date)&&(identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow)&&(identical(other.addressLabel, addressLabel) || other.addressLabel == addressLabel)&&(identical(other.patientName, patientName) || other.patientName == patientName)&&(identical(other.status, status) || other.status == status)&&(identical(other.fastingHours, fastingHours) || other.fastingHours == fastingHours));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BookingInfo&&(identical(other.bookingRef, bookingRef) || other.bookingRef == bookingRef)&&(identical(other.packageId, packageId) || other.packageId == packageId)&&(identical(other.packageName, packageName) || other.packageName == packageName)&&(identical(other.date, date) || other.date == date)&&(identical(other.timeWindow, timeWindow) || other.timeWindow == timeWindow)&&(identical(other.addressLabel, addressLabel) || other.addressLabel == addressLabel)&&(identical(other.patientName, patientName) || other.patientName == patientName)&&(identical(other.status, status) || other.status == status)&&(identical(other.fastingHours, fastingHours) || other.fastingHours == fastingHours)&&(identical(other.addressLine, addressLine) || other.addressLine == addressLine));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,bookingRef,packageId,packageName,date,timeWindow,addressLabel,patientName,status,fastingHours);
+    return Object.hash(runtimeType,bookingRef,packageId,packageName,date,timeWindow,addressLabel,patientName,status,fastingHours,addressLine);
 }
 
 @override
 String toString() {
-    return 'BookingInfo(bookingRef: $bookingRef, packageId: $packageId, packageName: $packageName, date: $date, timeWindow: $timeWindow, addressLabel: $addressLabel, patientName: $patientName, status: $status, fastingHours: $fastingHours)';
+    return 'BookingInfo(bookingRef: $bookingRef, packageId: $packageId, packageName: $packageName, date: $date, timeWindow: $timeWindow, addressLabel: $addressLabel, patientName: $patientName, status: $status, fastingHours: $fastingHours, addressLine: $addressLine)';
 }
 
 
@@ -616,7 +618,7 @@ abstract mixin class _$BookingInfoCopyWith<$Res> implements $BookingInfoCopyWith
   factory _$BookingInfoCopyWith(_BookingInfo value, $Res Function(_BookingInfo) _then) = __$BookingInfoCopyWithImpl;
 @override @useResult
 $Res call({
- String bookingRef, String packageId, Localized packageName, String date, String timeWindow, String addressLabel, String patientName, String status, int fastingHours
+ String bookingRef, String packageId, Localized packageName, String date, String timeWindow, String addressLabel, String patientName, String status, int fastingHours, String? addressLine
 });
 
 
@@ -633,7 +635,7 @@ class __$BookingInfoCopyWithImpl<$Res>
 
 /// Create a copy of BookingInfo
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? bookingRef = null,Object? packageId = null,Object? packageName = null,Object? date = null,Object? timeWindow = null,Object? addressLabel = null,Object? patientName = null,Object? status = null,Object? fastingHours = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? bookingRef = null,Object? packageId = null,Object? packageName = null,Object? date = null,Object? timeWindow = null,Object? addressLabel = null,Object? patientName = null,Object? status = null,Object? fastingHours = null,Object? addressLine = freezed,}) {
   return _then(_BookingInfo(
 bookingRef: null == bookingRef ? _self.bookingRef : bookingRef // ignore: cast_nullable_to_non_nullable
 as String,packageId: null == packageId ? _self.packageId : packageId // ignore: cast_nullable_to_non_nullable
@@ -644,7 +646,8 @@ as String,addressLabel: null == addressLabel ? _self.addressLabel : addressLabel
 as String,patientName: null == patientName ? _self.patientName : patientName // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as String,fastingHours: null == fastingHours ? _self.fastingHours : fastingHours // ignore: cast_nullable_to_non_nullable
-as int,
+as int,addressLine: freezed == addressLine ? _self.addressLine : addressLine // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

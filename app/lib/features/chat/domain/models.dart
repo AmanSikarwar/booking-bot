@@ -34,6 +34,7 @@ abstract class BookingInfo with _$BookingInfo {
     required String patientName,
     required String status,
     @Default(0) int fastingHours,
+    String? addressLine,
   }) = _BookingInfo;
 
   factory BookingInfo.fromJson(Map<String, Object?> json) => _$BookingInfoFromJson(json);

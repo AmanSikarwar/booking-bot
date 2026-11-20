@@ -88,6 +88,7 @@ class BookingsList extends StatelessWidget {
                           patientName: b.patientName,
                           status: b.status,
                           fastingHours: fasting[b.packageId] ?? 0,
+                          addressLine: b.addressLine,
                         ),
                       ).enter(context, delay: Motion.stagger * min(i, 8)),
                   ],

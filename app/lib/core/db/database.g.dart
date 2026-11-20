@@ -1225,6 +1225,15 @@ class $BookingsTable extends Bookings with TableInfo<$BookingsTable, Booking> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _addressLineMeta = const VerificationMeta('addressLine');
+  @override
+  late final GeneratedColumn<String> addressLine = GeneratedColumn<String>(
+    'address_line',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
@@ -1254,6 +1263,7 @@ class $BookingsTable extends Bookings with TableInfo<$BookingsTable, Booking> {
     timeWindow,
     addressLabel,
     patientName,
+    addressLine,
     status,
     createdAt,
   ];
@@ -1338,6 +1348,12 @@ class $BookingsTable extends Bookings with TableInfo<$BookingsTable, Booking> {
     } else if (isInserting) {
       context.missing(_patientNameMeta);
     }
+    if (data.containsKey('address_line')) {
+      context.handle(
+        _addressLineMeta,
+        addressLine.isAcceptableOrUnknown(data['address_line']!, _addressLineMeta),
+      );
+    }
     if (data.containsKey('status')) {
       context.handle(_statusMeta, status.isAcceptableOrUnknown(data['status']!, _statusMeta));
     } else if (isInserting) {
@@ -1396,6 +1412,10 @@ class $BookingsTable extends Bookings with TableInfo<$BookingsTable, Booking> {
         DriftSqlType.string,
         data['${effectivePrefix}patient_name'],
       )!,
+      addressLine: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}address_line'],
+      ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}status'],
@@ -1423,6 +1443,7 @@ class Booking extends DataClass implements Insertable<Booking> {
   final String timeWindow;
   final String addressLabel;
   final String patientName;
+  final String? addressLine;
   final String status;
   final DateTime createdAt;
   const Booking({
@@ -1435,6 +1456,7 @@ class Booking extends DataClass implements Insertable<Booking> {
     required this.timeWindow,
     required this.addressLabel,
     required this.patientName,
+    this.addressLine,
     required this.status,
     required this.createdAt,
   });
@@ -1450,6 +1472,9 @@ class Booking extends DataClass implements Insertable<Booking> {
     map['time_window'] = Variable<String>(timeWindow);
     map['address_label'] = Variable<String>(addressLabel);
     map['patient_name'] = Variable<String>(patientName);
+    if (!nullToAbsent || addressLine != null) {
+      map['address_line'] = Variable<String>(addressLine);
+    }
     map['status'] = Variable<String>(status);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
@@ -1466,6 +1491,7 @@ class Booking extends DataClass implements Insertable<Booking> {
       timeWindow: Value(timeWindow),
       addressLabel: Value(addressLabel),
       patientName: Value(patientName),
+      addressLine: addressLine == null && nullToAbsent ? const Value.absent() : Value(addressLine),
       status: Value(status),
       createdAt: Value(createdAt),
     );
@@ -1483,6 +1509,7 @@ class Booking extends DataClass implements Insertable<Booking> {
       timeWindow: serializer.fromJson<String>(json['timeWindow']),
       addressLabel: serializer.fromJson<String>(json['addressLabel']),
       patientName: serializer.fromJson<String>(json['patientName']),
+      addressLine: serializer.fromJson<String?>(json['addressLine']),
       status: serializer.fromJson<String>(json['status']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
@@ -1500,6 +1527,7 @@ class Booking extends DataClass implements Insertable<Booking> {
       'timeWindow': serializer.toJson<String>(timeWindow),
       'addressLabel': serializer.toJson<String>(addressLabel),
       'patientName': serializer.toJson<String>(patientName),
+      'addressLine': serializer.toJson<String?>(addressLine),
       'status': serializer.toJson<String>(status),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
@@ -1515,6 +1543,7 @@ class Booking extends DataClass implements Insertable<Booking> {
     String? timeWindow,
     String? addressLabel,
     String? patientName,
+    Value<String?> addressLine = const Value.absent(),
     String? status,
     DateTime? createdAt,
   }) => Booking(
@@ -1527,6 +1556,7 @@ class Booking extends DataClass implements Insertable<Booking> {
     timeWindow: timeWindow ?? this.timeWindow,
     addressLabel: addressLabel ?? this.addressLabel,
     patientName: patientName ?? this.patientName,
+    addressLine: addressLine.present ? addressLine.value : this.addressLine,
     status: status ?? this.status,
     createdAt: createdAt ?? this.createdAt,
   );
@@ -1541,6 +1571,7 @@ class Booking extends DataClass implements Insertable<Booking> {
       timeWindow: data.timeWindow.present ? data.timeWindow.value : this.timeWindow,
       addressLabel: data.addressLabel.present ? data.addressLabel.value : this.addressLabel,
       patientName: data.patientName.present ? data.patientName.value : this.patientName,
+      addressLine: data.addressLine.present ? data.addressLine.value : this.addressLine,
       status: data.status.present ? data.status.value : this.status,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
@@ -1558,6 +1589,7 @@ class Booking extends DataClass implements Insertable<Booking> {
           ..write('timeWindow: $timeWindow, ')
           ..write('addressLabel: $addressLabel, ')
           ..write('patientName: $patientName, ')
+          ..write('addressLine: $addressLine, ')
           ..write('status: $status, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -1575,6 +1607,7 @@ class Booking extends DataClass implements Insertable<Booking> {
     timeWindow,
     addressLabel,
     patientName,
+    addressLine,
     status,
     createdAt,
   );
@@ -1591,6 +1624,7 @@ class Booking extends DataClass implements Insertable<Booking> {
           other.timeWindow == this.timeWindow &&
           other.addressLabel == this.addressLabel &&
           other.patientName == this.patientName &&
+          other.addressLine == this.addressLine &&
           other.status == this.status &&
           other.createdAt == this.createdAt);
 }
@@ -1605,6 +1639,7 @@ class BookingsCompanion extends UpdateCompanion<Booking> {
   final Value<String> timeWindow;
   final Value<String> addressLabel;
   final Value<String> patientName;
+  final Value<String?> addressLine;
   final Value<String> status;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
@@ -1618,6 +1653,7 @@ class BookingsCompanion extends UpdateCompanion<Booking> {
     this.timeWindow = const Value.absent(),
     this.addressLabel = const Value.absent(),
     this.patientName = const Value.absent(),
+    this.addressLine = const Value.absent(),
     this.status = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1632,6 +1668,7 @@ class BookingsCompanion extends UpdateCompanion<Booking> {
     required String timeWindow,
     required String addressLabel,
     required String patientName,
+    this.addressLine = const Value.absent(),
     required String status,
     required DateTime createdAt,
     this.rowid = const Value.absent(),
@@ -1656,6 +1693,7 @@ class BookingsCompanion extends UpdateCompanion<Booking> {
     Expression<String>? timeWindow,
     Expression<String>? addressLabel,
     Expression<String>? patientName,
+    Expression<String>? addressLine,
     Expression<String>? status,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
@@ -1670,6 +1708,7 @@ class BookingsCompanion extends UpdateCompanion<Booking> {
       if (timeWindow != null) 'time_window': timeWindow,
       if (addressLabel != null) 'address_label': addressLabel,
       if (patientName != null) 'patient_name': patientName,
+      if (addressLine != null) 'address_line': addressLine,
       if (status != null) 'status': status,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
@@ -1686,6 +1725,7 @@ class BookingsCompanion extends UpdateCompanion<Booking> {
     Value<String>? timeWindow,
     Value<String>? addressLabel,
     Value<String>? patientName,
+    Value<String?>? addressLine,
     Value<String>? status,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
@@ -1700,6 +1740,7 @@ class BookingsCompanion extends UpdateCompanion<Booking> {
       timeWindow: timeWindow ?? this.timeWindow,
       addressLabel: addressLabel ?? this.addressLabel,
       patientName: patientName ?? this.patientName,
+      addressLine: addressLine ?? this.addressLine,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
@@ -1736,6 +1777,9 @@ class BookingsCompanion extends UpdateCompanion<Booking> {
     if (patientName.present) {
       map['patient_name'] = Variable<String>(patientName.value);
     }
+    if (addressLine.present) {
+      map['address_line'] = Variable<String>(addressLine.value);
+    }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
@@ -1760,6 +1804,7 @@ class BookingsCompanion extends UpdateCompanion<Booking> {
           ..write('timeWindow: $timeWindow, ')
           ..write('addressLabel: $addressLabel, ')
           ..write('patientName: $patientName, ')
+          ..write('addressLine: $addressLine, ')
           ..write('status: $status, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
@@ -2689,6 +2734,7 @@ typedef $$BookingsTableCreateCompanionBuilder = BookingsCompanion Function({
   required String timeWindow,
   required String addressLabel,
   required String patientName,
+  Value<String?> addressLine,
   required String status,
   required DateTime createdAt,
   Value<int> rowid,
@@ -2703,6 +2749,7 @@ typedef $$BookingsTableUpdateCompanionBuilder = BookingsCompanion Function({
   Value<String> timeWindow,
   Value<String> addressLabel,
   Value<String> patientName,
+  Value<String?> addressLine,
   Value<String> status,
   Value<DateTime> createdAt,
   Value<int> rowid,
@@ -2742,6 +2789,9 @@ class $$BookingsTableFilterComposer extends Composer<_$AppDatabase, $BookingsTab
 
   ColumnFilters<String> get patientName =>
       $composableBuilder(column: $table.patientName, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get addressLine =>
+      $composableBuilder(column: $table.addressLine, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => ColumnFilters(column));
@@ -2791,6 +2841,9 @@ class $$BookingsTableOrderingComposer extends Composer<_$AppDatabase, $BookingsT
   ColumnOrderings<String> get patientName =>
       $composableBuilder(column: $table.patientName, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get addressLine =>
+      $composableBuilder(column: $table.addressLine, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => ColumnOrderings(column));
 
@@ -2832,6 +2885,9 @@ class $$BookingsTableAnnotationComposer extends Composer<_$AppDatabase, $Booking
 
   GeneratedColumn<String> get patientName =>
       $composableBuilder(column: $table.patientName, builder: (column) => column);
+
+  GeneratedColumn<String> get addressLine =>
+      $composableBuilder(column: $table.addressLine, builder: (column) => column);
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
@@ -2875,6 +2931,7 @@ class $$BookingsTableTableManager
                 Value<String> timeWindow = const Value.absent(),
                 Value<String> addressLabel = const Value.absent(),
                 Value<String> patientName = const Value.absent(),
+                Value<String?> addressLine = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -2888,6 +2945,7 @@ class $$BookingsTableTableManager
                 timeWindow: timeWindow,
                 addressLabel: addressLabel,
                 patientName: patientName,
+                addressLine: addressLine,
                 status: status,
                 createdAt: createdAt,
                 rowid: rowid,
@@ -2903,6 +2961,7 @@ class $$BookingsTableTableManager
                 required String timeWindow,
                 required String addressLabel,
                 required String patientName,
+                Value<String?> addressLine = const Value.absent(),
                 required String status,
                 required DateTime createdAt,
                 Value<int> rowid = const Value.absent(),
@@ -2916,6 +2975,7 @@ class $$BookingsTableTableManager
                 timeWindow: timeWindow,
                 addressLabel: addressLabel,
                 patientName: patientName,
+                addressLine: addressLine,
                 status: status,
                 createdAt: createdAt,
                 rowid: rowid,

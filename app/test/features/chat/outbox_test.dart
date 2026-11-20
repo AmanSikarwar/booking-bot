@@ -10,6 +10,7 @@ import 'package:saathi/features/chat/data/chat_api.dart';
 import 'package:saathi/features/chat/data/outbox.dart';
 import 'package:saathi/features/chat/domain/chat_event.dart';
 import 'package:saathi/features/chat/domain/models.dart';
+import 'package:saathi/features/profile/profile.dart';
 import 'package:saathi/features/profile/profile_repository.dart';
 import 'package:uuid/uuid.dart';
 
@@ -112,6 +113,26 @@ void main() {
     expect(r.cards.single, isA<BookingCardData>());
     expect((await db.watchBookings().first).single.bookingRef, 'LAB-7Q3K9');
     expect(requests.single.clientMessageId, 'm1');
+  });
+
+  test('a booking keeps the full address it was made at, even after the profile changes', () async {
+    await queue('m1', 'yes book it');
+    reply([
+      const ChatEvent.ack(replay: false),
+      const ChatEvent.card(ChatCard.booking(booking)),
+      const ChatEvent.done(),
+    ]);
+    await outbox.drainOnce();
+    const home = 'Flat 302, Sunrise Apartments, Sector 14, Gurugram 122001';
+    final card = (await msg(replyIdFor('m1'))).cards.single as BookingCardData;
+    expect(card.booking.addressLine, home);
+    expect((await db.watchBookings().first).single.addressLine, home);
+
+    await ProfileRepository(
+      db,
+      const Uuid(),
+    ).saveAddress(sampleProfile.addresses.first.copyWith(line1: 'New flat'));
+    expect((await db.watchBookings().first).single.addressLine, home);
   });
 
   test('tool activity survives its result card until the visible reply starts', () async {

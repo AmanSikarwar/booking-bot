@@ -251,4 +251,19 @@ void main() {
     expect(find.text('Father, 64 yrs'), findsOneWidget);
     expect(find.text('House 21, Block C, Sector 9, Gurugram 122001'), findsOneWidget);
   });
+
+  testWidgets('booking card shows the address recorded at booking time over the current profile', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      BookingCardView(
+        booking: booking.copyWith(addressLabel: 'Home', addressLine: 'Old flat, Gurugram 122001'),
+        onViewAll: null,
+        profile: sampleProfile,
+      ),
+    );
+    expect(find.text('Old flat, Gurugram 122001'), findsOneWidget);
+    expect(find.textContaining('Sunrise Apartments'), findsNothing);
+  });
 }

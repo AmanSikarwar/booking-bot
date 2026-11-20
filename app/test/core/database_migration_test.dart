@@ -4,9 +4,11 @@ import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:saathi/core/db/database.dart';
+import 'package:saathi/features/catalog/package.dart';
+import 'package:saathi/features/chat/domain/models.dart';
 
 void main() {
-  test('v1 database upgrades to v3, keeps messages and back-fills chat titles', () async {
+  test('v1 database upgrades to v4, keeps messages and back-fills chat titles', () async {
     final dir = await Directory.systemTemp.createTemp('saathi_db');
     addTearDown(() => dir.delete(recursive: true));
     final file = File('${dir.path}/saathi.sqlite');
@@ -26,6 +28,7 @@ void main() {
     );
     await v2.customStatement('ALTER TABLE messages DROP COLUMN display');
     await v2.customStatement('ALTER TABLE conversations DROP COLUMN title');
+    await v2.customStatement('ALTER TABLE bookings DROP COLUMN address_line');
     await v2.customStatement('PRAGMA user_version = 1');
     await v2.close();
 
@@ -36,5 +39,21 @@ void main() {
     await upgraded.patchMessage('m1', const MessagesCompanion(display: Value('Sugar test')));
     expect((await upgraded.message('m1'))!.display, 'Sugar test');
     expect((await upgraded.watchConversations().first).single.title, 'sugar test');
+    await upgraded.saveBooking(
+      'c1',
+      const BookingInfo(
+        bookingRef: 'LAB-1',
+        packageId: 'p',
+        packageName: Localized(en: 'P', hi: 'P'),
+        date: '2026-11-21',
+        timeWindow: '07-09',
+        addressLabel: 'Home',
+        patientName: 'Priya',
+        status: 'confirmed',
+        addressLine: 'Flat 302',
+      ),
+      now,
+    );
+    expect((await upgraded.watchBookings().first).single.addressLine, 'Flat 302');
   });
 }

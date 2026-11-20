@@ -9,6 +9,7 @@ import '../../../core/connectivity/connectivity_service.dart';
 import '../../../core/db/database.dart';
 import '../domain/chat_event.dart';
 import '../domain/models.dart';
+import '../../profile/profile.dart';
 import '../../profile/profile_repository.dart';
 import 'chat_api.dart';
 
@@ -128,7 +129,8 @@ class Outbox {
             );
           case ToolStartedEvent(:final tool):
             await _db.patchMessage(replyId, MessagesCompanion(activeTool: Value(tool)));
-          case CardEvent(:final card):
+          case CardEvent(card: final received):
+            final card = await _withAddressLine(received);
             cards = [...cards, card];
             // A tool result may arrive in the same frame as its activity event.
             await _db.patchMessage(replyId, MessagesCompanion(cards: Value(cards)));
@@ -231,6 +233,13 @@ class Outbox {
       error: Value(code),
     ),
   );
+
+  Future<ChatCard> _withAddressLine(ChatCard card) async {
+    if (card is! BookingCardData || card.booking.addressLine != null) return card;
+    final saved = (await _profile.current()).addressLabelled(card.booking.addressLabel);
+    if (saved == null) return card;
+    return ChatCard.booking(card.booking.copyWith(addressLine: fullAddress(saved)));
+  }
 
   Future<void> _markIncomplete(String replyId) async {
     final reply = await _db.message(replyId);

@@ -40,6 +40,7 @@ _BookingInfo _$BookingInfoFromJson(Map<String, dynamic> json) => _BookingInfo(
   patientName: json['patient_name'] as String,
   status: json['status'] as String,
   fastingHours: (json['fasting_hours'] as num?)?.toInt() ?? 0,
+  addressLine: json['address_line'] as String?,
 );
 
 Map<String, dynamic> _$BookingInfoToJson(_BookingInfo instance) => <String, dynamic>{
@@ -52,6 +53,7 @@ Map<String, dynamic> _$BookingInfoToJson(_BookingInfo instance) => <String, dyna
   'patient_name': instance.patientName,
   'status': instance.status,
   'fasting_hours': instance.fastingHours,
+  'address_line': instance.addressLine,
 };
 
 _Slot _$SlotFromJson(Map<String, dynamic> json) =>

@@ -156,10 +156,12 @@ class BookingCardView extends StatelessWidget {
                 _InfoRow(
                   Icons.place_outlined,
                   b.addressLabel,
-                  detail: switch (profile?.addressLabelled(b.addressLabel)) {
-                    final a? => fullAddress(a),
-                    null => null,
-                  },
+                  detail:
+                      b.addressLine ??
+                      switch (profile?.addressLabelled(b.addressLabel)) {
+                        final a? => fullAddress(a),
+                        null => null,
+                      },
                 ),
                 _InfoRow(
                   Icons.person_outline,

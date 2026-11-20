@@ -68,6 +68,7 @@ class Bookings extends Table {
   TextColumn get timeWindow => text()();
   TextColumn get addressLabel => text()();
   TextColumn get patientName => text()();
+  TextColumn get addressLine => text().nullable()();
   TextColumn get status => text()();
   DateTimeColumn get createdAt => dateTime()();
 
@@ -101,7 +102,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -116,6 +117,7 @@ class AppDatabase extends _$AppDatabase {
             ORDER BY messages.created_at LIMIT 1
           )''');
       }
+      if (from < 4) await m.addColumn(bookings, bookings.addressLine);
     },
   );
 
@@ -239,6 +241,7 @@ class AppDatabase extends _$AppDatabase {
           timeWindow: b.timeWindow,
           addressLabel: b.addressLabel,
           patientName: b.patientName,
+          addressLine: Value(b.addressLine),
           status: b.status,
           createdAt: now,
         ),
