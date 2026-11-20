@@ -141,6 +141,8 @@ See the [API contract](PLAN.md#10-api-contract) for payloads and HTTP status cod
 - **OpenRouter Chat Completions:** The app reserves a separate daily allowance of 200 outbound attempts before sending them, including tool follow-ups and retries. Free Decision API triage uses its own upstream quota and can still run for admitted requests when the chat completion budget is exhausted. When the chat budget runs out during a stream, the app queues the turn unless a tool has already produced a usable card.
 - Both daily limits reset at **00:00 UTC (05:30 IST)**. The request cap controls volume. Actual spend also depends on the model and token usage.
 
+See the [cost analysis](costs.md) for recorded model spend, monthly estimates, and hosting allowances.
+
 ## Safety and offline behavior
 
 ### Safety checks
