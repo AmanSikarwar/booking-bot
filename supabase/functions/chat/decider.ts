@@ -1,6 +1,5 @@
 import thresholds from "./_shared/thresholds.json" with { type: "json" };
 import type { Locale } from "./catalog.ts";
-import { ModelQuotaExceeded } from "./quota.ts";
 
 export type Probs = Record<"emergency" | "mental_health_crisis" | "routine", number>;
 
@@ -14,8 +13,7 @@ export type Triage =
     outputTokens: number;
     costUsd: number;
   }
-  | { ok: false; reason: "timeout" | "rate_limited" | "upstream_error" | "malformed" | "refusal"; latencyMs: number }
-  | { ok: false; reason: "quota_exhausted"; retryAfter: number; latencyMs: number };
+  | { ok: false; reason: "timeout" | "rate_limited" | "upstream_error" | "malformed" | "refusal"; latencyMs: number };
 
 export interface Decider {
   readonly model: string;
@@ -68,9 +66,6 @@ export class OpenRouterDecider implements Decider {
         signal: AbortSignal.timeout(this.timeoutMs),
       });
     } catch (e) {
-      if (e instanceof ModelQuotaExceeded) {
-        return { ok: false, reason: "quota_exhausted", retryAfter: e.retryAfter, latencyMs: elapsed() };
-      }
       const timeout = e instanceof DOMException && (e.name === "TimeoutError" || e.name === "AbortError");
       return { ok: false, reason: timeout ? "timeout" : "upstream_error", latencyMs: elapsed() };
     }

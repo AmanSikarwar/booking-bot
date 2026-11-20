@@ -142,7 +142,6 @@ export async function runTurn(
     else record("crisis_support", { category, helplines: HELPLINES.crisis });
     await finish("");
   };
-  const quotaExhausted = (retryAfter: number) => fail("quota_exhausted", "daily model quota reached", true, retryAfter);
 
   emit({ event: "ack", data: { client_message_id: input.clientMessageId, replay: false } });
 
@@ -162,10 +161,6 @@ export async function runTurn(
     if (input.kind === "text") {
       const recent = await store.recentUserTexts(conv.id, 3);
       const t = await deps.decider.triage(recent.length ? recent : [input.text], locale);
-      if (!t.ok && t.reason === "quota_exhausted") {
-        if (hit) return await keywordFloor("decider_unavailable");
-        return await quotaExhausted(t.retryAfter);
-      }
       if (t.ok) {
         await log({
           kind: "decision",
@@ -305,7 +300,7 @@ export async function runTurn(
     await finish(text);
   } catch (e) {
     if (e instanceof ModelQuotaExceeded) {
-      await quotaExhausted(e.retryAfter);
+      await fail("quota_exhausted", "daily model quota reached", true, e.retryAfter);
     } else if (e instanceof LlmError && e.code === "rate_limited") {
       await fail("rate_limited", "the model is busy", true, e.retryAfter);
     } else {

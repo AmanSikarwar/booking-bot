@@ -34,7 +34,6 @@ const deps: Deps = {
   decider: mock ? new MockDecider() : new OpenRouterDecider(
     env("OPENROUTER_API_KEY"),
     env("DECIDER_MODEL") || "perplexity/pplx-decider-flash-v1.3:free",
-    modelFetch,
   ),
   detector: new RedFlagDetector(),
   catalog: new Catalog(),

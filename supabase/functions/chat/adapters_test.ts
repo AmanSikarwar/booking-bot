@@ -72,7 +72,7 @@ Deno.test("chat adapter: 5xx retried once then fails", async () => {
   assertEquals([err.code, calls], ["upstream_error", 2]);
 });
 
-Deno.test("model budget blocks upstream retries and is shared with triage", async () => {
+Deno.test("model budget blocks upstream retries at the quota boundary", async () => {
   let reservations = 0;
   let requests = 0;
   const budgetedFetch = withModelBudget(
@@ -85,10 +85,6 @@ Deno.test("model budget blocks upstream retries and is shared with triage", asyn
   const chat = new OpenRouterChat("k", "m", budgetedFetch);
   const err = await assertRejects(() => collect(chat.stream({ messages: [] })), ModelQuotaExceeded);
   assertEquals([err.retryAfter, requests, reservations], [120, 1, 2]);
-
-  const triage = await new OpenRouterDecider("k", "m", budgetedFetch).triage([], "en");
-  assert(!triage.ok && triage.reason === "quota_exhausted");
-  assertEquals([triage.retryAfter, requests, reservations], [120, 1, 3]);
 });
 
 Deno.test("chat adapter: mid-stream error chunk throws", async () => {

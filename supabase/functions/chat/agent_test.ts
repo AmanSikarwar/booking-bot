@@ -260,19 +260,25 @@ Deno.test("max 3 tool rounds, then tools disabled", async () => {
   assertEquals(chat.requests[3].tools, undefined);
 });
 
-const quotaExhausted = (): Triage => ({ ok: false, reason: "quota_exhausted", retryAfter: 90, latencyMs: 5 });
+const exhaustedChat: ChatModel = {
+  model: "test",
+  // deno-lint-ignore require-yield
+  async *stream() {
+    throw new ModelQuotaExceeded(90);
+  },
+};
 
 Deno.test("quota: model budget exhaustion keeps message retryable", async () => {
-  const { deps, store } = setup({ decider: quotaExhausted });
+  const { deps, store } = setup({ chat: exhaustedChat });
   const { events } = await turn(deps, input("sugar"));
   const err = events.find((e) => e.event === "error")!;
   assertEquals([err.data.code, err.data.retryable, err.data.retry_after], ["quota_exhausted", true, 90]);
   assertEquals(store.messages[0].status, "failed");
-  assertEquals(store.usage.length, 0);
+  assertEquals(store.usage.map((u) => u.kind), ["decision"]);
 });
 
 Deno.test("quota: red flags still work when quota is exhausted", async () => {
-  const { deps, store } = setup({ decider: quotaExhausted });
+  const { deps, store } = setup({ chat: exhaustedChat });
   assertEquals((await turn(deps, input("can't breathe"))).names, ["ack", "urgent_care", "done"]);
   assertEquals(store.usage.length, 0);
 });
@@ -454,8 +460,8 @@ Deno.test("soft keyword match: the decider clears it and the chat continues", as
   assert(!store.conversations.get("c1")!.flagged);
 });
 
-Deno.test("soft keyword match: the decider can still escalate", async () => {
-  const { deps } = setup({ decider: () => triage(0.7) as Triage });
+Deno.test("soft keyword match: triage can still escalate when chat quota is exhausted", async () => {
+  const { deps } = setup({ chat: exhaustedChat, decider: () => triage(0.7) as Triage });
   assertEquals((await turn(deps, input(SOFT))).names, ["ack", "urgent_care", "done"]);
 });
 
@@ -478,13 +484,11 @@ Deno.test("booking: a soft match must have a recorded safety pass", async () => 
   assert((await turn(deps, input("book the test", { kind: "action" }))).names.includes("booking_confirmed"));
 });
 
-Deno.test("soft keyword match: escalates when the decider is unavailable, skipped or over quota", async () => {
+Deno.test("soft keyword match: escalates when the decider is unavailable or skipped", async () => {
   const down = setup({ decider: () => triage(-1) as Triage });
   assertEquals((await turn(down.deps, input(SOFT))).names, ["ack", "urgent_care", "done"]);
   const action = setup();
   assertEquals((await turn(action.deps, input(SOFT, { kind: "action" }))).names, ["ack", "urgent_care", "done"]);
-  const quota = setup({ decider: quotaExhausted });
-  assertEquals((await turn(quota.deps, input(SOFT))).names, ["ack", "urgent_care", "done"]);
 });
 
 Deno.test("hard keyword match never reaches the decider", async () => {
