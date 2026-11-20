@@ -170,17 +170,30 @@ class AppDatabase extends _$AppDatabase {
   Future<void> patchMessage(String id, MessagesCompanion patch) =>
       (update(messages)..where((m) => m.id.equals(id))).write(patch);
 
-  Future<Message?> nextDue(DateTime now) =>
-      (select(messages)
-            ..where(
-              (m) =>
-                  m.role.equalsValue(MessageRole.user) &
-                  m.status.isInValues([MessageStatus.queued, MessageStatus.incomplete]) &
-                  (m.nextAttemptAt.isNull() | m.nextAttemptAt.isSmallerOrEqualValue(now)),
-            )
-            ..orderBy([(m) => OrderingTerm.asc(m.createdAt)])
-            ..limit(1))
-          .getSingleOrNull();
+  Future<Message?> nextDue(DateTime now) async {
+    final pending =
+        await (select(messages)
+              ..where(
+                (m) =>
+                    m.role.equalsValue(MessageRole.user) &
+                    m.status.isInValues([
+                      MessageStatus.queued,
+                      MessageStatus.incomplete,
+                      MessageStatus.sending,
+                      MessageStatus.streaming,
+                    ]),
+              )
+              ..orderBy([(m) => OrderingTerm.asc(m.createdAt)]))
+            .get();
+    final waiting = <String>{};
+    for (final m in pending) {
+      if (!waiting.add(m.conversationId)) continue;
+      final due = m.nextAttemptAt == null || !m.nextAttemptAt!.isAfter(now);
+      final ready = m.status == MessageStatus.queued || m.status == MessageStatus.incomplete;
+      if (ready && due) return m;
+    }
+    return null;
+  }
 
   Future<DateTime?> earliestPendingAttempt() async {
     final row =

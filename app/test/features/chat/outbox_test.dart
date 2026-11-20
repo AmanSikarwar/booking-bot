@@ -74,16 +74,17 @@ void main() {
 
   tearDown(() => db.close());
 
-  Future<void> queue(String id, String text, {int secondsAgo = 0}) => db.upsertMessage(
-    MessagesCompanion.insert(
-      id: id,
-      conversationId: 'c1',
-      role: MessageRole.user,
-      body: Value(text),
-      status: MessageStatus.queued,
-      createdAt: clock.now().subtract(Duration(seconds: secondsAgo)),
-    ),
-  );
+  Future<void> queue(String id, String text, {int secondsAgo = 0, String conversation = 'c1'}) =>
+      db.upsertMessage(
+        MessagesCompanion.insert(
+          id: id,
+          conversationId: conversation,
+          role: MessageRole.user,
+          body: Value(text),
+          status: MessageStatus.queued,
+          createdAt: clock.now().subtract(Duration(seconds: secondsAgo)),
+        ),
+      );
 
   void reply(List<ChatEvent> events, {Object? error}) {
     when(() => api.send(any())).thenAnswer((inv) {
@@ -139,6 +140,34 @@ void main() {
     await outbox.drainOnce();
     expect(requests.map((r) => r.clientMessageId), ['early', 'late']);
     expect(await outbox.drainOnce(), isFalse);
+  });
+
+  test('a newer message waits while an older one in the same chat backs off', () async {
+    await queue('a', 'first', secondsAgo: 30);
+    await queue('b', 'second', secondsAgo: 10);
+    await queue('other', 'elsewhere', secondsAgo: 5, conversation: 'c2');
+    reply(const [], error: const ChatApiException(502, 'server_error', retryable: true));
+    await outbox.drainOnce();
+    expect((await msg('a')).nextAttemptAt, isNotNull);
+
+    reply([const ChatEvent.ack(replay: false), const ChatEvent.done()]);
+    await outbox.drainOnce();
+    expect(requests.last.clientMessageId, 'other', reason: 'another chat is not held up');
+    expect(await outbox.drainOnce(), isFalse, reason: 'b must not overtake a');
+
+    clock.current = (await msg('a')).nextAttemptAt!;
+    await outbox.drainOnce();
+    await outbox.drainOnce();
+    expect(requests.map((r) => r.clientMessageId), ['a', 'other', 'a', 'b']);
+  });
+
+  test('a failed message does not block later ones', () async {
+    await queue('a', 'first', secondsAgo: 30);
+    await queue('b', 'second');
+    await db.patchMessage('a', const MessagesCompanion(status: Value(MessageStatus.failed)));
+    reply([const ChatEvent.ack(replay: false), const ChatEvent.done()]);
+    await outbox.drainOnce();
+    expect(requests.single.clientMessageId, 'b');
   });
 
   test(
