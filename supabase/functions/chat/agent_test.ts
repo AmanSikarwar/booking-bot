@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "@std/assert";
-import { beginTurn, type Deps, runTurn, type TurnInput } from "./agent.ts";
+import { beginTurn, type Deps, isFollowUp, runTurn, type TurnInput } from "./agent.ts";
 import { Catalog } from "./catalog.ts";
 import type { Triage } from "./decider.ts";
 import type { ChatChunk, ChatModel, ChatRequest } from "./llm.ts";
@@ -499,4 +499,16 @@ Deno.test("hard keyword match never reaches the decider", async () => {
   const { deps } = setup({ decider: () => (called = true, triage(0) as Triage) });
   await turn(deps, input("I had a heart attack years ago and now I have chest pain again"));
   assert(!called);
+});
+
+Deno.test("follow-ups (replay or in-progress poll) are recognised; new messages and other users' ids are not", async () => {
+  const { deps, store } = setup({ chat: new ScriptedChat([[text("ok")]]) });
+  const first = input("thyroid test");
+  assert(!(await isFollowUp(store, first)), "a new message pays quota");
+  const begin = await beginTurn(deps, first);
+  assert(await isFollowUp(store, first), "a poll while processing is free");
+  if (begin.kind === "run") await runTurn(deps, first, begin, () => {});
+  assert(await isFollowUp(store, first), "a replay of a completed turn is free");
+  assert(!(await isFollowUp(store, { ...first, userId: "intruder" })), "someone else's ids are not");
+  assert(!(await isFollowUp(store, { ...first, clientMessageId: "m-new" })), "a new id in the same chat pays");
 });

@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { beginTurn, type Deps, runTurn, type TurnInput } from "./agent.ts";
+import { beginTurn, type Deps, isFollowUp, runTurn, type TurnInput } from "./agent.ts";
 import { Catalog } from "./catalog.ts";
 import { OpenRouterDecider } from "./decider.ts";
 import { OpenRouterChat } from "./llm.ts";
@@ -105,11 +105,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const denial = await store.reserveQuota("chat", userId);
-    if (denial) return error(429, denial.code, "chat request limit reached", true, denial.retry_after);
-
     const input = parseBody(await req.json().catch(() => null), userId);
     if (!input) return error(400, "invalid_request", "invalid request body");
+
+    if (!(await isFollowUp(store, input))) {
+      const denial = await store.reserveQuota("chat", userId);
+      if (denial) return error(429, denial.code, "chat request limit reached", true, denial.retry_after);
+    }
 
     const begin = await beginTurn(deps, input);
     if (begin.kind === "error") return error(begin.status, begin.code, begin.message, begin.status === 409);

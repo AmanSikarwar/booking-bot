@@ -48,6 +48,13 @@ const BOOKING_INTENT = /\b(book|booking|schedule|appointment|slot|reserve|collec
 const HISTORY_TURNS = 10;
 const HELPLINES = { urgent: ["112", "108"], crisis: ["14416"] };
 
+export async function isFollowUp(store: Store, input: TurnInput): Promise<boolean> {
+  const conv = await store.getConversation(input.conversationId);
+  if (!conv || conv.user_id !== input.userId) return false;
+  const m = await store.findUserMessage(conv.id, input.clientMessageId);
+  return m?.status === "completed" || m?.status === "processing";
+}
+
 export async function beginTurn(deps: Deps, input: TurnInput): Promise<Begin> {
   const { store } = deps;
   let conv = await store.getConversation(input.conversationId);
