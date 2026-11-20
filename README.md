@@ -22,7 +22,7 @@ On phones, the bottom bar opens Chat, History, Bookings, Packages, and Profile. 
 
 ## Screenshots
 
-Captured from the deployed web demo at desktop and phone viewport sizes.
+The desktop screenshot is from the deployed web demo. The mobile screenshots show the native app running on an Android 16 emulator.
 
 <table>
   <tr>
