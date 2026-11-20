@@ -110,6 +110,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final t = context.t;
     final flagged = context.select((ChatCubit c) => c.state.flagged);
     final online = context.watch<ConnectivityCubit>().state;
+    final empty = context.select((ChatCubit c) => c.state.messages.isEmpty);
     return Chat(
       currentUserId: meId,
       chatController: _controller,
@@ -133,7 +134,7 @@ class _ChatScreenState extends State<ChatScreen> {
         },
         customMessageBuilder: (context, m, _, {required isSentByMe, groupStatus}) =>
             _custom(context, m, flagged: flagged),
-        emptyChatListBuilder: (context) => _Welcome(onPick: _send),
+        emptyChatListBuilder: (context) => const _Welcome(),
         chatAnimatedListBuilder: (context, itemBuilder) =>
             ChatAnimatedListReversed(itemBuilder: itemBuilder),
         composerBuilder: (context) => Composer(
@@ -147,18 +148,31 @@ class _ChatScreenState extends State<ChatScreen> {
           emptyFieldSendIconColor: Palette.inkMuted,
           hintColor: Palette.inkMuted,
           textColor: Palette.ink,
-          topWidget: !online
-              ? _Strip(icon: Icons.wifi_off, text: t.offline.banner)
-              : flagged
-              ? _Strip(
-                  icon: Icons.pause_circle_outline,
-                  text: t.chat.flaggedNote,
-                  action: (label: t.chat.newChat, onTap: _newChat),
-                )
-              : null,
+          topWidget: _composerTop(t, online: online, flagged: flagged, empty: empty),
         ),
       ),
     );
+  }
+
+  Widget? _composerTop(
+    Translations t, {
+    required bool online,
+    required bool flagged,
+    required bool empty,
+  }) {
+    final strip = !online
+        ? _Strip(icon: Icons.wifi_off, text: t.offline.banner)
+        : flagged
+        ? _Strip(
+            icon: Icons.pause_circle_outline,
+            text: t.chat.flaggedNote,
+            action: (label: t.chat.newChat, onTap: _newChat),
+          )
+        : null;
+    final suggestions = empty ? SuggestionBar(onPick: _send) : null;
+    if (strip == null) return suggestions;
+    if (suggestions == null) return strip;
+    return Column(mainAxisSize: MainAxisSize.min, children: [strip, suggestions]);
   }
 
   Widget _custom(BuildContext context, fc.CustomMessage m, {required bool flagged}) {
@@ -481,17 +495,61 @@ class _SidePanel extends StatelessWidget {
   }
 }
 
-const _suggestionIcons = [
-  Icons.biotech_outlined,
-  Icons.health_and_safety_outlined,
-  Icons.water_drop_outlined,
-  Icons.battery_alert_outlined,
-];
+class SuggestionBar extends StatelessWidget {
+  const SuggestionBar({super.key, required this.onPick});
 
-class _Welcome extends StatelessWidget {
-  const _Welcome({required this.onPick});
+  static const _icons = [
+    Icons.biotech_outlined,
+    Icons.health_and_safety_outlined,
+    Icons.water_drop_outlined,
+    Icons.battery_alert_outlined,
+  ];
 
   final void Function(String) onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t.chat;
+    final chips = [
+      for (final (i, s) in t.suggestions.indexed)
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.8),
+          child: ActionChip(
+            avatar: Icon(_icons[i % _icons.length], size: 16, color: Palette.lavender),
+            label: Text(s),
+            backgroundColor: Palette.surface,
+            onPressed: () => onPick(s),
+          ),
+        ),
+    ];
+    const padding = EdgeInsets.fromLTRB(16, 6, 16, 2);
+    return Semantics(
+      container: true,
+      label: t.tryAsking,
+      child: context.windowSize == WindowSize.compact
+          ? SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: padding,
+              child: Row(
+                children: [
+                  for (final c in chips)
+                    Padding(padding: const EdgeInsetsDirectional.only(end: 8), child: c),
+                ],
+              ),
+            )
+          : Padding(
+              padding: padding,
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Wrap(spacing: 8, runSpacing: 8, children: chips),
+              ),
+            ),
+    );
+  }
+}
+
+class _Welcome extends StatelessWidget {
+  const _Welcome();
 
   @override
   Widget build(BuildContext context) {
@@ -501,36 +559,6 @@ class _Welcome extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       children: [
         SaathiBubble(child: SaathiText(text: t.chat.greeting)),
-        const SizedBox(height: 20),
-        Padding(
-          padding: const EdgeInsetsDirectional.only(start: 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                t.chat.tryAsking,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Palette.inkMuted,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final (i, s) in t.chat.suggestions.indexed)
-                    ActionChip(
-                      avatar: Icon(_suggestionIcons[i % _suggestionIcons.length], size: 16),
-                      label: Text(s),
-                      onPressed: () => onPick(s),
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
         if (!expanded)
           Padding(
             padding: const EdgeInsetsDirectional.only(start: 32, top: 12),
