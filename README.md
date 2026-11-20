@@ -1,42 +1,281 @@
 # Saathi
 
-Saathi is an English and Hindi lab-booking companion for finding test packages and simulating home sample collections. The catalogue, patient profiles, addresses, availability and bookings use synthetic data.
+**Saathi (साथी) is an English and Hindi lab-booking companion.** Find a test package in conversation or in the catalogue, choose a patient and an address, and book a simulated home sample collection.
 
-[Web demo](https://amansikarwar.github.io/booking-bot/) · [Android demo APK](https://github.com/AmanSikarwar/booking-bot/releases/tag/v0.1.0) · [Project plan](PLAN.md)
+[Open the web demo](https://amansikarwar.dev/booking-bot/) · [Download the Android demo APK](https://github.com/AmanSikarwar/booking-bot/releases/tag/v0.1.0) · [View CI runs](https://github.com/AmanSikarwar/booking-bot/actions/workflows/ci.yml)
 
-## Run locally
+The demo uses a synthetic catalogue, sample profiles and addresses, and simulated appointment availability. Use sample information when trying it. A confirmation creates a demo booking record.
 
-Use Flutter 3.50.0 and Dart 3.14.0. From the repository root, run the app against the demo backend.
+![Desktop Saathi chat showing a Thyroid Profile recommendation, preparation details, a booking button, and conversation history](docs/screenshots/desktop-chat.png)
+
+[Try the demo](#try-the-demo) · [Screenshots](#screenshots) · [Architecture](#architecture) · [Safety and offline behavior](#safety-and-offline-behavior) · [Developer setup](#developer-setup) · [Tests and evaluations](#tests-and-evaluations) · [Releases](#releases)
+
+## Try the demo
+
+1. Choose **Check my thyroid**, ask for a **Sugar test for Papa**, or open **Packages** to browse the 15-package catalogue.
+2. Tap a package to see the included tests, price, fasting instructions, report time, and sample requirements.
+3. Choose **Book home collection**. Select a date, time window, patient, and saved address. If the slot is full, Saathi offers alternatives.
+4. Open **Bookings** to see the confirmation and its reference. Open **History** to return to a previous conversation.
+5. Switch to **हिन्दी** from the chat header. Catalogue labels, interface copy, and the assistant's reply language switch with it.
+
+On phones, the bottom bar opens Chat, History, Bookings, Packages, and Profile. Desktop uses a side panel for history, bookings, and the catalogue, with the profile available from the header. The seeded sample profile includes family members and saved addresses and can be edited or reset.
+
+## Screenshots
+
+Captured from the deployed web demo at desktop and phone viewport sizes.
+
+<table>
+  <tr>
+    <th scope="col">Package details</th>
+    <th scope="col">Booking form</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/mobile-package-details.png" width="310" alt="Mobile Basic Wellness package sheet listing price, sample types, included tests, and a Book home collection button"></td>
+    <td><img src="docs/screenshots/mobile-booking-form.png" width="310" alt="Mobile booking form with date, time, synthetic patient, and saved address selections"></td>
+  </tr>
+  <tr>
+    <th scope="col">Booking confirmation</th>
+    <th scope="col">Hindi catalogue</th>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/mobile-booking-confirmation.png" width="310" alt="Mobile booking ticket showing its reference, collection date, sample patient and address, and Saved offline status"></td>
+    <td><img src="docs/screenshots/mobile-hindi-catalogue.png" width="310" alt="Mobile catalogue in Hindi with category filters, package prices, and booking buttons"></td>
+  </tr>
+</table>
+
+## Architecture
+
+The Flutter app reads from local Drift storage. Its outbox sends user messages to Supabase and applies streamed events to local records. Package ranking and booking validation run in the Edge Function. The models interpret text and choose tools, while application code owns catalogue prices, slot availability, and booking writes.
+
+```mermaid
+flowchart LR
+    subgraph Device["Flutter app"]
+        UI["Chat, catalogue, profile, bookings"]
+        Local[("Drift local storage")]
+        Assets["Bundled catalogue and safety rules"]
+        Outbox["Message outbox and SSE client"]
+        UI <--> Local
+        Assets --> UI
+        Outbox <--> Local
+    end
+
+    subgraph Backend["Supabase"]
+        Auth["Anonymous Auth"]
+        Edge["Deno chat Edge Function"]
+        DB[("Postgres")]
+        Auth -->|"Session validation"| Edge
+        Edge <--> DB
+    end
+
+    subgraph Models["OpenRouter"]
+        Triage["Decider Flash"]
+        Chat["DeepSeek and configured fallbacks"]
+    end
+
+    Outbox -->|"Obtain session"| Auth
+    Outbox -->|"Authenticated chat request"| Edge
+    Edge -->|"SSE text and card events"| Outbox
+    Edge -->|"Eligible text turns"| Triage
+    Edge -->|"Chat and tool calls"| Chat
+```
+
+| Layer | Implementation |
+| --- | --- |
+| Flutter UI | Material UI, responsive layouts, BLoC, typed `go_router` routes, English and Hindi strings generated by `slang` |
+| Device storage | Drift with SQLite on native platforms and SQLite WASM on web. Conversations, cards, bookings, profile data, and queued messages are stored locally |
+| Edge Function | Deno and TypeScript. Validates sessions, conversation ownership, turn input, tool arguments, and booking constraints |
+| Backend storage | Supabase Postgres. Stores conversations, messages, bookings, safety decisions, and model usage. Row-level policies limit authenticated reads of conversation and booking data to the owner |
+| Models | DeepSeek as the default chat model and Decider Flash for triage. Defaults and overrides are in [the function entry point](supabase/functions/chat/index.ts) and [`.env.example`](.env.example) |
+
+### How a booking works
+
+The chat agent has three tools. `search_packages` returns ranked catalogue matches. `show_booking_form` provides a native form and available windows when the user asks to book. `book_slot` validates the selection, applies the safety gate, and either saves a mock booking or returns alternatives. Package cards can also open the form directly on the device.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant App as Flutter app
+    participant API as Chat Edge Function
+    participant Store as Supabase Postgres
+
+    User->>App: Ask for a test package
+    App->>API: Send authenticated text turn
+    API-->>App: Stream reply and package cards
+    User->>App: Open a booking form and select a slot
+    App->>API: Submit the booking as an action turn
+    API->>API: Validate the slot and check safety history
+    alt Slot available and booking allowed
+        API->>Store: Save or reuse the mock booking
+        API-->>App: Stream booking_confirmed
+        App->>App: Save the ticket in Drift
+    else Slot full
+        API-->>App: Stream slot_unavailable with alternatives
+    else Safety gate blocks the booking
+        API-->>App: Send the assistant reply without confirmation
+    end
+```
+
+### Chat API
+
+Send `POST /functions/v1/chat` with a Supabase session token in the `Authorization: Bearer …` header. The app also sends the project's publishable key. A turn includes a device-generated `conversation_id` and `client_message_id`, `kind` (`text` or `action`), `locale` (`en` or `hi`), message text, a client timestamp, and optional profile context. The function loads conversation history server-side.
+
+| Server-sent events | How the app uses them |
+| --- | --- |
+| `ack`, `text_delta`, `done` | Recognize a new or replayed turn, stream the reply, and mark the turn complete |
+| `tool_started`, `package_cards`, `booking_form` | Show activity and render native package and form widgets |
+| `booking_confirmed`, `slot_unavailable` | Store the booking ticket or show alternative collection windows |
+| `urgent_care`, `crisis_support` | Render fixed, localized safety cards |
+| `error` | Distinguish retryable failures, quota waits, and terminal errors |
+
+See the [API contract](PLAN.md#10-api-contract) for payloads and HTTP status codes.
+
+## Safety and offline behavior
+
+### Safety checks
+
+The app uses shared keyword rules to show an immediate urgent-care or crisis card for hard matches, including offline. The server repeats the check. For eligible text turns, the decision model examines up to three recent user messages. Selected context-dependent keyword matches go through this model so that a mention of past medical history can be treated differently from a current emergency. If triage is unavailable, the server still escalates a context-dependent keyword match.
+
+```mermaid
+flowchart TD
+    Input["Server receives an authenticated turn"] --> Hard{"Hard keyword match?"}
+    Hard -->|Yes| Escalate["Show fixed safety card and flag conversation"]
+    Hard -->|No| Triage["Triage eligible text turns"]
+    Triage -->|"Urgent or crisis"| Escalate
+    Triage -->|"Contextual match and triage unavailable or skipped"| Escalate
+    Triage -->|"No escalation"| Chat["Continue to package and booking tools"]
+    Chat --> Gate["Booking gate checks conversation flag and recent messages"]
+```
+
+Structured booking actions skip model triage. The server still checks keyword matches and booking history. The safety gate blocks flagged conversations, hard matches, and contextual matches without a recorded pass. A separate output check detects diagnosis-like language. Cards use fixed translations, and the assistant's scope covers lab tests, preparation, and bookings. The [safety design](PLAN.md#6-safety-design) records thresholds and fallback behavior.
+
+### Offline queue and replay
+
+- The bundled catalogue, profile, previous chats, saved bookings, and keyword detector are available offline.
+- New messages and booking form submissions wait in the outbox for connectivity. The form opens locally and the server confirms the slot.
+- After an interrupted reply, the app keeps the partial text and retries with the same message ID. The server replays stored events when it has already finished that turn.
+- Turn keys are scoped to the conversation. Booking creation uses a separate idempotency key that lets a replay return the original reference.
+- Transient failures use backoff. Quota errors can leave a message queued without using a retry attempt.
+
+### Profile data
+
+The app keeps the sample profile's phone, email, ages, and full saved addresses in local storage. Chat requests include patient names, family relations, and address labels as context. Booking requests include the selected patient name and address label. Chat text is processed by the hosted backend and its configured model provider, so use synthetic inputs.
+
+## Developer setup
+
+### Run the Flutter app
+
+Use **Flutter 3.50.0** with **Dart 3.14.0**. Install Chrome for web development or set up the Android SDK and Java 17 for Android builds.
 
 ```sh
-cd app
+git clone https://github.com/AmanSikarwar/booking-bot.git
+cd booking-bot/app
 flutter pub get --enforce-lockfile
 flutter run -d chrome
 ```
 
-To use a separate hosted Supabase project, apply the migration under `supabase/migrations`, enable anonymous sign-in, and deploy `supabase/functions/chat`. Set `LLM_MODE=mock` in that project's function secrets to use scripted responses without an OpenRouter key. For live mode, set `LLM_MODE=live` and `OPENROUTER_API_KEY` in the function secrets. Copy `.env.example` to `.env`, fill in the target URL and publishable key, then launch with `flutter run -d chrome --dart-define-from-file=../.env` from `app/`.
+The app defaults to the public demo backend. For Android development, use `flutter devices` to find an emulator or connected device, then pass its device ID to `flutter run -d`.
 
-## How it works
+### Use a separate Supabase project
 
-- Flutter stores chats, bookings, profiles and the message outbox locally in Drift. The bundled catalogue works offline. The outbox replays queued messages in order when the connection returns, using each message's ID to prevent duplicates.
-- The Supabase Edge Function streams replies and card events using server-sent events. The agent can search packages, present a native booking form and confirm a mock slot.
-- Saathi explains packages in plain language and stays within booking and preparation questions. Shared keyword rules detect clear red flags on the device and server. The server's decision model handles paraphrases and selected context-dependent matches. Escalated conversations pause booking.
+1. Create a Supabase project, enable anonymous sign-ins in Authentication settings, and install the Supabase CLI v3.
+2. From the repository root, link that project and apply the checked-in migration.
 
-## Verify changes
+   ```sh
+   supabase login
+   supabase link --project-ref YOUR_PROJECT_REF
+   supabase db push --remote --yes
+   supabase secrets set --remote --yes LLM_MODE=mock
+   supabase functions deploy chat --use-api --no-verify-jwt --remote --yes
+   ```
+
+3. Create `.env` at the repository root using [`.env.example`](.env.example). For the Flutter build, set only `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY`.
+
+   ```sh
+   cd app
+   flutter run -d chrome --dart-define-from-file=../.env
+   ```
+
+**Mock mode** runs scripted chat and triage responses without an OpenRouter key. For live mode, set `LLM_MODE=live` and `OPENROUTER_API_KEY` in the function's secrets. The function validates Supabase session tokens in its own handler. Client builds use the publishable key, while service-role credentials and the OpenRouter key belong on the server.
+
+| Optional function setting | Purpose |
+| --- | --- |
+| `LLM_MODEL`, `LLM_FALLBACK_MODELS` | Override the primary chat model and comma-separated fallbacks |
+| `DECIDER_MODEL` | Override the decision model used for triage |
+| `USER_TURNS_PER_DAY`, `GLOBAL_REQUESTS_PER_DAY` | Enforce daily turn and model request limits. The defaults are 25 and 900 |
+
+### Repository map
+
+| Path | What lives there |
+| --- | --- |
+| [`app/lib/core/`](app/lib/core/) | Routing, local database, connectivity, configuration, and SSE network client |
+| [`app/lib/features/`](app/lib/features/) | Chat, catalogue, booking, history, profile, and safety screens and logic |
+| [`app/lib/i18n/`](app/lib/i18n/) | English and Hindi string sources and generated accessors |
+| [`supabase/functions/chat/`](supabase/functions/chat/) | Streaming endpoint, agent, prompt, model adapters, tools, and Deno tests |
+| [`supabase/migrations/`](supabase/migrations/) | Postgres schema and access policies |
+| [`catalog/`](catalog/), [`safety/`](safety/) | Canonical package catalogue, keyword rules, thresholds, and detector fixtures |
+| [`evals/`](evals/) | Hosted evaluation cases, runner, and reports |
+| [`.github/workflows/`](.github/workflows/) | CI and the manual Pages deployment workflow |
+
+Edit catalogue and safety data in their canonical directories, then run [`scripts/sync_shared.sh`](scripts/sync_shared.sh) to update the Flutter and Edge Function copies. For changes to generated Dart models, routes, dependency injection, or translations, run `dart run build_runner build` from `app/`.
+
+## Tests and evaluations
+
+Run these checks from the repository root.
 
 ```sh
-(cd app && flutter analyze && flutter test)
+(cd app && flutter pub get --enforce-lockfile && flutter analyze --no-pub && flutter test --no-pub)
 (cd supabase/functions/chat && deno lint && deno task test)
 scripts/sync_shared.sh
 git diff --exit-code -- app/assets/shared supabase/functions/chat/_shared
 ```
 
-Update the source catalogue or safety rules before running `scripts/sync_shared.sh`. Run `dart run build_runner build` from `app/` after changing models, routes, dependency injection or translations that use code generation.
+[CI](.github/workflows/ci.yml) uses Flutter 3.50.0 and Deno 2.9.8. It checks app behavior, migrations, layout, localization, queue recovery, SSE parsing, tool validation, and shared safety fixtures. The checks use mocks and consume zero OpenRouter quota.
 
-The [latest safety eval](evals/RESULTS-safety.md) compared keyword detection alone with the full hosted flow. The hosted flow showed the correct card for 28/28 flagged cases, with zero false alarms on 15 routine cases. Keyword detection alone caught 15/28 with three false alarms. The earlier [68-turn report](evals/RESULTS.md) includes package ranking and persona checks. The [eval notes](evals/README.md) record $0.015 in model spend for the initial run, with 97 chat requests and 65 free decision requests.
+**Hosted safety eval, 20 November 2026**
 
-## Release the demo
+| Measure | Keyword detector | Full hosted flow |
+| --- | ---: | ---: |
+| Correct safety card on flagged cases | 15/28 | 28/28 |
+| Indirect red flags caught | 2/13 | 13/13 |
+| False alarms on routine cases | 3/15 | 0/15 |
 
-Place the release keystore in `app/android/app/` and keep `storeFile`, `storePassword`, `keyAlias`, and `keyPassword` in the local `app/android/key.properties` file. Set `storeFile` to the keystore filename when it is in the Android app module. Build the signed APK with `flutter build apk --release` from `app/`. The output is `app/build/app/outputs/flutter-apk/app-release.apk` relative to the repository root.
+The [43-turn safety run](evals/RESULTS-safety.md) recorded zero request errors and a median full-stream time of 1.08 seconds. An [earlier 68-turn run](evals/RESULTS.md) showed package cards on 20/20 recommendation prompts, ranked the expected package first on 19/20, and placed it in the top three on 20/20. These are results on synthetic cases. The initial run's [recorded model spend](evals/README.md) was US$0.015.
 
-Set the repository's Pages source to GitHub Actions and run the **Publish web demo** workflow on `main`. It builds Flutter for the configured Pages path. The Android APK is the primary way to try the offline flow. Web storage depends on browser support and can be cleared by the browser. The iOS project is included for development.
+To repeat the live evals from the repository root, use the command below. It defaults to the demo backend and consumes hosted model quota. Set `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` in the shell to target another project.
+
+```sh
+deno run --allow-net --allow-read --allow-write --allow-env evals/run.ts
+```
+
+Pass `safety`, `reco`, or `persona` to run a single suite. A focused run writes a separate report, such as `evals/RESULTS-safety.md`.
+
+## Releases
+
+### Android
+
+The [v0.1.0 demo prerelease](https://github.com/AmanSikarwar/booking-bot/releases/tag/v0.1.0) contains a debug-signed APK and SHA-256 checksum. The current build configuration uses a local release keystore for new release builds. Android requires the same signing identity to install an update over an existing app with the same application ID.
+
+1. Put the release keystore in `app/android/app/`.
+2. Create `app/android/key.properties` with these properties. For a keystore in the app module, set `storeFile` to its filename. Both files are ignored by Git.
+
+   ```properties
+   storeFile=YOUR_KEYSTORE_FILENAME.jks
+   storePassword=YOUR_STORE_PASSWORD
+   keyAlias=YOUR_KEY_ALIAS
+   keyPassword=YOUR_KEY_PASSWORD
+   ```
+
+3. Run `flutter build apk --release` from `app/`. The signed output is `app/build/app/outputs/flutter-apk/app-release.apk`. Verify the APK with `apksigner verify --print-certs` before publishing.
+4. Attach the APK and its SHA-256 checksum to the corresponding GitHub Release.
+
+### Web
+
+The [web demo](https://amansikarwar.dev/booking-bot/) is hosted on GitHub Pages. Set the repository's Pages source to **GitHub Actions**, then run [**Publish web demo**](.github/workflows/pages.yml) on `main`. The workflow gets the base path from Pages, builds the Flutter bundle, and deploys it.
+
+For a local web release build served from the root of a web server, run `flutter build web --release --no-web-resources-cdn` from `app/`. Serve `app/build/web/` over HTTP. Use the Android build to try the offline flow without depending on browser storage, which can be cleared or evicted. The repository includes the iOS runner for development. The published demo targets are Android and web.
+
+## Further reading
+
+- [Project plan](PLAN.md) for the data model, persona, API contract, and deployment design.
+- [Evaluation notes](evals/README.md) for case construction, run commands, and results.
+- [AI usage](AI_USAGE.md) for the development record.
