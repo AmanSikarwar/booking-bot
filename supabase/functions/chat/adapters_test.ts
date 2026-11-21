@@ -87,6 +87,50 @@ Deno.test("model budget blocks upstream retries at the quota boundary", async ()
   assertEquals([err.retryAfter, requests, reservations], [120, 1, 2]);
 });
 
+function stalled(init: RequestInit | undefined, first?: string): Promise<Response> {
+  const signal = init!.signal!;
+  if (first === undefined) {
+    return new Promise((_, reject) => signal.addEventListener("abort", () => reject(signal.reason)));
+  }
+  const body = new ReadableStream<Uint8Array>({
+    start(c) {
+      c.enqueue(new TextEncoder().encode(`data: ${first}\n\n`));
+      signal.addEventListener("abort", () => c.error(signal.reason));
+    },
+  });
+  return Promise.resolve(new Response(body, { status: 200 }));
+}
+
+Deno.test("chat adapter: a model that never answers times out without a retry", async () => {
+  let calls = 0;
+  const model = new OpenRouterChat(
+    "k",
+    "m",
+    (_u, init) => {
+      calls++;
+      return stalled(init);
+    },
+    [],
+    20,
+  );
+  const err = await assertRejects(() => collect(model.stream({ messages: [] })), LlmError, "timed out");
+  assertEquals([err.code, calls], ["upstream_error", 1]);
+});
+
+Deno.test("chat adapter: a stream that stalls midway times out", async () => {
+  const first = JSON.stringify({ choices: [{ delta: { content: "Hi" } }] });
+  const model = new OpenRouterChat("k", "m", (_u, init) => stalled(init, first), [], 20);
+  const seen: ChatChunk[] = [];
+  await assertRejects(
+    async () => {
+      for await (const c of model.stream({ messages: [] })) seen.push(c);
+    },
+    LlmError,
+    "timed out",
+  );
+  assertEquals(seen, [{ type: "text", delta: "Hi" }]);
+});
+
 Deno.test("chat adapter: mid-stream error chunk throws", async () => {
   const chunks = [
     JSON.stringify({ choices: [{ delta: { content: "Hi" } }] }),

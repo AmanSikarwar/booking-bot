@@ -35,6 +35,8 @@ export type ChatChunk =
   | { type: "tool_calls"; calls: ToolCall[] }
   | { type: "done"; usage: Usage };
 
+export const REQUEST_TIMEOUT_MS = 18_000;
+
 export class LlmError extends Error {
   constructor(
     readonly code: "rate_limited" | "upstream_error",
@@ -57,38 +59,45 @@ export class OpenRouterChat implements ChatModel {
     readonly model: string,
     private readonly fetchFn: typeof fetch = fetch,
     private readonly fallbacks: string[] = [],
+    private readonly timeoutMs = REQUEST_TIMEOUT_MS,
   ) {}
 
   async *stream(req: ChatRequest): AsyncGenerator<ChatChunk> {
     const started = Date.now();
-    const res = await this.#post(req, started);
+    const signal = AbortSignal.timeout(this.timeoutMs);
+    const timedOut = () => new LlmError("upstream_error", "model request timed out", undefined, Date.now() - started);
+    const res = await this.#post(req, started, signal, timedOut);
     const calls = new Map<number, ToolCall>();
     let usage: Usage = { model: this.model, input_tokens: 0, output_tokens: 0, cost_usd: 0, latency_ms: 0 };
-    for await (const e of parseSse(res.body!)) {
-      if (e.data === "[DONE]") break;
-      const chunk = JSON.parse(e.data);
-      if (chunk.error) {
-        throw new LlmError("upstream_error", chunk.error.message ?? "stream error", undefined, Date.now() - started);
+    try {
+      for await (const e of parseSse(res.body!)) {
+        if (e.data === "[DONE]") break;
+        const chunk = JSON.parse(e.data);
+        if (chunk.error) {
+          throw new LlmError("upstream_error", chunk.error.message ?? "stream error", undefined, Date.now() - started);
+        }
+        if (chunk.model) usage.model = chunk.model;
+        if (chunk.usage) {
+          usage = {
+            ...usage,
+            input_tokens: chunk.usage.prompt_tokens ?? 0,
+            output_tokens: chunk.usage.completion_tokens ?? 0,
+            cost_usd: chunk.usage.cost ?? 0,
+          };
+        }
+        const delta = chunk.choices?.[0]?.delta;
+        if (delta?.content) yield { type: "text", delta: delta.content };
+        for (const tc of delta?.tool_calls ?? []) {
+          const i = tc.index ?? 0;
+          const cur = calls.get(i) ?? { id: "", type: "function", function: { name: "", arguments: "" } };
+          if (tc.id) cur.id = tc.id;
+          if (tc.function?.name) cur.function.name += tc.function.name;
+          if (tc.function?.arguments) cur.function.arguments += tc.function.arguments;
+          calls.set(i, cur);
+        }
       }
-      if (chunk.model) usage.model = chunk.model;
-      if (chunk.usage) {
-        usage = {
-          ...usage,
-          input_tokens: chunk.usage.prompt_tokens ?? 0,
-          output_tokens: chunk.usage.completion_tokens ?? 0,
-          cost_usd: chunk.usage.cost ?? 0,
-        };
-      }
-      const delta = chunk.choices?.[0]?.delta;
-      if (delta?.content) yield { type: "text", delta: delta.content };
-      for (const tc of delta?.tool_calls ?? []) {
-        const i = tc.index ?? 0;
-        const cur = calls.get(i) ?? { id: "", type: "function", function: { name: "", arguments: "" } };
-        if (tc.id) cur.id = tc.id;
-        if (tc.function?.name) cur.function.name += tc.function.name;
-        if (tc.function?.arguments) cur.function.arguments += tc.function.arguments;
-        calls.set(i, cur);
-      }
+    } catch (e) {
+      throw signal.aborted && !(e instanceof LlmError) ? timedOut() : e;
     }
     if (calls.size) {
       yield {
@@ -99,7 +108,7 @@ export class OpenRouterChat implements ChatModel {
     yield { type: "done", usage: { ...usage, latency_ms: Date.now() - started } };
   }
 
-  async #post(req: ChatRequest, started: number): Promise<Response> {
+  async #post(req: ChatRequest, started: number, signal: AbortSignal, timedOut: () => LlmError): Promise<Response> {
     const body = JSON.stringify({
       model: this.model,
       ...(this.fallbacks.length ? { models: [this.model, ...this.fallbacks].slice(0, 3) } : {}),
@@ -118,9 +127,11 @@ export class OpenRouterChat implements ChatModel {
           method: "POST",
           headers: { Authorization: `Bearer ${this.apiKey}`, "Content-Type": "application/json" },
           body,
+          signal,
         });
       } catch (e) {
         if (e instanceof ModelQuotaExceeded) throw e;
+        if (signal.aborted) throw timedOut();
         if (attempt === 0) continue;
         throw new LlmError("upstream_error", String(e), undefined, Date.now() - started);
       }
