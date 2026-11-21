@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -113,6 +113,23 @@ void main() {
     expect(r.cards.single, isA<BookingCardData>());
     expect((await db.watchBookings().first).single.bookingRef, 'LAB-7Q3K9');
     expect(requests.single.clientMessageId, 'm1');
+  });
+
+  test('batches streamed text into a few writes instead of one per delta', () async {
+    await queue('m1', 'thyroid');
+    reply([
+      const ChatEvent.ack(replay: false),
+      for (var i = 0; i < 50; i++) ChatEvent.textDelta('w$i '),
+      const ChatEvent.done(),
+    ]);
+    var writes = 0;
+    final sub = db.tableUpdates(TableUpdateQuery.onTable(db.messages)).listen((_) => writes++);
+    await outbox.drainOnce();
+    await sub.cancel();
+    final r = await msg(replyIdFor('m1'));
+    expect(r.body, [for (var i = 0; i < 50; i++) 'w$i '].join());
+    expect(r.status, MessageStatus.sent);
+    expect(writes, lessThan(10));
   });
 
   test('a booking keeps the full address it was made at, even after the profile changes', () async {

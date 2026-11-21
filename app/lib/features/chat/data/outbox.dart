@@ -18,6 +18,7 @@ class Outbox {
   Outbox(this._db, this._api, this._connectivity, this._clock, this._profile);
 
   static const maxAttempts = 5;
+  static const bodyFlushInterval = Duration(milliseconds: 80);
   static const _quotaCodes = {'quota_exhausted', 'user_daily_limit'};
 
   final AppDatabase _db;
@@ -86,6 +87,18 @@ class Outbox {
     var cards = <ChatCard>[];
     var done = false;
     ErrorEvent? error;
+    var written = '';
+    Future<void>? pendingBody;
+    Future<void> flushBody() async => pendingBody;
+    Future<void> writeBody() async {
+      if (body == written) return;
+      written = body;
+      await _db.patchMessage(
+        replyId,
+        MessagesCompanion(body: Value(body), activeTool: const Value(null)),
+      );
+    }
+
     try {
       final profile = (await _profile.current()).forAgent();
       final events = _api.send(
@@ -100,6 +113,7 @@ class Outbox {
         ),
       );
       await for (final e in events) {
+        if (e is! TextDeltaEvent) await flushBody();
         switch (e) {
           case AckEvent():
             body = '';
@@ -123,10 +137,12 @@ class Outbox {
           case TextDeltaEvent(:final text):
             if (text.isEmpty) continue;
             body += text;
-            await _db.patchMessage(
-              replyId,
-              MessagesCompanion(body: Value(body), activeTool: const Value(null)),
-            );
+            if (pendingBody != null) continue;
+            await writeBody();
+            pendingBody = Future.delayed(bodyFlushInterval, () {
+              pendingBody = null;
+              return writeBody();
+            });
           case ToolStartedEvent(:final tool):
             await _db.patchMessage(replyId, MessagesCompanion(activeTool: Value(tool)));
           case CardEvent(card: final received):
@@ -148,9 +164,11 @@ class Outbox {
           case UnknownEvent():
         }
       }
+      await flushBody();
     } on ChatApiException catch (e) {
       return _onHttpError(m, e);
     } on Object {
+      await flushBody();
       await _markIncomplete(replyId);
       await _retryLater(m, 'network');
       return _connectivity.recheck();
