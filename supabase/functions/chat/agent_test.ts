@@ -588,3 +588,7 @@ Deno.test("show_booking_form prefills the day the user said, not the model's gue
   const prefill = events.find((e) => e.event === "booking_form")!.data.prefill as Record<string, unknown>;
   assertEquals(prefill.date, "2026-11-21");
 });
+
+Deno.test("prompt tells the model to search instead of asking on vague checkup requests", () => {
+  assert(systemPrompt("hi", NOW, false).includes("call search_packages right away"));
+});
