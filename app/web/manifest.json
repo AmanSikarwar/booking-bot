@@ -1,9 +1,9 @@
 {
-    "name": "saathi",
-    "short_name": "saathi",
+    "name": "Saathi",
+    "short_name": "Saathi",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0F766E",
+    "background_color": "#F2F6F6",
     "theme_color": "#0F766E",
     "description": "Saathi, a lab test booking companion with offline-first chat",
     "orientation": "portrait-primary",
