@@ -6,16 +6,40 @@ The runner spaces requests just over six seconds apart and respects HTTP `Retry-
 
 ```sh
 deno run --allow-net --allow-read --allow-write --allow-env evals/run.ts          # all suites
-deno run --allow-net --allow-read --allow-write --allow-env evals/run.ts safety   # or: reco, persona
+deno run --allow-net --allow-read --allow-write --allow-env evals/run.ts safety   # or: reco, persona, booking
+deno run --allow-net --allow-read --allow-write --allow-env --env-file=.env evals/decider.ts   # compare decider models
 ```
 
-- `cases/safety.json`: 43 messages. 13 explicit red flags, 13 indirect ones (paraphrases, Hinglish, Devanagari), 2 real emergencies that also mention history or exertion, and 15 routine messages, several with alarming words ("dying to know", "heart attack two years ago"). The first two runs below used the first 40.
-- `cases/reco.json`: 20 requests, each with the package ids that count as a correct match.
-- `cases/persona.json`: 8 prompts for persona rules (admits being an AI, no diagnosis, no medicines, stays on topic, Hindi). Recommendation replies are checked against the same rules.
+The runner sends the app's sample profile and spreads turns over several anonymous users, so the per-user limits (4 a minute, 40 a day) don't stop a run. A full run is about 120 turns and 160 model calls, most of the 200-call daily budget.
+
+`decider.ts` sends the safety cases straight to OpenRouter's Decisions API with each model named on the command line (default: the free Perplexity decider and `typesafe/jev-1.13`), outside the deployed function, and writes `RESULTS-decider.md` with catch rates, latency tails against the server's timeout, tokens and cost. It needs `OPENROUTER_API_KEY`.
+
+- `cases/safety.json`: 60 cases. 13 explicit red flags, 4 with typos and casual spelling, 15 indirect ones (paraphrases, Hinglish, Devanagari), 2 real emergencies that also mention history or exertion, 3 emergencies that only become clear over several messages, and 23 routine messages: controls, negated or figurative alarm words ("no chest pain", "not suicidal", "dying for a holiday") and routine follow-ups. Multi-turn cases carry a `history` that is sent first in the same conversation.
+- `cases/reco.json`: 30 requests, each with the package ids that count as a correct match.
+- `cases/persona.json`: 14 prompts for persona rules (admits being an AI, no diagnosis, no medicines, stays on topic, Hindi, prompt injection). Recommendation replies are checked against the same rules.
+- `cases/booking.json`: 13 agentic cases. Text cases check the pre-filled booking form (package, relative and weekday dates, time window, family member, saved address) and that plain questions don't open a form. Action cases send the message the form sends and check the booking, that repeating it returns the same booking reference, and that a full slot offers alternatives. `{open_date}`-style placeholders are filled with real slots at run time.
 
 "Keyword only" runs the server's `RedFlagDetector` locally on each message. "Keyword + decider" is what the deployed function actually did. Full runs write `RESULTS.md`. Single-suite runs write a separate report such as `RESULTS-safety.md`. Message IDs in `results/*.json` can be joined to `safety_checks.decider_probs` and `llm_usage`.
 
-## Findings (run of 2026-11-20)
+## Findings (run of 2026-11-22)
+
+Full tables are in [RESULTS.md](RESULTS.md) and [RESULTS-decider.md](RESULTS-decider.md). 118 turns, 0 errors, median 2.7 s per turn (full stream).
+
+| Suite | Result |
+|---|---|
+| Safety: red flags caught, right card | 37/37 (keyword only: 19/37) |
+| Safety: emergencies that build up over turns | 3/3 (keyword only: 0/3) |
+| Safety: false alarms | 3/23 (keyword only: 7/23) |
+| Booking: all checks pass | 13/13 |
+| Recommendations: expected package first / top 3 | 28/30 / 29/30 |
+| Persona: every check | 44/44 replies |
+
+- **The three false alarms were keyword matches** the decider never saw: "No chest pain or breathlessness…", "I'm not suicidal…" and "My uncle had a stroke last year…". A negation word just before a phrase, or a past stroke, now sends the message to the decider instead of escalating at once; the keyword still escalates if the decider is unavailable. After deploying, all three got package cards on the live server, with decider emergency scores of 0.01 to 0.04.
+- **Booking is reliable.** The form was filled from "tomorrow" (and "tommorow"), "kal", कल, "Sunday", "day after tomorrow", "papa", "mummy", "husband", "office" and "papa's house". A repeated booking returned the same reference, and a full slot offered alternatives.
+- **One recommendation miss was the model asking instead of searching** for "मेरी पत्नी के लिए जांच" ("tests for my wife"). The prompt now tells it to search right away on vague checkup requests; on the live server it now shows Women's Wellness, and "papa ka checkup" shows Senior Care.
+- **Decider comparison:** the free Perplexity decider and `typesafe/jev-1.13` both caught 37/37 with the right card. Jev is more decisive (highest emergency score on a routine message 0.19, against 0.30) and has a shorter tail (p95 638 ms, against 1,083 ms; the server times out at 1,500 ms), but costs about $0.00002 per call against $0.
+
+## Earlier findings (run of 2026-11-20)
 
 Full tables are in [RESULTS.md](RESULTS.md).
 

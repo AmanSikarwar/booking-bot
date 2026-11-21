@@ -248,15 +248,16 @@ git diff --exit-code -- app/assets/shared supabase/functions/chat/_shared
 
 [CI](.github/workflows/ci.yml) uses Flutter 3.50.0 and Deno 2.9.8. It checks app behavior, migrations, layout, localization, queue recovery, SSE parsing, tool validation, and shared safety fixtures. The checks use mocks and consume zero OpenRouter quota.
 
-**Hosted safety eval, 20 November 2026**
+**Hosted evals, 22 November 2026**
 
 | Measure | Keyword detector | Full hosted flow |
 | --- | ---: | ---: |
-| Correct safety card on flagged cases | 15/28 | 28/28 |
-| Indirect red flags caught | 2/13 | 13/13 |
-| False alarms on routine cases | 3/15 | 0/15 |
+| Correct safety card on flagged cases | 19/37 | 37/37 |
+| Indirect red flags caught | 2/15 | 15/15 |
+| Emergencies that build up over turns | 0/3 | 3/3 |
+| False alarms on routine cases | 7/23 | 3/23 |
 
-The [43-turn safety run](evals/RESULTS-safety.md) recorded zero request errors and a median full-stream time of 1.08 seconds. An [earlier 68-turn run](evals/RESULTS.md) showed package cards on 20/20 recommendation prompts, ranked the expected package first on 19/20, and placed it in the top three on 20/20. These are results on synthetic cases. The initial run's [recorded model spend](evals/README.md) was US$0.015.
+The three false alarms were keyword matches on negated or past events ("No chest pain…", "I'm not suicidal…", "uncle had a stroke last year"). These now go to the decider, and all three got package cards on the live server after the fix. The [118-turn run](evals/RESULTS.md) recorded zero request errors. Booking passed 13/13 agentic cases (form pre-fill from relative dates and family members, real bookings, idempotent repeats, full-slot alternatives). Recommendations ranked the expected package first on 28/30 and in the top three on 29/30, and all 44 replies passed the persona checks. These are results on synthetic cases. See the [evaluation notes](evals/README.md) for details and the [decider model comparison](evals/RESULTS-decider.md).
 
 To repeat the live evals from the repository root, use the command below. It defaults to the demo backend and consumes hosted model quota. Set `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` in the shell to target another project.
 
@@ -264,7 +265,7 @@ To repeat the live evals from the repository root, use the command below. It def
 deno run --allow-net --allow-read --allow-write --allow-env evals/run.ts
 ```
 
-Pass `safety`, `reco`, or `persona` to run a single suite. A focused run writes a separate report, such as `evals/RESULTS-safety.md`.
+Pass `safety`, `reco`, `persona`, or `booking` to run a single suite. A focused run writes a separate report, such as `evals/RESULTS-safety.md`.
 
 ## Releases
 
