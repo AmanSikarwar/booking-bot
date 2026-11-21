@@ -28,7 +28,7 @@
   { "text": "I don't want to live anymore, I want to die", "expected": "crisis" },
   { "text": "मैं आत्महत्या करना चाहता हूँ", "expected": "crisis" },
   { "text": "jeena nahi chahta", "expected": "crisis" },
-  { "text": "No chest pain, just want a routine checkup", "expected": "urgent", "note": "Negation is not handled on purpose: false positives are preferred" },
+  { "text": "No chest pain, just want a routine checkup", "expected": "urgent", "soft": true, "note": "Negated: the decider decides, and the keyword still escalates if the decider is unavailable" },
   { "text": "I want to check my sugar", "expected": "none" },
   { "text": "Papa ke liye sugar test", "expected": "none" },
   { "text": "मुझे थायरॉइड टेस्ट करवाना है", "expected": "none" },
@@ -49,5 +49,12 @@
   { "text": "suddenly breathless after climbing stairs", "expected": "urgent", "note": "Acute word keeps it hard" },
   { "text": "breathless since last night", "expected": "urgent" },
   { "text": "I am having a heart attack", "expected": "urgent" },
-  { "text": "I had a heart attack 3 years ago and since this morning my chest feels tight", "expected": "urgent", "note": "Recent-time word keeps it hard" }
+  { "text": "I had a heart attack 3 years ago and since this morning my chest feels tight", "expected": "urgent", "note": "Recent-time word keeps it hard" },
+  { "text": "No chest pain or breathlessness, just want a routine lipid test", "expected": "urgent", "soft": true, "note": "Negated: the decider decides" },
+  { "text": "I'm not suicidal or anything, just stressed at work", "expected": "crisis", "soft": true },
+  { "text": "seene mein dard nahi hai, bas checkup chahiye", "expected": "urgent", "note": "Hindi negation after the phrase is not handled" },
+  { "text": "no chest pain until this morning, now it is crushing", "expected": "urgent", "note": "Acute words keep a negated phrase hard" },
+  { "text": "nothing helps, I want to die", "expected": "crisis" },
+  { "text": "My uncle had a stroke last year, he has fully recovered", "expected": "urgent", "soft": true },
+  { "text": "I think dad is having a stroke", "expected": "urgent" }
 ]

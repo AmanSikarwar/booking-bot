@@ -123,9 +123,15 @@
     }
   ],
   "soften": {
-    "note": "A keyword match is soft (sent to the decider instead of escalating at once) only when every matched phrase is listed in a rule, that rule's context appears, and no acute word does. Crisis phrases and chest pain are never softened.",
+    "note": "A keyword match is soft (sent to the decider instead of escalating at once) only when no acute word appears and every matched phrase is either listed in a rule whose context appears, or has a negation word among the negation_window words before it. If the decider is unavailable, a soft match still escalates.",
     "acute": ["now", "right now", "suddenly", "since morning", "this morning", "since last night", "last night", "tonight", "since yesterday", "today", "at rest", "abhi", "achanak", "aaj", "अभी", "अचानक", "आज", "severe", "very bad", "bahut tez"],
+    "negation": ["no", "not", "without", "never", "dont", "doesnt", "didnt", "isnt", "arent", "havent", "hasnt", "denies", "nahi", "नहीं", "बिना"],
+    "negation_window": 4,
     "rules": [
+      {
+        "phrases": ["stroke", "paralysis", "लकवा", "lakwa"],
+        "context": ["years ago", "year ago", "yrs ago", "months ago", "month ago", "last year", "last month", "in the past", "history of", "died of", "recovered", "saal pehle", "sal pehle", "mahine pehle", "pichle saal", "pehle hua tha", "साल पहले", "महीने पहले", "पिछले साल"]
+      },
       {
         "phrases": ["heart attack", "दिल का दौरा", "dil ka daura"],
         "context": ["years ago", "year ago", "yrs ago", "months ago", "month ago", "last year", "last month", "in the past", "history of", "died of", "saal pehle", "sal pehle", "mahine pehle", "pichle saal", "pehle hua tha", "साल पहले", "महीने पहले", "पिछले साल"]

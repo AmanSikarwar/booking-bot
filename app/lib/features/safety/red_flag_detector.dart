@@ -54,12 +54,15 @@ class RedFlagDetector {
     : _variants = Map<String, String>.from(rules['variants'] as Map),
       _categories = [],
       _acute = [],
-      _soften = [] {
+      _soften = [],
+      _negation = {} {
     String n(Object? s) => normalize(s as String, _variants);
     List<String> all(Object? list) =>
         (list as List? ?? const []).map(n).where((p) => p.isNotEmpty).toList();
     final soften = rules['soften'] as Map<String, Object?>? ?? const {};
     _acute.addAll(all(soften['acute']));
+    _negation.addAll(all(soften['negation']));
+    _negationWindow = soften['negation_window'] as int? ?? 0;
     for (final r in (soften['rules'] as List? ?? const []).cast<Map<String, Object?>>()) {
       _soften.add((phrases: all(r['phrases']), context: all(r['context'])));
     }
@@ -85,6 +88,8 @@ class RedFlagDetector {
   final List<_Category> _categories;
   final List<String> _acute;
   final List<({List<String> phrases, List<String> context})> _soften;
+  final Set<String> _negation;
+  late final int _negationWindow;
 
   RedFlagResult? detect(String text) {
     final norm = normalize(text, _variants);
@@ -94,6 +99,11 @@ class RedFlagDetector {
     bool has(String w) => words.contains(' $w ');
     final tokens = norm.split(' ');
     bool present(String w) => tokens.any((t) => t.startsWith(w));
+    bool negated(String p) {
+      final before = padded.substring(0, padded.indexOf(' $p')).split(' ');
+      return before.reversed.take(_negationWindow).any(_negation.contains);
+    }
+
     final categories = <String>[];
     final matches = <String>[];
     RedFlagOutcome? outcome;
@@ -108,7 +118,9 @@ class RedFlagDetector {
       soft =
           soft &&
           found.isNotEmpty &&
-          found.every((p) => _soften.any((r) => r.phrases.contains(p) && r.context.any(has)));
+          found.every(
+            (p) => negated(p) || _soften.any((r) => r.phrases.contains(p) && r.context.any(has)),
+          );
       categories.add(c.id);
       matches.add(phrase ?? combo!.map((g) => g.firstWhere(present)).join('+'));
       if (c.outcome == RedFlagOutcome.urgent || outcome == null) outcome = c.outcome;

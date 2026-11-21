@@ -17,7 +17,12 @@ interface RawRules {
     phrases: string[];
     combos: string[][][];
   }[];
-  soften?: { acute: string[]; rules: { phrases: string[]; context: string[] }[] };
+  soften?: {
+    acute: string[];
+    negation?: string[];
+    negation_window?: number;
+    rules: { phrases: string[]; context: string[] }[];
+  };
 }
 
 interface Category {
@@ -46,6 +51,8 @@ export class RedFlagDetector {
   readonly #categories: Category[];
   readonly #acute: string[];
   readonly #soften: { phrases: string[]; context: string[] }[];
+  readonly #negation: Set<string>;
+  readonly #negationWindow: number;
 
   constructor(rules: RawRules = rawRules as RawRules) {
     this.#variants = rules.variants;
@@ -57,6 +64,8 @@ export class RedFlagDetector {
       combos: c.combos.map((groups) => groups.map((g) => g.map(n).filter(Boolean))),
     }));
     this.#acute = (rules.soften?.acute ?? []).map(n).filter(Boolean);
+    this.#negation = new Set((rules.soften?.negation ?? []).map(n).filter(Boolean));
+    this.#negationWindow = rules.soften?.negation_window ?? 0;
     this.#soften = (rules.soften?.rules ?? []).map((r) => ({
       phrases: r.phrases.map(n).filter(Boolean),
       context: r.context.map(n).filter(Boolean),
@@ -69,6 +78,10 @@ export class RedFlagDetector {
     const padded = ` ${norm}`;
     const words = ` ${norm} `;
     const has = (w: string) => words.includes(` ${w} `);
+    const negated = (p: string) =>
+      padded.slice(0, padded.indexOf(` ${p}`)).split(" ").reverse().slice(0, this.#negationWindow).some((t) =>
+        this.#negation.has(t)
+      );
     const tokens = norm.split(" ");
     const categories: string[] = [];
     const matches: string[] = [];
@@ -82,7 +95,7 @@ export class RedFlagDetector {
         : c.combos.find((groups) => groups.every((g) => g.some((w) => tokens.some((t) => t.startsWith(w)))));
       if (!phrase && !combo) continue;
       soft &&= found.length > 0 &&
-        found.every((p) => this.#soften.some((r) => r.phrases.includes(p) && r.context.some(has)));
+        found.every((p) => negated(p) || this.#soften.some((r) => r.phrases.includes(p) && r.context.some(has)));
       categories.push(c.id);
       matches.push(phrase ?? combo!.map((g) => g.find((w) => tokens.some((t) => t.startsWith(w)))).join("+"));
       if (c.outcome === "urgent" || outcome === null) outcome = c.outcome;
