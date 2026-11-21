@@ -17,7 +17,7 @@ jobs:
       pages: read
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
         id: pages
       - uses: subosito/flutter-action@v2
         with:
@@ -30,7 +30,7 @@ jobs:
         run: |
           flutter pub get --enforce-lockfile
           flutter build web --release --no-pub --base-href="${PAGES_BASE_PATH%/}/" --no-web-resources-cdn
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: app/build/web
 
@@ -44,5 +44,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v5
         id: deployment
