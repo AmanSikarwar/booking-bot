@@ -142,5 +142,78 @@
   "expected_any": [
    "pkg_basic_wellness"
   ]
+ },
+ {
+  "text": "my periods are heavy and I feel weak all the time",
+  "locale": "en",
+  "expected_any": [
+   "pkg_anemia_panel",
+   "pkg_womens_wellness"
+  ]
+ },
+ {
+  "text": "training for a marathon, want some blood work",
+  "locale": "en",
+  "expected_any": [
+   "pkg_fitness"
+  ]
+ },
+ {
+  "text": "I take painkillers almost daily, worried about my liver",
+  "locale": "en",
+  "expected_any": [
+   "pkg_liver_function"
+  ]
+ },
+ {
+  "text": "dengue jaisa lag raha hai, platelets check karna hai",
+  "locale": "hi",
+  "expected_any": [
+   "pkg_fever_panel"
+  ]
+ },
+ {
+  "text": "PCOD test",
+  "locale": "en",
+  "expected_any": [
+   "pkg_pcos_panel"
+  ]
+ },
+ {
+  "text": "60 saal ke papa ke liye pura checkup",
+  "locale": "hi",
+  "expected_any": [
+   "pkg_senior_care",
+   "pkg_full_body"
+  ]
+ },
+ {
+  "text": "haath pair sunn rehte hain, B12 kam ho sakta hai",
+  "locale": "hi",
+  "expected_any": [
+   "pkg_vitamin_d_b12"
+  ]
+ },
+ {
+  "text": "cheapest test you have",
+  "locale": "en",
+  "expected_any": [
+   "pkg_basic_wellness"
+  ]
+ },
+ {
+  "text": "heart disease runs in my family, I'm 40",
+  "locale": "en",
+  "expected_any": [
+   "pkg_heart_risk",
+   "pkg_lipid_profile"
+  ]
+ },
+ {
+  "text": "मेरी पत्नी के लिए जांच",
+  "locale": "hi",
+  "expected_any": [
+   "pkg_womens_wellness"
+  ]
  }
 ]
