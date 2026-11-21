@@ -209,7 +209,7 @@ Deno.test("booking: confirmed once, reprocess returns the same booking", async (
   const w = free(date);
   const mk = () => new ScriptedChat([[call("book_slot", bookArgs(date, w))], [text("Done.")]]);
   const { deps, store } = setup({ chat: mk() });
-  const inp = input("yes, book it");
+  const inp = input("yes, book it", { kind: "action" });
   const { names, events } = await turn(deps, inp);
   assertEquals(names, ["ack", "tool_started", "booking_confirmed", "text_delta", "done"]);
   const ref = events[2].data.booking_ref;
@@ -220,11 +220,23 @@ Deno.test("booking: confirmed once, reprocess returns the same booking", async (
   assertEquals(store.bookings.length, 1);
 });
 
+Deno.test("booking: a typed message never books, the model is sent to the form instead", async () => {
+  const date = "2026-11-22";
+  const chat = new ScriptedChat([[call("book_slot", bookArgs(date, free(date)))], [
+    text("Please confirm in the form."),
+  ]]);
+  const { deps, store } = setup({ chat });
+  const { names } = await turn(deps, input("yes, book it"));
+  assert(!names.includes("booking_confirmed"));
+  assertEquals(store.bookings.length, 0);
+  assert(JSON.stringify(chat.requests[1].messages.at(-1)).includes("show_booking_form"));
+});
+
 Deno.test("booking: full slot offers alternatives", async () => {
   const { d, w } = fullSlot();
   const chat = new ScriptedChat([[call("book_slot", bookArgs(d, w))], [text("That slot's full.")]]);
   const { deps, store } = setup({ chat });
-  const { events } = await turn(deps, input("yes"));
+  const { events } = await turn(deps, input("yes", { kind: "action" }));
   const ev = events.find((e) => e.event === "slot_unavailable")!;
   assertEquals((ev.data.alternatives as unknown[]).length, 3);
   assertEquals(store.bookings.length, 0);
@@ -235,7 +247,7 @@ Deno.test("booking: blocked when the conversation is flagged", async () => {
   const chat = new ScriptedChat([[call("book_slot", bookArgs(date, free(date)))], [text("I can't book that.")]]);
   const { deps, store } = setup({ chat });
   await turn(deps, input("I fainted yesterday"));
-  const { names } = await turn(deps, input("ok book the thyroid test"));
+  const { names } = await turn(deps, input("ok book the thyroid test", { kind: "action" }));
   assert(!names.includes("booking_confirmed"));
   assertEquals(store.bookings.length, 0);
   assert(JSON.stringify(chat.requests[1].messages.at(-1)).includes("booking_blocked_for_safety"));
@@ -535,7 +547,7 @@ Deno.test("booking: a reference already taken by another booking falls through t
     status: "confirmed",
     idempotency_key: "someone-else",
   } as never);
-  const { names, events } = await turn(deps, input("yes, book it"));
+  const { names, events } = await turn(deps, input("yes, book it", { kind: "action" }));
   assert(names.includes("booking_confirmed"));
   assertEquals(events.find((e) => e.event === "booking_confirmed")!.data.booking_ref, bookingRef(key, 1));
 });
@@ -546,12 +558,12 @@ Deno.test("booking: the same slot booked again with a new address moves the book
   const { deps, store } = setup({
     chat: new ScriptedChat([[call("book_slot", bookArgs(date, w))], [text("Done.")]]),
   });
-  const first = await turn(deps, input("book it"));
+  const first = await turn(deps, input("book it", { kind: "action" }));
   const ref = first.events.find((e) => e.event === "booking_confirmed")!.data.booking_ref;
   deps.chat = new ScriptedChat([[call("book_slot", { ...bookArgs(date, w), address_label: "Office" })], [
     text("Moved."),
   ]]);
-  const moved = await turn(deps, input("make it Office instead"));
+  const moved = await turn(deps, input("make it Office instead", { kind: "action" }));
   const confirmed = moved.events.find((e) => e.event === "booking_confirmed")!.data;
   assertEquals([confirmed.booking_ref, confirmed.address_label], [ref, "Office"]);
   assertEquals(store.bookings.length, 1);

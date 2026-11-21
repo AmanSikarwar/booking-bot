@@ -298,7 +298,7 @@ The same card also opens **locally** when the user taps *Book home collection* o
 
 ### Tool: `book_slot` (mocked)
 
-Books a home sample collection, only after the user has explicitly confirmed every detail.
+Books a home sample collection. The server runs it only for a booking-form or slot-chip message, so a typed "yes" never books.
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|

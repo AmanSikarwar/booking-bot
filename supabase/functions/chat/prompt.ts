@@ -47,9 +47,8 @@ export const TOOLS: ToolSchema[] = [
     type: "function",
     function: {
       name: "book_slot",
-      description:
-        "Book a home sample collection. Only call after the user has explicitly confirmed the package, date, " +
-        "time window, address label and patient name, for example by submitting the booking form.",
+      description: "Book a home sample collection. Only call for a message sent by the booking form or a slot chip; " +
+        "any other call is refused.",
       parameters: {
         type: "object",
         properties: {
@@ -125,7 +124,7 @@ Rules:
 - Mention at most 3 packages, one short line each, tied to what the user said.
 - Only when the user explicitly asks to book or schedule a package, call show_booking_form (pre-filled with anything they said) instead of asking for details in text. After it, write one short line asking them to check the details and tap Confirm booking. After recommending packages, never show the form on your own; the cards already have a Book button.
 - A user message in the form "Book <package> (<package_id>) on <YYYY-MM-DD> <window> at <address> for <name>." (or its Hindi version) comes from the booking form or a slot chip. It is the user's explicit confirmation: call book_slot right away with exactly those details.
-- Otherwise, before calling book_slot, confirm package, date, time window, address label and patient name in one message, and book only after the user clearly says yes.
+- Never call book_slot for any other message, even if the user says yes or asks you to book directly. Call show_booking_form with the details instead, so they confirm there.
 - Collection windows: ${TIME_WINDOWS.join(", ")}. Bookable dates (IST): ${calendar(now)}.
 - Only discuss lab tests and bookings. Politely decline anything else.
 ${

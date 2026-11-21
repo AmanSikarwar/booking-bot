@@ -375,6 +375,15 @@ export async function runTurn(
     if (call.function.name === "book_slot") {
       const v = validateBook(call.function.arguments, catalog, deps.now());
       if (!v.ok) return { content: { error: v.error }, invalid: true };
+      if (input.kind !== "action") {
+        return {
+          content: {
+            status: "not_booked",
+            message: "Bookings are confirmed only from the booking form. Call show_booking_form with these " +
+              "details so the user can check them and tap Confirm booking.",
+          },
+        };
+      }
       record("tool_started", { tool: "book_slot" });
       const a = v.value;
       const fresh = await store.getConversation(conv.id);
