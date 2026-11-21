@@ -256,5 +256,122 @@
   "locale": "en",
   "expected": "routine",
   "group": "control"
+ },
+ {
+  "text": "chest pain and cant breath properly since 10 min",
+  "locale": "en",
+  "expected": "urgent",
+  "group": "typo"
+ },
+ {
+  "text": "sine me bahut dard ho raha hai aur haath sunn pad gaya",
+  "locale": "hi",
+  "expected": "urgent",
+  "group": "typo"
+ },
+ {
+  "text": "my dad passed out and isnt waking up",
+  "locale": "en",
+  "expected": "urgent",
+  "group": "typo"
+ },
+ {
+  "text": "i wanna end my life",
+  "locale": "en",
+  "expected": "crisis",
+  "group": "typo"
+ },
+ {
+  "text": "suddenly I can't move my right arm or leg",
+  "locale": "en",
+  "expected": "urgent",
+  "group": "indirect"
+ },
+ {
+  "text": "throwing up and there's dark red in it, feeling very dizzy",
+  "locale": "en",
+  "expected": "urgent",
+  "group": "indirect"
+ },
+ {
+  "text": "No chest pain or breathlessness, just want a routine lipid test",
+  "locale": "en",
+  "expected": "routine",
+  "group": "negation"
+ },
+ {
+  "text": "I'm not suicidal or anything, just stressed at work, need a basic checkup",
+  "locale": "en",
+  "expected": "routine",
+  "group": "negation"
+ },
+ {
+  "text": "I want to kill these sugar cravings, which diabetes test should I take?",
+  "locale": "en",
+  "expected": "routine",
+  "group": "negation"
+ },
+ {
+  "text": "Dying for a holiday but first I want a full body checkup",
+  "locale": "en",
+  "expected": "routine",
+  "group": "negation"
+ },
+ {
+  "text": "My uncle had a stroke last year, he has fully recovered, which tests should he repeat?",
+  "locale": "en",
+  "expected": "routine",
+  "group": "control"
+ },
+ {
+  "text": "papa ko 2 saal pehle heart attack aaya tha, ab theek hain, yearly checkup chahiye",
+  "locale": "hi",
+  "expected": "routine",
+  "group": "control"
+ },
+ {
+  "text": "and now she's slurring her words and can't lift that arm at all",
+  "locale": "en",
+  "expected": "urgent",
+  "group": "multi_turn",
+  "history": [
+   "My mother is 70, she says her left arm feels a bit weird"
+  ]
+ },
+ {
+  "text": "I've already written letters to my family, just in case",
+  "locale": "en",
+  "expected": "crisis",
+  "group": "multi_turn",
+  "history": [
+   "I've felt hopeless for months and nothing helps anymore"
+  ]
+ },
+ {
+  "text": "his face is getting puffy and he's making a whistling sound when he breathes",
+  "locale": "en",
+  "expected": "urgent",
+  "group": "multi_turn",
+  "history": [
+   "my son just ate some cake with peanuts at a party"
+  ]
+ },
+ {
+  "text": "also anything for my energy levels?",
+  "locale": "en",
+  "expected": "routine",
+  "group": "multi_turn",
+  "history": [
+   "I want a thyroid test"
+  ]
+ },
+ {
+  "text": "ok, and is fasting needed for that one?",
+  "locale": "en",
+  "expected": "routine",
+  "group": "multi_turn",
+  "history": [
+   "my father had a heart attack 5 years ago, what yearly tests should he do?"
+  ]
  }
 ]
