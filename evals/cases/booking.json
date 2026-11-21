@@ -1,0 +1,157 @@
+[
+ {
+  "text": "book thyroid test for papa for tomorrow",
+  "locale": "en",
+  "expect": {
+   "form": true,
+   "package_any": [
+    "pkg_thyroid_profile"
+   ],
+   "date": "tomorrow",
+   "patient": "Ramesh Sharma"
+  }
+ },
+ {
+  "text": "book a thyroid one for papa for tommorow",
+  "locale": "en",
+  "expect": {
+   "form": true,
+   "package_any": [
+    "pkg_thyroid_profile"
+   ],
+   "date": "tomorrow",
+   "patient": "Ramesh Sharma"
+  }
+ },
+ {
+  "text": "kal subah mummy ke liye sugar test book karo",
+  "locale": "hi",
+  "expect": {
+   "form": true,
+   "package_any": [
+    "pkg_diabetes_care"
+   ],
+   "date": "tomorrow",
+   "window_any": [
+    "07-09",
+    "09-11"
+   ],
+   "patient": "Sunita Sharma"
+  }
+ },
+ {
+  "text": "मम्मी के लिए थायरॉइड टेस्ट कल बुक करो",
+  "locale": "hi",
+  "expect": {
+   "form": true,
+   "package_any": [
+    "pkg_thyroid_profile"
+   ],
+   "date": "tomorrow",
+   "patient": "Sunita Sharma"
+  }
+ },
+ {
+  "text": "book a lipid profile for me on Sunday at the office",
+  "locale": "en",
+  "expect": {
+   "form": true,
+   "package_any": [
+    "pkg_lipid_profile"
+   ],
+   "date": "sunday",
+   "patient": "Priya Sharma",
+   "address": "Office"
+  }
+ },
+ {
+  "text": "schedule a full body checkup for my husband day after tomorrow",
+  "locale": "en",
+  "expect": {
+   "form": true,
+   "package_any": [
+    "pkg_full_body"
+   ],
+   "date": "day_after",
+   "patient": "Arjun Sharma"
+  }
+ },
+ {
+  "text": "book vitamin D test for papa at papa's house",
+  "locale": "en",
+  "expect": {
+   "form": true,
+   "package_any": [
+    "pkg_vitamin_d_b12"
+   ],
+   "patient": "Ramesh Sharma",
+   "address": "Papa's house"
+  }
+ },
+ {
+  "text": "book fever panel for me today 4 to 6 pm",
+  "locale": "en",
+  "expect": {
+   "form": true,
+   "package_any": [
+    "pkg_fever_panel"
+   ],
+   "date": "today",
+   "window_any": [
+    "16-18"
+   ],
+   "patient": "Priya Sharma"
+  }
+ },
+ {
+  "text": "ok book that one for me tomorrow",
+  "locale": "en",
+  "expect": {
+   "form": true,
+   "package_any": [
+    "pkg_thyroid_profile"
+   ],
+   "date": "tomorrow",
+   "patient": "Priya Sharma"
+  },
+  "history": [
+   "which test is for thyroid?"
+  ]
+ },
+ {
+  "text": "which test should my father do for sugar?",
+  "locale": "en",
+  "expect": {
+   "form": false
+  }
+ },
+ {
+  "text": "what does the lipid profile include?",
+  "locale": "en",
+  "expect": {
+   "form": false
+  }
+ },
+ {
+  "text": "Book Thyroid Profile (pkg_thyroid_profile) on {open_date} {open_window} at Home for Priya Sharma.",
+  "locale": "en",
+  "expect": {
+   "booked": true,
+   "package_any": [
+    "pkg_thyroid_profile"
+   ],
+   "patient": "Priya Sharma",
+   "address": "Home"
+  },
+  "kind": "action",
+  "twice": true
+ },
+ {
+  "text": "Book Lipid Profile (pkg_lipid_profile) on {full_date} {full_window} at Office for Ramesh Sharma.",
+  "locale": "en",
+  "expect": {
+   "unavailable": true
+  },
+  "kind": "action"
+ }
+]
